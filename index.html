@@ -1,0 +1,2446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Aire Serv Install Survey</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --blue: #1d4ed8; --blue-dark: #1e40af; --blue-light: #eff6ff;
+    --red: #dc2626; --red-light: #fef2f2; --red-border: #fecaca;
+    --green: #15803d; --green-light: #f0fdf4; --green-border: #86efac;
+    --yellow: #d97706; --yellow-light: #fffbeb; --yellow-border: #fde68a;
+    --gray-50: #f9fafb; --gray-100: #f3f4f6; --gray-200: #e5e7eb;
+    --gray-300: #d1d5db; --gray-400: #9ca3af; --gray-600: #4b5563;
+    --gray-700: #374151; --gray-900: #111827;
+    --radius: 12px; --radius-sm: 8px;
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--gray-100); color: var(--gray-900); min-height: 100vh; }
+  
+  /* HEADER */
+  .header { background: #0f172a; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  .header-title { color: #fff; font-size: 17px; font-weight: 600; }
+  .header-sub { color: #94a3b8; font-size: 12px; margin-top: 2px; }
+  .header-logo { color: #fff; font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+  .header-logo span { color: #3b82f6; }
+
+  /* PROGRESS */
+  .progress-bar { background: #1e293b; padding: 12px 20px; }
+  .progress-steps { display: flex; gap: 4px; margin-bottom: 8px; }
+  .progress-step { flex: 1; height: 4px; border-radius: 2px; background: #334155; transition: background 0.3s; }
+  .progress-step.done { background: #3b82f6; }
+  .progress-step.active { background: #60a5fa; }
+  .progress-label { color: #94a3b8; font-size: 12px; }
+  .progress-label span { color: #fff; font-weight: 500; }
+
+  /* SECTIONS */
+  .section { display: none; padding: 20px; max-width: 800px; margin: 0 auto; }
+  .section.active { display: block; }
+  .section-header { margin-bottom: 20px; }
+  .section-title { font-size: 22px; font-weight: 700; color: var(--gray-900); margin-bottom: 4px; }
+  .section-desc { font-size: 14px; color: var(--gray-600); line-height: 1.5; }
+
+  /* CARDS */
+  .card { background: #fff; border-radius: var(--radius); border: 1px solid var(--gray-200); padding: 18px 20px; margin-bottom: 16px; }
+  .card-title { font-size: 13px; font-weight: 600; color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 14px; }
+
+  /* FORM ELEMENTS */
+  .field { margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+  label { display: block; font-size: 13px; font-weight: 500; color: var(--gray-700); margin-bottom: 5px; }
+  .label-hint { font-size: 11px; color: var(--gray-400); font-weight: 400; margin-left: 6px; }
+  input[type="text"], input[type="number"], input[type="tel"], input[type="email"], select, textarea {
+    width: 100%; padding: 11px 14px; border: 1.5px solid var(--gray-300); border-radius: var(--radius-sm);
+    font-size: 15px; color: var(--gray-900); background: #fff; outline: none; transition: border 0.15s;
+    -webkit-appearance: none; appearance: none;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--blue); }
+  textarea { resize: vertical; min-height: 80px; line-height: 1.5; font-family: inherit; }
+  select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; }
+  .field-row { display: grid; gap: 12px; margin-bottom: 14px; }
+  .field-row.col2 { grid-template-columns: 1fr 1fr; }
+  .field-row.col3 { grid-template-columns: 1fr 1fr 1fr; }
+  .field-row.col4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  .unit-input { display: flex; align-items: center; gap: 0; }
+  .unit-input input { border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
+  .unit-badge { background: var(--gray-100); border: 1.5px solid var(--gray-300); border-left: none; padding: 11px 12px; font-size: 13px; color: var(--gray-600); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; white-space: nowrap; }
+
+  /* TOGGLES */
+  .toggle-group { display: flex; gap: 8px; flex-wrap: wrap; }
+  .toggle-btn { padding: 9px 16px; border-radius: 20px; border: 1.5px solid var(--gray-300); background: #fff; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; color: var(--gray-700); }
+  .toggle-btn.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+  .toggle-btn.active-green { background: var(--green); border-color: var(--green); color: #fff; }
+  .toggle-btn.active-red { background: var(--red); border-color: var(--red); color: #fff; }
+
+  /* JOB TYPE CARDS */
+  .job-type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+  .job-type-card { background: #fff; border: 2px solid var(--gray-200); border-radius: var(--radius); padding: 16px; cursor: pointer; transition: all 0.15s; text-align: center; }
+  .job-type-card:hover { border-color: var(--blue); background: var(--blue-light); }
+  .job-type-card.selected { border-color: var(--blue); background: var(--blue-light); }
+  .job-type-icon { font-size: 32px; margin-bottom: 8px; }
+  .job-type-name { font-size: 14px; font-weight: 600; color: var(--gray-900); margin-bottom: 4px; }
+  .job-type-desc { font-size: 11px; color: var(--gray-400); line-height: 1.4; }
+
+  /* DIAGRAMS */
+  .diagram-card { background: var(--blue-light); border: 1px solid #bfdbfe; border-radius: var(--radius); padding: 16px; margin-bottom: 16px; }
+  .diagram-title { font-size: 12px; font-weight: 600; color: var(--blue); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+  .diagram-svg { display: block; margin: 0 auto; }
+  .diagram-note { font-size: 12px; color: #1e40af; margin-top: 10px; line-height: 1.5; }
+
+  /* PHOTO CAPTURE */
+  .photo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .photo-item { background: var(--gray-50); border: 2px dashed var(--gray-300); border-radius: var(--radius-sm); padding: 14px; text-align: center; cursor: pointer; transition: all 0.15s; position: relative; }
+  .photo-item.captured { border-color: var(--green); border-style: solid; background: var(--green-light); }
+  .photo-item.required-missing { border-color: var(--red); background: var(--red-light); }
+  .photo-icon { font-size: 24px; margin-bottom: 6px; }
+  .photo-label { font-size: 12px; font-weight: 500; color: var(--gray-700); }
+  .photo-status { font-size: 11px; color: var(--gray-400); margin-top: 3px; }
+  .photo-item.captured .photo-status { color: var(--green); }
+  .photo-preview { width: 100%; height: 80px; object-fit: cover; border-radius: 6px; margin-bottom: 6px; display: none; }
+  .photo-item.captured .photo-preview { display: block; }
+  input[type="file"] { display: none; }
+
+  /* INFO BOXES */
+  .info-box { border-radius: var(--radius-sm); padding: 12px 14px; font-size: 13px; line-height: 1.5; margin-bottom: 14px; }
+  .info-blue { background: var(--blue-light); border: 1px solid #bfdbfe; color: #1e40af; }
+  .info-yellow { background: var(--yellow-light); border: 1px solid var(--yellow-border); color: #92400e; }
+  .info-red { background: var(--red-light); border: 1px solid var(--red-border); color: var(--red); }
+  .info-green { background: var(--green-light); border: 1px solid var(--green-border); color: var(--green); }
+
+  /* FLAG ITEMS */
+  .flag-item { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border-radius: var(--radius-sm); margin-bottom: 8px; font-size: 13px; line-height: 1.5; }
+  .flag-red { background: var(--red-light); border: 1px solid var(--red-border); color: var(--red); }
+  .flag-yellow { background: var(--yellow-light); border: 1px solid var(--yellow-border); color: #92400e; }
+  .flag-green { background: var(--green-light); border: 1px solid var(--green-border); color: var(--green); }
+  .flag-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+  /* NAVIGATION */
+  .nav-bar { background: #fff; border-top: 1px solid var(--gray-200); padding: 16px 20px; display: flex; gap: 12px; position: sticky; bottom: 0; z-index: 100; }
+  .btn { padding: 13px 24px; border-radius: var(--radius-sm); font-size: 15px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; flex: 1; }
+  .btn-primary { background: var(--blue); color: #fff; }
+  .btn-primary:hover { background: var(--blue-dark); }
+  .btn-secondary { background: var(--gray-100); color: var(--gray-700); border: 1px solid var(--gray-200); }
+  .btn-secondary:hover { background: var(--gray-200); }
+  .btn-success { background: #15803d; color: #fff; }
+  .btn-danger { background: var(--red); color: #fff; }
+
+  /* SUMMARY */
+  .summary-section { margin-bottom: 20px; }
+  .summary-section-title { font-size: 14px; font-weight: 700; color: var(--gray-900); padding: 10px 0; border-bottom: 2px solid var(--gray-200); margin-bottom: 12px; }
+  .summary-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid var(--gray-100); font-size: 13px; gap: 16px; }
+  .summary-label { color: var(--gray-600); flex-shrink: 0; min-width: 160px; }
+  .summary-value { color: var(--gray-900); font-weight: 500; text-align: right; }
+  .summary-value.missing { color: var(--red); font-style: italic; }
+  .complexity-badge { display: inline-block; padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 700; }
+  .complexity-simple { background: var(--green-light); color: var(--green); border: 1px solid var(--green-border); }
+  .complexity-moderate { background: var(--yellow-light); color: var(--yellow); border: 1px solid var(--yellow-border); }
+  .complexity-complex { background: var(--red-light); color: var(--red); border: 1px solid var(--red-border); }
+
+  /* MINI-SPLIT HEAD */
+  .head-unit-card { background: #f8fafc; border: 1.5px solid var(--gray-200); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; }
+  .head-unit-title { font-size: 14px; font-weight: 600; color: var(--gray-900); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+  .remove-btn { font-size: 12px; color: var(--red); cursor: pointer; background: none; border: none; padding: 4px 8px; }
+
+  /* SECTION COMPLETE BADGE */
+  .section-complete { display: none; align-items: center; gap: 8px; background: var(--green-light); border: 1px solid var(--green-border); border-radius: var(--radius-sm); padding: 10px 14px; font-size: 13px; color: var(--green); font-weight: 500; margin-top: 16px; }
+  .section-complete.show { display: flex; }
+
+  /* PRINT */
+  @media print {
+    .header, .progress-bar, .nav-bar { display: none !important; }
+    .section { display: block !important; padding: 10px; }
+    .card { break-inside: avoid; }
+  }
+
+  /* MOBILE */
+  @media (max-width: 480px) {
+    .field-row.col3, .field-row.col4 { grid-template-columns: 1fr 1fr; }
+    .job-type-grid { grid-template-columns: 1fr 1fr; }
+    .photo-grid { grid-template-columns: 1fr 1fr; }
+    .field-row.col2 { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div>
+    <div class="header-logo">AIRE<span>SERV</span></div>
+    <div class="header-sub">East Glendale · Peoria</div>
+  </div>
+  <div style="text-align:right;">
+    <div class="header-title">Install Survey</div>
+    <div class="header-sub" id="headerJobType">HCD Pre-Sale Assessment</div>
+  </div>
+</div>
+
+<!-- PROGRESS -->
+<div class="progress-bar">
+  <div class="progress-steps" id="progressSteps"></div>
+  <div class="progress-label">Step <span id="progressCurrent">1</span> of <span id="progressTotal">11</span> — <span id="progressName">Job Setup</span></div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 1: JOB SETUP -->
+<!-- ============================================================ -->
+<div class="section active" id="section-1">
+  <div class="section-header">
+    <div class="section-title">Job Setup</div>
+    <div class="section-desc">Enter customer information and select the job type. This determines which sections appear next.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Customer Information</div>
+    <div class="field"><label>Customer Name <span style="color:var(--red)">*</span></label><input type="text" id="custName" placeholder="Full name"></div>
+    <div class="field-row col2">
+      <div class="field"><label>Phone</label><input type="tel" id="custPhone" placeholder="(623) 555-0000"></div>
+      <div class="field"><label>Email</label><input type="email" id="custEmail" placeholder="email@example.com"></div>
+    </div>
+    <div class="field"><label>Service Address <span style="color:var(--red)">*</span></label><input type="text" id="custAddress" placeholder="Street address, city, zip"></div>
+    <div class="field-row col2">
+      <div class="field"><label>Survey Date</label><input type="text" id="surveyDate" placeholder=""></div>
+      <div class="field"><label>HCD / Sales Rep</label><input type="text" id="hcdName" placeholder="Your name"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Job Type <span style="color:var(--red)">*</span></div>
+    <div class="job-type-grid" id="jobTypeGrid">
+      <div class="job-type-card" onclick="selectJobType('split_hp', this)">
+        <div class="job-type-icon">🔄</div>
+        <div class="job-type-name">Split Heat Pump</div>
+        <div class="job-type-desc">Outdoor condenser + indoor air handler, heating and cooling</div>
+      </div>
+      <div class="job-type-card" onclick="selectJobType('split_ac', this)">
+        <div class="job-type-icon">❄️</div>
+        <div class="job-type-name">Split AC + Furnace</div>
+        <div class="job-type-desc">Outdoor AC condenser + indoor furnace with coil</div>
+      </div>
+      <div class="job-type-card" onclick="selectJobType('packaged', this)">
+        <div class="job-type-icon">📦</div>
+        <div class="job-type-name">Packaged Unit</div>
+        <div class="job-type-desc">Single cabinet — rooftop or ground mount</div>
+      </div>
+      <div class="job-type-card" onclick="selectJobType('minisplit', this)">
+        <div class="job-type-icon">💨</div>
+        <div class="job-type-name">Mini-Split</div>
+        <div class="job-type-desc">Ductless — single or multi-zone</div>
+      </div>
+    </div>
+    <div class="field" id="jobTypeSelected" style="display:none;">
+      <div class="info-green" id="jobTypeConfirm"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Property Notes</div>
+    <div class="field-row col2">
+      <div class="field">
+        <label>Year Built <span class="label-hint">approx</span></label>
+        <input type="number" id="yearBuilt" placeholder="e.g. 1998" min="1940" max="2026">
+      </div>
+      <div class="field">
+        <label>Home Size <span class="label-hint">sq ft</span></label>
+        <input type="number" id="homeSqft" placeholder="e.g. 1800">
+      </div>
+    </div>
+    <div class="field-row col2">
+      <div class="field">
+        <label>Stories</label>
+        <select id="homeStories">
+          <option value="">Select...</option>
+          <option>1 story</option>
+          <option>2 story</option>
+          <option>3+ story</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Foundation</label>
+        <select id="homeFoundation">
+          <option value="">Select...</option>
+          <option>Slab</option>
+          <option>Raised / Crawl space</option>
+          <option>Basement</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>HOA? <span class="label-hint">affects placement</span></label>
+      <div class="toggle-group">
+        <button class="toggle-btn" onclick="toggle(this,'hoaYes','hoaNo')">Yes — has restrictions</button>
+        <button class="toggle-btn" onclick="toggle(this,'hoaNo','hoaYes')">No HOA</button>
+        <button class="toggle-btn" onclick="toggle(this,'hoaUnk','hoaYes hoaNo')">Unknown</button>
+      </div>
+    </div>
+    <div class="field" style="margin-top:10px;">
+      <label>Permit Required?</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" onclick="toggle(this,'permitY','permitN')">Yes</button>
+        <button class="toggle-btn" onclick="toggle(this,'permitN','permitY')">No</button>
+        <button class="toggle-btn" onclick="toggle(this,'permitUnk','permitY permitN')">Check with office</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 2: EXISTING EQUIPMENT -->
+<!-- ============================================================ -->
+<div class="section" id="section-2">
+  <div class="section-header">
+    <div class="section-title">Existing Equipment</div>
+    <div class="section-desc">Capture all nameplate data from existing units. Take a photo of each nameplate — don't rely on handwriting alone.</div>
+  </div>
+
+  <div class="diagram-card">
+    <div class="diagram-title">📋 Where to find nameplate data</div>
+    <svg class="diagram-svg" width="340" height="120" viewBox="0 0 340 120">
+      <rect x="10" y="10" width="150" height="100" rx="8" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+      <text x="85" y="30" text-anchor="middle" font-size="11" font-weight="600" fill="#1e40af">CONDENSER</text>
+      <rect x="25" y="40" width="120" height="55" rx="4" fill="white" stroke="#93c5fd" stroke-width="1"/>
+      <text x="85" y="57" text-anchor="middle" font-size="9" fill="#374151">Model # — usually front panel</text>
+      <text x="85" y="70" text-anchor="middle" font-size="9" fill="#374151">Serial # — same plate</text>
+      <text x="85" y="83" text-anchor="middle" font-size="9" fill="#374151">MCA / MOCP — electrical data</text>
+      <text x="85" y="96" text-anchor="middle" font-size="9" fill="#374151">Tons / BTU — capacity</text>
+      <rect x="180" y="10" width="150" height="100" rx="8" fill="#dcfce7" stroke="#22c55e" stroke-width="1.5"/>
+      <text x="255" y="30" text-anchor="middle" font-size="11" font-weight="600" fill="#15803d">AIR HANDLER / FURNACE</text>
+      <rect x="195" y="40" width="120" height="55" rx="4" fill="white" stroke="#86efac" stroke-width="1"/>
+      <text x="255" y="57" text-anchor="middle" font-size="9" fill="#374151">Model # — side or door panel</text>
+      <text x="255" y="70" text-anchor="middle" font-size="9" fill="#374151">Serial # — same plate</text>
+      <text x="255" y="83" text-anchor="middle" font-size="9" fill="#374151">BTU / CFM — capacity</text>
+      <text x="255" y="96" text-anchor="middle" font-size="9" fill="#374151">Voltage / Amps</text>
+    </svg>
+    <div class="diagram-note">💡 Photograph every nameplate before recording. If the plate is worn or unreadable, note that — it affects warranty and refrigerant records.</div>
+  </div>
+
+  <!-- PACKAGED UNIT CARD — shown only when packaged is selected -->
+  <div class="card" id="existingPackaged" style="display:none;">
+    <div class="card-title">Existing Packaged Unit</div>
+    <div class="info-blue" style="font-size:12px;margin-bottom:14px;">A packaged unit contains all components in one cabinet — compressor, coil, and air handler together. One nameplate covers everything.</div>
+    <div class="field-row col2">
+      <div class="field"><label>Brand</label><input type="text" id="pkgBrand" placeholder="e.g. Carrier, Lennox"></div>
+      <div class="field"><label>Tonnage</label>
+        <select id="pkgTons">
+          <option value="">Select...</option>
+          <option>1.5 ton</option><option>2.0 ton</option><option>2.5 ton</option>
+          <option>3.0 ton</option><option>3.5 ton</option><option>4.0 ton</option>
+          <option>4.5 ton</option><option>5.0 ton</option><option>Unknown</option>
+        </select>
+      </div>
+    </div>
+    <div class="field"><label>Model Number</label><input type="text" id="pkgModel" placeholder="Full model number from nameplate"></div>
+    <div class="field"><label>Serial Number</label><input type="text" id="pkgSerial" placeholder="Full serial number from nameplate"></div>
+    <div class="field-row col2">
+      <div class="field"><label>Unit type</label>
+        <select id="pkgType">
+          <option value="">Select...</option>
+          <option>Gas / Electric (heat pump)</option>
+          <option>All electric heat pump</option>
+          <option>Gas heat / electric cool</option>
+          <option>Electric heat / electric cool</option>
+        </select>
+      </div>
+      <div class="field"><label>Mount type</label>
+        <select id="pkgMount">
+          <option value="">Select...</option>
+          <option>Rooftop — curb mount</option>
+          <option>Ground mount — slab</option>
+          <option>Ground mount — pad</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-row col3">
+      <div class="field"><label>Unit Width <span class="label-hint">inches</span></label><input type="number" id="pkgW" placeholder="e.g. 47"></div>
+      <div class="field"><label>Unit Depth <span class="label-hint">inches</span></label><input type="number" id="pkgD" placeholder="e.g. 47"></div>
+      <div class="field"><label>Unit Height <span class="label-hint">inches</span></label><input type="number" id="pkgH" placeholder="e.g. 36"></div>
+    </div>
+    <div class="field-row col2">
+      <div class="field"><label>MCA <span class="label-hint">Min Circuit Amps</span></label><input type="number" id="pkgMCA" placeholder="e.g. 25"></div>
+      <div class="field"><label>MOCP <span class="label-hint">Max Overcurrent</span></label><input type="number" id="pkgMOCP" placeholder="e.g. 35"></div>
+    </div>
+    <div class="field-row col2">
+      <div class="field"><label>Refrigerant type</label>
+        <select id="pkgRefrig">
+          <option value="">Select...</option>
+          <option>R-22</option><option>R-410A</option><option>R-454B</option><option>Unknown</option>
+        </select>
+      </div>
+      <div class="field"><label>Approx age</label>
+        <select id="pkgAge">
+          <option value="">Select...</option>
+          <option>0-5 years</option><option>6-10 years</option><option>11-15 years</option>
+          <option>16-20 years</option><option>20+ years</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Supply / return connection location on unit</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" onclick="toggle(this,'pkgConnBottom','pkgConnSide pkgConnTop')">Bottom</button>
+        <button class="toggle-btn" onclick="toggle(this,'pkgConnSide','pkgConnBottom pkgConnTop')">Side</button>
+        <button class="toggle-btn" onclick="toggle(this,'pkgConnTop','pkgConnBottom pkgConnSide')">Top</button>
+      </div>
+    </div>
+    <div class="field" style="margin-top:10px;"><label>Unit condition</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" onclick="toggle(this,'pkgGood','pkgFair pkgPoor')">Good</button>
+        <button class="toggle-btn" onclick="toggle(this,'pkgFair','pkgGood pkgPoor')">Fair</button>
+        <button class="toggle-btn" onclick="toggle(this,'pkgPoor','pkgGood pkgFair')">Poor / Failed</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="existingCondenser">
+    <div class="card-title">Existing Outdoor Unit (Condenser / Heat Pump)</div>
+    <div class="field-row col2">
+      <div class="field"><label>Brand</label><input type="text" id="condBrand" placeholder="e.g. Carrier, Trane"></div>
+      <div class="field"><label>Tonnage</label>
+        <select id="condTons">
+          <option value="">Select...</option>
+          <option>1.5 ton</option><option>2.0 ton</option><option>2.5 ton</option>
+          <option>3.0 ton</option><option>3.5 ton</option><option>4.0 ton</option>
+          <option>4.5 ton</option><option>5.0 ton</option><option>Unknown</option>
+        </select>
+      </div>
+    </div>
+    <div class="field"><label>Model Number</label><input type="text" id="condModel" placeholder="Full model number from nameplate"></div>
+    <div class="field"><label>Serial Number</label><input type="text" id="condSerial" placeholder="Full serial number from nameplate"></div>
+    <div class="field-row col2">
+      <div class="field"><label>Refrigerant Type</label>
+        <select id="condRefrig">
+          <option value="">Select...</option>
+          <option>R-22</option><option>R-410A</option><option>R-454B</option>
+          <option>R-32</option><option>Unknown — check nameplate</option>
+        </select>
+      </div>
+      <div class="field"><label>Approx Age</label>
+        <select id="condAge">
+          <option value="">Select...</option>
+          <option>0-5 years</option><option>6-10 years</option><option>11-15 years</option>
+          <option>16-20 years</option><option>20+ years</option><option>Unknown</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-row col2">
+      <div class="field"><label>MCA <span class="label-hint">Min Circuit Amps</span></label><input type="number" id="condMCA" placeholder="e.g. 25"></div>
+      <div class="field"><label>MOCP <span class="label-hint">Max Overcurrent</span></label><input type="number" id="condMOCP" placeholder="e.g. 35"></div>
+    </div>
+    <div class="info-blue" style="font-size:12px;">MCA and MOCP are on the condenser nameplate. MCA = minimum wire ampacity. MOCP = maximum breaker/fuse size. These determine if the existing electrical can support the new unit.</div>
+    <div class="field">
+      <label>Condenser Condition</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" onclick="toggle(this,'condGood','condFair condPoor')">Good</button>
+        <button class="toggle-btn" onclick="toggle(this,'condFair','condGood condPoor')">Fair</button>
+        <button class="toggle-btn" onclick="toggle(this,'condPoor','condGood condFair')">Poor / Failed</button>
+      </div>
+    </div>
+    <div class="field" style="margin-top:10px;">
+      <label>Fan Discharge Direction <span class="label-hint">current unit</span></label>
+      <div class="toggle-group">
+        <button class="toggle-btn" onclick="toggle(this,'fanUp','fanHoriz')">Upward vertical</button>
+        <button class="toggle-btn" onclick="toggle(this,'fanHoriz','fanUp')">Horizontal side</button>
+        <button class="toggle-btn" onclick="toggle(this,'fanUnk','fanUp fanHoriz')">Unknown</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="existingIndoor">
+    <div class="card-title" id="indoorCardTitle">Existing Indoor Unit (Air Handler / Furnace)</div>
+    <div class="field-row col2">
+      <div class="field"><label>Brand</label><input type="text" id="ahBrand" placeholder="e.g. Goodman, Rheem"></div>
+      <div class="field"><label>Type</label>
+        <select id="ahType">
+          <option value="">Select...</option>
+          <option>Air Handler</option><option>Gas Furnace</option>
+          <option>Electric Furnace</option><option>Fan Coil</option>
+        </select>
+      </div>
+    </div>
+    <div class="field"><label>Model Number</label><input type="text" id="ahModel" placeholder="Full model number from nameplate"></div>
+    <div class="field"><label>Serial Number</label><input type="text" id="ahSerial" placeholder="Full serial number from nameplate"></div>
+    <div class="field-row col2">
+      <div class="field"><label>BTU Capacity</label><input type="text" id="ahBTU" placeholder="e.g. 60,000 BTU"></div>
+      <div class="field"><label>CFM Rating</label><input type="number" id="ahCFM" placeholder="e.g. 1200"></div>
+    </div>
+    <div class="field">
+      <label>Orientation / Setup</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" onclick="toggle(this,'ahUpflow','ahDownflow ahHoriz')">Upflow</button>
+        <button class="toggle-btn" onclick="toggle(this,'ahDownflow','ahUpflow ahHoriz')">Downflow</button>
+        <button class="toggle-btn" onclick="toggle(this,'ahHoriz','ahUpflow ahDownflow')">Horizontal</button>
+      </div>
+    </div>
+
+    <div class="field" id="furnaceEfficiencyFields" style="display:none;">
+      <label>Furnace efficiency rating</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" onclick="selectFurnaceEfficiency('80', this)">80% AFUE — standard</button>
+        <button class="toggle-btn" onclick="selectFurnaceEfficiency('90', this)">90%+ AFUE — high efficiency</button>
+        <button class="toggle-btn" onclick="selectFurnaceEfficiency('unknown', this)">Unknown — check nameplate</button>
+      </div>
+    </div>
+
+    <div class="field" id="furnaceVentFields" style="display:none; margin-top:10px;">
+      <label>Existing flue / vent type</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" onclick="toggle(this,'ventTypeB','ventPVC ventSingle ventMasonry')">Type B — double wall metal</button>
+        <button class="toggle-btn" onclick="toggle(this,'ventPVC','ventTypeB ventSingle ventMasonry')">PVC plastic pipe</button>
+        <button class="toggle-btn" onclick="toggle(this,'ventSingle','ventTypeB ventPVC ventMasonry')">Single wall metal</button>
+        <button class="toggle-btn" onclick="toggle(this,'ventMasonry','ventTypeB ventPVC ventSingle')">Masonry chimney</button>
+      </div>
+    </div>
+
+    <div class="field" id="furnaceVentSizeFields" style="display:none; margin-top:10px;">
+      <div class="field-row col2">
+        <div class="field">
+          <label>Flue pipe diameter <span class="label-hint">inches</span></label>
+          <select id="flueDiameter">
+            <option value="">Select...</option>
+            <option>2"</option><option>3"</option><option>4"</option>
+            <option>5"</option><option>6"</option><option>Unknown</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Flue pipe length <span class="label-hint">approx feet</span></label>
+          <input type="number" id="flueLength" placeholder="e.g. 15">
+        </div>
+      </div>
+    </div>
+
+    <div class="field" id="furnaceCondensateFields" style="display:none; margin-top:10px;">
+      <div class="info-blue" style="font-size:12px;">90%+ furnace produces condensate — confirm drain routing before ordering.</div>
+      <label>Existing condensate drain for furnace?</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" onclick="toggle(this,'furnDrainYes','furnDrainNo')">Yes — existing drain</button>
+        <button class="toggle-btn" onclick="toggle(this,'furnDrainNo','furnDrainYes')">No — new drain needed</button>
+      </div>
+    </div>
+
+    <div class="field" id="furnaceCombAirFields" style="display:none; margin-top:10px;">
+      <label>Combustion air intake</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" onclick="toggle(this,'combAirExist','combAirNew combAirNone')">Existing intake pipe</button>
+        <button class="toggle-btn" onclick="toggle(this,'combAirNew','combAirExist combAirNone')">New intake needed</button>
+        <button class="toggle-btn" onclick="toggle(this,'combAirNone','combAirExist combAirNew')">Open combustion — no intake</button>
+      </div>
+    </div>
+
+    <div class="info-yellow" id="furnaceVentWarning" style="display:none; font-size:12px; margin-top:10px;">
+      ⚠️ Replacing an 80% furnace with a 90%+ unit requires new PVC venting, a condensate drain, and a combustion air intake pipe. Add to job scope before pricing.
+    </div>
+
+    <div class="field" style="margin-top:10px;">
+      <label>Location</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" onclick="toggle(this,'locAttic','locGarage locCloset locBasement')">Attic</button>
+        <button class="toggle-btn" onclick="toggle(this,'locGarage','locAttic locCloset locBasement')">Garage</button>
+        <button class="toggle-btn" onclick="toggle(this,'locCloset','locAttic locGarage locBasement')">Closet</button>
+        <button class="toggle-btn" onclick="toggle(this,'locBasement','locAttic locGarage locCloset')">Basement</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Thermostat</div>
+    <div class="field-row col2">
+      <div class="field"><label>Brand / Model</label><input type="text" id="tstatModel" placeholder="e.g. Honeywell T6 Pro"></div>
+      <div class="field"><label>Type</label>
+        <select id="tstatType">
+          <option value="">Select...</option>
+          <option>Manual</option><option>Programmable</option>
+          <option>Smart / WiFi</option><option>Communicating</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Wire Configuration <span class="label-hint">count wires at thermostat base</span></label>
+      <div class="toggle-group">
+        <button class="toggle-btn" onclick="toggle(this,'wire4','wire5 wire6 wire8')">4-wire</button>
+        <button class="toggle-btn" onclick="toggle(this,'wire5','wire4 wire6 wire8')">5-wire</button>
+        <button class="toggle-btn" onclick="toggle(this,'wire6','wire4 wire5 wire8')">6-wire</button>
+        <button class="toggle-btn" onclick="toggle(this,'wire8','wire4 wire5 wire6')">8-wire</button>
+      </div>
+    </div>
+    <div class="field" style="margin-top:10px;"><label>Notes <span class="label-hint">e.g. C-wire present, location, any issues</span></label><textarea id="tstatNotes" placeholder="Any notes about the thermostat wiring or location..."></textarea></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Required Photos — Existing Equipment</div>
+    <div class="photo-grid">
+      <div class="photo-item" id="photo-cond-nameplate" onclick="capturePhoto('photo-cond-nameplate', 'Condenser Nameplate')">
+        <img class="photo-preview" id="prev-photo-cond-nameplate">
+        <div class="photo-icon">📷</div>
+        <div class="photo-label">Condenser Nameplate</div>
+        <div class="photo-status">Required</div>
+      </div>
+      <div class="photo-item" id="photo-cond-unit" onclick="capturePhoto('photo-cond-unit', 'Condenser Full Unit')">
+        <img class="photo-preview" id="prev-photo-cond-unit">
+        <div class="photo-icon">📷</div>
+        <div class="photo-label">Condenser Full View</div>
+        <div class="photo-status">Required</div>
+      </div>
+      <div class="photo-item" id="photo-ah-nameplate" onclick="capturePhoto('photo-ah-nameplate', 'Air Handler Nameplate')">
+        <img class="photo-preview" id="prev-photo-ah-nameplate">
+        <div class="photo-icon">📷</div>
+        <div class="photo-label">Air Handler Nameplate</div>
+        <div class="photo-status">Required</div>
+      </div>
+      <div class="photo-item" id="photo-ah-unit" onclick="capturePhoto('photo-ah-unit', 'Air Handler Full Unit')">
+        <img class="photo-preview" id="prev-photo-ah-unit">
+        <div class="photo-icon">📷</div>
+        <div class="photo-label">Air Handler Full View</div>
+        <div class="photo-status">Required</div>
+      </div>
+      <div class="photo-item" id="photo-packaged-nameplate" style="display:none;" onclick="capturePhoto('photo-packaged-nameplate', 'Packaged Unit Nameplate')">
+        <img class="photo-preview" id="prev-photo-packaged-nameplate">
+        <div class="photo-icon">📷</div>
+        <div class="photo-label">Unit Nameplate</div>
+        <div class="photo-status">Required</div>
+      </div>
+      <div class="photo-item" id="photo-packaged-unit" style="display:none;" onclick="capturePhoto('photo-packaged-unit', 'Packaged Unit Full View')">
+        <img class="photo-preview" id="prev-photo-packaged-unit">
+        <div class="photo-icon">📷</div>
+        <div class="photo-label">Unit Full View</div>
+        <div class="photo-status">Required</div>
+      </div>
+      <div class="photo-item" id="photo-tstat" onclick="capturePhoto('photo-tstat', 'Thermostat Wiring')">
+        <img class="photo-preview" id="prev-photo-tstat">
+        <div class="photo-icon">📷</div>
+        <div class="photo-label">Thermostat Wiring</div>
+        <div class="photo-status">Required</div>
+      </div>
+      <div class="photo-item" id="photo-extra-equip" onclick="capturePhoto('photo-extra-equip', 'Additional Equipment')">
+        <img class="photo-preview" id="prev-photo-extra-equip">
+        <div class="photo-icon">📷</div>
+        <div class="photo-label">Additional Photo</div>
+        <div class="photo-status">Optional</div>
+      </div>
+    </div>
+    <input type="file" id="fileInput" accept="image/*" capture="environment" onchange="handlePhotoCapture(event)">
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 3: SPACE ASSESSMENT -->
+<!-- ============================================================ -->
+<div class="section" id="section-3">
+  <div class="section-header">
+    <div class="section-title">Space Assessment</div>
+    <div class="section-desc">Measure the physical space where equipment lives. New equipment must fit — measure twice, order once.</div>
+  </div>
+
+  <div class="diagram-card">
+    <div class="diagram-title">📐 How to measure unit footprint</div>
+    <svg class="diagram-svg" width="300" height="140" viewBox="0 0 300 140">
+      <rect x="80" y="20" width="140" height="80" rx="4" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/>
+      <text x="150" y="65" text-anchor="middle" font-size="12" fill="#1e40af" font-weight="600">UNIT</text>
+      <line x1="80" y1="115" x2="220" y2="115" stroke="#374151" stroke-width="1.5"/>
+      <line x1="80" y1="110" x2="80" y2="120" stroke="#374151" stroke-width="1.5"/>
+      <line x1="220" y1="110" x2="220" y2="120" stroke="#374151" stroke-width="1.5"/>
+      <text x="150" y="130" text-anchor="middle" font-size="11" fill="#374151">WIDTH (left to right)</text>
+      <line x1="240" y1="20" x2="240" y2="100" stroke="#374151" stroke-width="1.5"/>
+      <line x1="235" y1="20" x2="245" y2="20" stroke="#374151" stroke-width="1.5"/>
+      <line x1="235" y1="100" x2="245" y2="100" stroke="#374151" stroke-width="1.5"/>
+      <text x="270" y="65" text-anchor="middle" font-size="11" fill="#374151" transform="rotate(90,270,65)">DEPTH</text>
+      <line x1="30" y1="20" x2="30" y2="100" stroke="#374151" stroke-width="1.5"/>
+      <line x1="25" y1="20" x2="35" y2="20" stroke="#374151" stroke-width="1.5"/>
+      <line x1="25" y1="100" x2="35" y2="100" stroke="#374151" stroke-width="1.5"/>
+      <text x="15" y="65" text-anchor="middle" font-size="11" fill="#374151" transform="rotate(-90,15,65)">HEIGHT</text>
+    </svg>
+    <div class="diagram-note">💡 Measure the existing unit AND the available space. Also measure doorways, hallways, and attic access — the new unit must fit through every opening on the path to the install location.</div>
+  </div>
+
+  <div class="card" id="spaceCondenser">
+    <div class="card-title">Condenser / Outdoor Unit Space</div>
+    <div class="info-blue" style="font-size:12px; margin-bottom:14px;">Measure the existing pad or space AND all clearances. Manufacturer minimum clearances are typically 12" on sides, 18-24" on service side, and unrestricted overhead for vertical discharge units.</div>
+    <div class="field-row col3">
+      <div class="field"><label>Pad Width <span class="label-hint">inches</span></label><input type="number" id="padW" placeholder="e.g. 36"></div>
+      <div class="field"><label>Pad Depth <span class="label-hint">inches</span></label><input type="number" id="padD" placeholder="e.g. 36"></div>
+      <div class="field"><label>Existing Unit Height <span class="label-hint">inches</span></label><input type="number" id="condH" placeholder="e.g. 38"></div>
+    </div>
+    <div class="card-title" style="margin-top:16px;">Clearances from unit to obstruction</div>
+    <div class="diagram-card" style="margin-bottom:14px;">
+      <svg class="diagram-svg" width="280" height="200" viewBox="0 0 280 200">
+        <rect x="100" y="70" width="80" height="80" rx="4" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/>
+        <text x="140" y="115" text-anchor="middle" font-size="11" fill="#1e40af" font-weight="600">UNIT</text>
+        <line x1="140" y1="10" x2="140" y2="68" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <text x="140" y="45" text-anchor="middle" font-size="10" fill="#dc2626" font-weight="600">OVERHEAD</text>
+        <line x1="140" y1="152" x2="140" y2="190" stroke="#374151" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <text x="140" y="185" text-anchor="middle" font-size="10" fill="#374151">SOUTH</text>
+        <line x1="10" y1="110" x2="98" y2="110" stroke="#374151" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <text x="54" y="105" text-anchor="middle" font-size="10" fill="#374151">WEST</text>
+        <line x1="182" y1="110" x2="270" y2="110" stroke="#374151" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <text x="226" y="105" text-anchor="middle" font-size="10" fill="#374151">EAST</text>
+        <text x="140" y="8" text-anchor="middle" font-size="9" fill="#dc2626">Must be unrestricted for vertical discharge</text>
+      </svg>
+    </div>
+    <div class="field-row col2">
+      <div class="field"><label>North clearance <span class="label-hint">inches</span></label><input type="number" id="clearN" placeholder="e.g. 24"></div>
+      <div class="field"><label>South clearance <span class="label-hint">inches</span></label><input type="number" id="clearS" placeholder="e.g. 24"></div>
+    </div>
+    <div class="field-row col2">
+      <div class="field"><label>East clearance <span class="label-hint">inches</span></label><input type="number" id="clearE" placeholder="e.g. 18"></div>
+      <div class="field"><label>West clearance <span class="label-hint">inches</span></label><input type="number" id="clearW" placeholder="e.g. 18"></div>
+    </div>
+    <div class="field">
+      <label>Overhead clearance <span class="label-hint">inches — to overhang, roof, or obstruction</span></label>
+      <input type="number" id="clearOverhead" placeholder="e.g. 60 — enter 999 if completely open">
+    </div>
+    <div class="field">
+      <label>Recommended discharge direction for this space</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" onclick="toggle(this,'recUp','recHoriz recEither')">Vertical upward</button>
+        <button class="toggle-btn" onclick="toggle(this,'recHoriz','recUp recEither')">Horizontal side</button>
+        <button class="toggle-btn" onclick="toggle(this,'recEither','recUp recHoriz')">Either works</button>
+      </div>
+    </div>
+    <div class="field" style="margin-top:10px;">
+      <label>Pad type</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" onclick="toggle(this,'padConcrete','padPlastic padGround padRoof')">Concrete slab</button>
+        <button class="toggle-btn" onclick="toggle(this,'padPlastic','padConcrete padGround padRoof')">Plastic pad</button>
+        <button class="toggle-btn" onclick="toggle(this,'padGround','padConcrete padPlastic padRoof')">Ground mount</button>
+        <button class="toggle-btn" onclick="toggle(this,'padRoof','padConcrete padPlastic padGround')">Rooftop curb</button>
+      </div>
+    </div>
+    <div class="field" style="margin-top:10px;"><label>Space notes</label><textarea id="condenserSpaceNotes" placeholder="Any obstructions, tight access, unusual conditions..."></textarea></div>
+  </div>
+
+  <div class="card" id="spaceIndoor">
+    <div class="card-title">Indoor Unit Space</div>
+    <div class="field-row col3">
+      <div class="field"><label>Space Width <span class="label-hint">inches</span></label><input type="number" id="spaceW" placeholder="e.g. 24"></div>
+      <div class="field"><label>Space Depth <span class="label-hint">inches</span></label><input type="number" id="spaceD" placeholder="e.g. 30"></div>
+      <div class="field"><label>Space Height <span class="label-hint">inches</span></label><input type="number" id="spaceH" placeholder="e.g. 60"></div>
+    </div>
+    <div class="field-row col3">
+      <div class="field"><label>Existing Unit Width <span class="label-hint">inches</span></label><input type="number" id="ahW" placeholder="e.g. 21"></div>
+      <div class="field"><label>Existing Unit Depth <span class="label-hint">inches</span></label><input type="number" id="ahD" placeholder="e.g. 27"></div>
+      <div class="field"><label>Existing Unit Height <span class="label-hint">inches</span></label><input type="number" id="ahH" placeholder="e.g. 58"></div>
+    </div>
+    <div class="field" id="atticAccessField">
+      <label>Attic Access Opening <span class="label-hint">if applicable — inches W × H</span></label>
+      <div class="field-row col2">
+        <div class="field"><input type="number" id="atticW" placeholder="Width e.g. 22"></div>
+        <div class="field"><input type="number" id="atticH" placeholder="Height e.g. 30"></div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Path to install location — any tight spots?</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" onclick="toggle(this,'pathClear','pathTight pathMeasure')">Clear — no issues</button>
+        <button class="toggle-btn" onclick="toggle(this,'pathTight','pathClear pathMeasure')">Tight — note below</button>
+        <button class="toggle-btn" onclick="toggle(this,'pathMeasure','pathClear pathTight')">Needs measuring</button>
+      </div>
+    </div>
+    <div class="field" style="margin-top:10px;"><label>Path notes <span class="label-hint">doorway widths, hallway turns, ceiling heights</span></label><textarea id="pathNotes" placeholder="e.g. Hallway is 32 inches wide, 90-degree turn at closet door..."></textarea></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Required Photos — Space</div>
+    <div class="photo-grid">
+      <div class="photo-item" id="photo-cond-space" onclick="capturePhoto('photo-cond-space', 'Condenser Space Full View')">
+        <img class="photo-preview" id="prev-photo-cond-space">
+        <div class="photo-icon">📷</div>
+        <div class="photo-label">Condenser Space</div>
+        <div class="photo-status">Required</div>
+      </div>
+      <div class="photo-item" id="photo-cond-north" onclick="capturePhoto('photo-cond-north', 'Condenser North Side')">
+        <img class="photo-preview" id="prev-photo-cond-north">
+        <div class="photo-icon">📷</div>
+        <div class="photo-label">Condenser N Side</div>
+        <div class="photo-status">Required</div>
+      </div>
+      <div class="photo-item" id="photo-cond-south" onclick="capturePhoto('photo-cond-south', 'Condenser South Side')">
+        <img class="photo-preview" id="prev-photo-cond-south">
+        <div class="photo-icon">📷</div>
+        <div class="photo-label">Condenser S Side</div>
+        <div class="photo-status">Required</div>
+      </div>
+      <div class="photo-item" id="photo-indoor-space" onclick="capturePhoto('photo-indoor-space', 'Indoor Unit Space')">
+        <img class="photo-preview" id="prev-photo-indoor-space">
+        <div class="photo-icon">📷</div>
+        <div class="photo-label">Indoor Space</div>
+        <div class="photo-status">Required</div>
+      </div>
+      <div class="photo-item" id="photo-attic-access" onclick="capturePhoto('photo-attic-access', 'Attic Access Opening')">
+        <img class="photo-preview" id="prev-photo-attic-access">
+        <div class="photo-icon">📷</div>
+        <div class="photo-label">Attic Access</div>
+        <div class="photo-status">If applicable</div>
+      </div>
+      <div class="photo-item" id="photo-path" onclick="capturePhoto('photo-path', 'Path to Install Location')">
+        <img class="photo-preview" id="prev-photo-path">
+        <div class="photo-icon">📷</div>
+        <div class="photo-label">Install Path</div>
+        <div class="photo-status">If tight</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 4: DUCT SYSTEM -->
+<!-- ============================================================ -->
+<div class="section" id="section-4">
+  <div class="section-header">
+    <div class="section-title">Duct System</div>
+    <div class="section-desc">Capture plenum and duct dimensions carefully. Plenum mismatch is the most common install day surprise — measure carefully.</div>
+  </div>
+
+  <div class="diagram-card">
+    <div class="diagram-title">📐 Plenum measurement guide</div>
+    <svg class="diagram-svg" width="320" height="160" viewBox="0 0 320 160">
+      <rect x="100" y="60" width="120" height="70" rx="4" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+      <text x="160" y="100" text-anchor="middle" font-size="11" fill="#92400e" font-weight="600">PLENUM</text>
+      <rect x="130" y="20" width="60" height="40" rx="2" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+      <text x="160" y="45" text-anchor="middle" font-size="10" fill="#1e40af">AIR HANDLER</text>
+      <line x1="100" y1="145" x2="220" y2="145" stroke="#374151" stroke-width="1.5"/>
+      <line x1="100" y1="140" x2="100" y2="150" stroke="#374151" stroke-width="1.5"/>
+      <line x1="220" y1="140" x2="220" y2="150" stroke="#374151" stroke-width="1.5"/>
+      <text x="160" y="158" text-anchor="middle" font-size="10" fill="#374151">WIDTH →</text>
+      <line x1="240" y1="60" x2="240" y2="130" stroke="#374151" stroke-width="1.5"/>
+      <line x1="235" y1="60" x2="245" y2="60" stroke="#374151" stroke-width="1.5"/>
+      <line x1="235" y1="130" x2="245" y2="130" stroke="#374151" stroke-width="1.5"/>
+      <text x="260" y="100" text-anchor="middle" font-size="10" fill="#374151">HEIGHT</text>
+      <text x="280" y="113" text-anchor="middle" font-size="10" fill="#374151">↕</text>
+      <line x1="60" y1="60" x2="98" y2="85" stroke="#d97706" stroke-width="1.5" stroke-dasharray="3,2"/>
+      <text x="30" y="55" text-anchor="middle" font-size="10" fill="#d97706">Depth =</text>
+      <text x="30" y="68" text-anchor="middle" font-size="10" fill="#d97706">front to back</text>
+    </svg>
+    <div class="diagram-note">💡 Measure the plenum box itself — Width × Height × Depth. Also count every duct connection (supply runs) coming off the plenum and record each size. Mismatched plenum size = sheet metal fabrication on install day.</div>
+  </div>
+
+  <div id="ductPlenumsCard">
+  <div class="card">
+    <div class="card-title">Supply Plenum</div>
+    <div class="field-row col3">
+      <div class="field"><label>Width <span class="label-hint">inches</span></label><input type="number" id="supW" placeholder="e.g. 20"></div>
+      <div class="field"><label>Height <span class="label-hint">inches</span></label><input type="number" id="supH" placeholder="e.g. 10"></div>
+      <div class="field"><label>Depth <span class="label-hint">inches</span></label><input type="number" id="supD" placeholder="e.g. 14"></div>
+    </div>
+    <div class="field">
+      <label>Plenum material</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" onclick="toggle(this,'supMetal','supFlex supBoard')">Sheet metal</button>
+        <button class="toggle-btn" onclick="toggle(this,'supFlex','supMetal supBoard')">Flex duct</button>
+        <button class="toggle-btn" onclick="toggle(this,'supBoard','supMetal supFlex')">Duct board</button>
+      </div>
+    </div>
+    <div class="field" style="margin-top:14px;">
+      <label>Supply duct connections off plenum</label>
+      <div class="info-blue" style="font-size:12px; margin-bottom:10px;">Count every duct that branches off the supply plenum. Record the diameter of each one.</div>
+      <div id="supplyConnections">
+        <div class="field-row col2" style="margin-bottom:8px;">
+          <div class="field"><label style="font-size:11px;">Connection 1 — diameter (inches)</label><input type="number" placeholder="e.g. 8" class="sup-conn"></div>
+          <div class="field"><label style="font-size:11px;">Duct type</label>
+            <select class="sup-conn-type"><option>Flex</option><option>Metal round</option><option>Metal rectangular</option></select>
+          </div>
+        </div>
+        <div class="field-row col2" style="margin-bottom:8px;">
+          <div class="field"><label style="font-size:11px;">Connection 2 — diameter (inches)</label><input type="number" placeholder="e.g. 8" class="sup-conn"></div>
+          <div class="field"><label style="font-size:11px;">Duct type</label>
+            <select class="sup-conn-type"><option>Flex</option><option>Metal round</option><option>Metal rectangular</option></select>
+          </div>
+        </div>
+        <div class="field-row col2" style="margin-bottom:8px;">
+          <div class="field"><label style="font-size:11px;">Connection 3 — diameter (inches)</label><input type="number" placeholder="e.g. 6" class="sup-conn"></div>
+          <div class="field"><label style="font-size:11px;">Duct type</label>
+            <select class="sup-conn-type"><option>Flex</option><option>Metal round</option><option>Metal rectangular</option></select>
+          </div>
+        </div>
+        <div class="field-row col2" style="margin-bottom:8px;">
+          <div class="field"><label style="font-size:11px;">Connection 4 — diameter (inches)</label><input type="number" placeholder="e.g. 6" class="sup-conn"></div>
+          <div class="field"><label style="font-size:11px;">Duct type</label>
+            <select class="sup-conn-type"><option>Flex</option><option>Metal round</option><option>Metal rectangular</option></select>
+          </div>
+        </div>
+      </div>
+      <button class="toggle-btn" onclick="addConnection()" style="margin-top:8px;">+ Add connection</button>
+    </div>
+    <div class="field" style="margin-top:10px;"><label>Total supply connections count</label><input type="number" id="supTotalConns" placeholder="Total number of supply runs"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Return Plenum / Return Air</div>
+    <div class="field-row col3">
+      <div class="field"><label>Width <span class="label-hint">inches</span></label><input type="number" id="retW" placeholder="e.g. 20"></div>
+      <div class="field"><label>Height <span class="label-hint">inches</span></label><input type="number" id="retH" placeholder="e.g. 20"></div>
+      <div class="field"><label>Depth <span class="label-hint">inches</span></label><input type="number" id="retD" placeholder="e.g. 20"></div>
+    </div>
+    <div class="field-row col2">
+      <div class="field"><label>Return drop size W <span class="label-hint">inches</span></label><input type="number" id="retDropW" placeholder="e.g. 16"></div>
+      <div class="field"><label>Return drop size H <span class="label-hint">inches</span></label><input type="number" id="retDropH" placeholder="e.g. 20"></div>
+    </div>
+    <div class="field">
+      <label>Return configuration</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" onclick="toggle(this,'retCentral','retMulti')">Single central return</button>
+        <button class="toggle-btn" onclick="toggle(this,'retMulti','retCentral')">Multiple room returns</button>
+      </div>
+    </div>
+    <div class="field" style="margin-top:10px;">
+      <label>Filter location and size</label>
+      <div class="field-row col2">
+        <div class="field">
+          <select id="filterLoc">
+            <option value="">Filter location...</option>
+            <option>Return grille</option><option>Air handler / furnace</option>
+            <option>Return plenum</option><option>Media cabinet</option>
+          </select>
+        </div>
+        <div class="field">
+          <select id="filterSize">
+            <option value="">Filter size...</option>
+            <option>16x20x1</option><option>16x25x1</option><option>20x20x1</option>
+            <option>20x25x1</option><option>20x25x4</option><option>20x25x5</option>
+            <option>16x20x4</option><option>16x25x4</option><option>Other — note below</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div><!-- end ductPlenumsCard -->
+
+  <!-- PACKAGED UNIT DUCT SECTION -->
+  <div class="card" id="ductPackagedCard" style="display:none;">
+    <div class="card-title">Packaged Unit — Duct Connections</div>
+    <div class="info-blue" style="font-size:12px;margin-bottom:14px;">Packaged units connect directly to ductwork at the cabinet. Measure the supply and return openings on the unit itself.</div>
+    <div class="field-row col2">
+      <div class="field"><label>Supply opening W <span class="label-hint">inches</span></label><input type="number" id="pkgSupW" placeholder="e.g. 18"></div>
+      <div class="field"><label>Supply opening H <span class="label-hint">inches</span></label><input type="number" id="pkgSupH" placeholder="e.g. 18"></div>
+    </div>
+    <div class="field-row col2">
+      <div class="field"><label>Return opening W <span class="label-hint">inches</span></label><input type="number" id="pkgRetW" placeholder="e.g. 18"></div>
+      <div class="field"><label>Return opening H <span class="label-hint">inches</span></label><input type="number" id="pkgRetH" placeholder="e.g. 20"></div>
+    </div>
+    <div class="field"><label>Curb dimensions (if rooftop) W × D <span class="label-hint">inches</span></label>
+      <div class="field-row col2">
+        <div class="field"><input type="number" id="curbW" placeholder="Width"></div>
+        <div class="field"><input type="number" id="curbD" placeholder="Depth"></div>
+      </div>
+    </div>
+    <div class="field"><label>New curb needed?</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" onclick="toggle(this,'curbNew','curbReuse curbNA')">Yes — new curb</button>
+        <button class="toggle-btn" onclick="toggle(this,'curbReuse','curbNew curbNA')">Reuse existing</button>
+        <button class="toggle-btn" onclick="toggle(this,'curbNA','curbNew curbReuse')">Ground mount — N/A</button>
+      </div>
+    </div>
+    <div class="field" style="margin-top:10px;"><label>Duct connection notes</label><textarea placeholder="Any notes about the duct connections at the packaged unit..."></textarea></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Duct Condition</div>
+    <div class="field">
+      <label>Overall duct condition</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" onclick="toggle(this,'ductGood','ductFair ductPoor')">Good</button>
+        <button class="toggle-btn" onclick="toggle(this,'ductFair','ductGood ductPoor')">Fair — some wear</button>
+        <button class="toggle-btn" onclick="toggle(this,'ductPoor','ductGood ductFair')">Poor — needs attention</button>
+      </div>
+    </div>
+    <div class="field" style="margin-top:10px;">
+      <label>Visible issues</label>
+      <div class="toggle-group" style="flex-wrap:wrap;">
+        <button class="toggle-btn" onclick="this.classList.toggle('active')">Disconnected runs</button>
+        <button class="toggle-btn" onclick="this.classList.toggle('active')">Torn flex duct</button>
+        <button class="toggle-btn" onclick="this.classList.toggle('active')">Missing insulation</button>
+        <button class="toggle-btn" onclick="this.classList.toggle('active')">Mold / moisture</button>
+        <button class="toggle-btn" onclick="this.classList.toggle('active')">Pest damage</button>
+        <button class="toggle-btn" onclick="this.classList.toggle('active')">None visible</button>
+      </div>
+    </div>
+    <div class="field" style="margin-top:10px;"><label>Duct notes</label><textarea id="ductNotes" placeholder="Any additional observations about the duct system..."></textarea></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Required Photos — Duct System</div>
+    <div class="photo-grid">
+      <div class="photo-item" id="photo-sup-plenum" onclick="capturePhoto('photo-sup-plenum', 'Supply Plenum')">
+        <img class="photo-preview" id="prev-photo-sup-plenum">
+        <div class="photo-icon">📷</div>
+        <div class="photo-label">Supply Plenum</div>
+        <div class="photo-status">Required</div>
+      </div>
+      <div class="photo-item" id="photo-ret-plenum" onclick="capturePhoto('photo-ret-plenum', 'Return Plenum')">
+        <img class="photo-preview" id="prev-photo-ret-plenum">
+        <div class="photo-icon">📷</div>
+        <div class="photo-label">Return Plenum</div>
+        <div class="photo-status">Required</div>
+      </div>
+      <div class="photo-item" id="photo-filter" onclick="capturePhoto('photo-filter', 'Filter and Filter Rack')">
+        <img class="photo-preview" id="prev-photo-filter">
+        <div class="photo-icon">📷</div>
+        <div class="photo-label">Filter / Rack</div>
+        <div class="photo-status">Required</div>
+      </div>
+      <div class="photo-item" id="photo-duct-cond" onclick="capturePhoto('photo-duct-cond', 'Duct Condition')">
+        <img class="photo-preview" id="prev-photo-duct-cond">
+        <div class="photo-icon">📷</div>
+        <div class="photo-label">Duct Condition</div>
+        <div class="photo-status">Required</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 5: REFRIGERANT & PIPING -->
+<!-- ============================================================ -->
+<div class="section" id="section-5">
+  <div class="section-header">
+    <div class="section-title">Refrigerant & Piping</div>
+    <div class="section-desc">Line set compatibility, condensate routing, and drain pan condition. These details prevent surprises on install day.</div>
+  </div>
+
+  <div class="diagram-card">
+    <div class="diagram-title">🔧 Line set identification</div>
+    <svg class="diagram-svg" width="320" height="120" viewBox="0 0 320 120">
+      <circle cx="60" cy="40" r="18" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/>
+      <text x="60" y="44" text-anchor="middle" font-size="10" fill="#1e40af" font-weight="600">SUCTION</text>
+      <text x="60" y="70" text-anchor="middle" font-size="10" fill="#374151">Larger pipe</text>
+      <text x="60" y="83" text-anchor="middle" font-size="10" fill="#374151">Usually 3/4" or 7/8"</text>
+      <text x="60" y="96" text-anchor="middle" font-size="10" fill="#374151">Insulated (cold)</text>
+      <circle cx="60" cy="40" r="10" fill="#93c5fd" stroke="#3b82f6" stroke-width="1"/>
+      <circle cx="220" cy="40" r="12" fill="#fee2e2" stroke="#dc2626" stroke-width="2"/>
+      <text x="220" y="44" text-anchor="middle" font-size="10" fill="#991b1b" font-weight="600">LIQUID</text>
+      <text x="220" y="70" text-anchor="middle" font-size="10" fill="#374151">Smaller pipe</text>
+      <text x="220" y="83" text-anchor="middle" font-size="10" fill="#374151">Usually 3/8" or 1/4"</text>
+      <text x="220" y="96" text-anchor="middle" font-size="10" fill="#374151">Not insulated</text>
+      <circle cx="220" cy="40" r="6" fill="#fca5a5" stroke="#dc2626" stroke-width="1"/>
+      <line x1="95" y1="40" x2="195" y2="40" stroke="#374151" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="145" y="35" text-anchor="middle" font-size="10" fill="#6b7280">LINE SET</text>
+    </svg>
+    <div class="diagram-note">💡 The suction line is the large insulated copper pipe. The liquid line is the small uninsulated copper pipe. Both run between the condenser and air handler. Measure both diameters and total length.</div>
+  </div>
+
+  <div class="card" id="lineSetCard">
+    <div class="card-title">Refrigerant Line Set</div>
+    <div class="field-row col2">
+      <div class="field">
+        <label>Suction line diameter <span class="label-hint">inches</span></label>
+        <select id="suctionSize">
+          <option value="">Select...</option>
+          <option>1/2"</option><option>5/8"</option><option>3/4"</option>
+          <option>7/8"</option><option>1-1/8"</option><option>Unknown</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Liquid line diameter <span class="label-hint">inches</span></label>
+        <select id="liquidSize">
+          <option value="">Select...</option>
+          <option>1/4"</option><option>3/8"</option><option>1/2"</option>
+          <option>5/8"</option><option>Unknown</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-row col2">
+      <div class="field">
+        <label>Estimated line set length <span class="label-hint">feet</span></label>
+        <input type="number" id="lineSetLength" placeholder="e.g. 35">
+      </div>
+      <div class="field">
+        <label>Line set age / condition</label>
+        <select id="lineSetCondition">
+          <option value="">Select...</option>
+          <option>Good — reuse</option>
+          <option>Fair — reuse with drier</option>
+          <option>Poor — replace</option>
+          <option>Unknown</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Line set routing path</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" onclick="this.classList.toggle('active')">Attic</button>
+        <button class="toggle-btn" onclick="this.classList.toggle('active')">Exposed exterior</button>
+        <button class="toggle-btn" onclick="this.classList.toggle('active')">Slab/buried</button>
+        <button class="toggle-btn" onclick="this.classList.toggle('active')">Garage</button>
+        <button class="toggle-btn" onclick="this.classList.toggle('active')">Crawl space</button>
+      </div>
+    </div>
+    <div class="field" style="margin-top:10px;">
+      <label>Insulation condition on suction line</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" onclick="toggle(this,'insulGood','insulFair insulPoor')">Good</button>
+        <button class="toggle-btn" onclick="toggle(this,'insulFair','insulGood insulPoor')">Cracking / worn</button>
+        <button class="toggle-btn" onclick="toggle(this,'insulPoor','insulGood insulFair')">Missing sections</button>
+      </div>
+    </div>
+    <div class="field" style="margin-top:10px;">
+      <label>Wall penetration — entry point condition</label>
+      <select id="penetrationCondition">
+        <option value="">Select...</option>
+        <option>Sealed properly</option>
+        <option>Needs sealing / caulk</option>
+        <option>Damaged — needs repair</option>
+        <option>New penetration needed</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="card" id="condensateCard">
+    <div class="card-title">Condensate & Drain</div>
+    <div class="diagram-card" style="margin-bottom:14px;">
+      <div class="diagram-title">💧 Drain pan check</div>
+      <svg class="diagram-svg" width="280" height="100" viewBox="0 0 280 100">
+        <rect x="60" y="20" width="160" height="50" rx="4" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+        <rect x="75" y="55" width="130" height="15" rx="2" fill="#bfdbfe" stroke="#3b82f6" stroke-width="1"/>
+        <text x="140" y="47" text-anchor="middle" font-size="11" fill="#1e40af">AIR HANDLER</text>
+        <text x="140" y="72" text-anchor="middle" font-size="10" fill="#1e40af">PRIMARY DRAIN PAN</text>
+        <line x1="200" y1="70" x2="240" y2="85" stroke="#dc2626" stroke-width="1.5"/>
+        <text x="255" y="89" text-anchor="middle" font-size="10" fill="#dc2626">Check for</text>
+        <text x="255" y="99" text-anchor="middle" font-size="10" fill="#dc2626">rust/cracks</text>
+        <line x1="75" y1="70" x2="35" y2="85" stroke="#374151" stroke-width="1.5"/>
+        <text x="20" y="89" text-anchor="middle" font-size="10" fill="#374151">Drain</text>
+        <text x="20" y="99" text-anchor="middle" font-size="10" fill="#374151">outlet</text>
+      </svg>
+    </div>
+    <div class="field-row col2">
+      <div class="field">
+        <label>Primary drain pan condition</label>
+        <select id="drainPanCondition">
+          <option value="">Select...</option>
+          <option>Good — reuse</option>
+          <option>Minor rust — monitor</option>
+          <option>Cracked / leaking — replace</option>
+          <option>Missing</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Secondary / overflow pan</label>
+        <select id="secondaryPan">
+          <option value="">Select...</option>
+          <option>Present and good</option>
+          <option>Present — needs attention</option>
+          <option>Not present — may need</option>
+          <option>Not applicable</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-row col2">
+      <div class="field">
+        <label>Drain pan W <span class="label-hint">inches</span></label>
+        <input type="number" id="drainPanW" placeholder="e.g. 21">
+      </div>
+      <div class="field">
+        <label>Drain pan L <span class="label-hint">inches</span></label>
+        <input type="number" id="drainPanL" placeholder="e.g. 21">
+      </div>
+    </div>
+    <div class="field">
+      <label>Condensate drain routing</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" onclick="this.classList.toggle('active')">Floor drain</button>
+        <button class="toggle-btn" onclick="this.classList.toggle('active')">Outside</button>
+        <button class="toggle-btn" onclick="this.classList.toggle('active')">Condensate pump</button>
+        <button class="toggle-btn" onclick="this.classList.toggle('active')">Utility sink</button>
+        <button class="toggle-btn" onclick="this.classList.toggle('active')">Unknown</button>
+      </div>
+    </div>
+    <div class="field" style="margin-top:10px;">
+      <label>Condensate drain line material</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" onclick="toggle(this,'drainPVC','drainCopper drainFlex')">PVC</button>
+        <button class="toggle-btn" onclick="toggle(this,'drainCopper','drainPVC drainFlex')">Copper</button>
+        <button class="toggle-btn" onclick="toggle(this,'drainFlex','drainPVC drainCopper')">Flexible</button>
+      </div>
+    </div>
+    <div class="field" style="margin-top:10px;">
+      <label>Drain line diameter <span class="label-hint">inches</span></label>
+      <select id="drainLineSize">
+        <option value="">Select...</option>
+        <option>3/4"</option><option>1"</option><option>1-1/4"</option><option>Unknown</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Condensate pump needed?</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" onclick="toggle(this,'pumpYes','pumpNo pumpExist')">Yes — new needed</button>
+        <button class="toggle-btn" onclick="toggle(this,'pumpExist','pumpYes pumpNo')">Existing — reuse</button>
+        <button class="toggle-btn" onclick="toggle(this,'pumpNo','pumpYes pumpExist')">Not needed</button>
+      </div>
+    </div>
+    <div class="field" style="margin-top:10px;"><label>Piping notes</label><textarea id="pipingNotes" placeholder="Any observations about line set, drain, or piping condition..."></textarea></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Required Photos — Refrigerant & Piping</div>
+    <div class="photo-grid">
+      <div class="photo-item" id="photo-lineset" onclick="capturePhoto('photo-lineset', 'Line Set Full View')">
+        <img class="photo-preview" id="prev-photo-lineset">
+        <div class="photo-icon">📷</div>
+        <div class="photo-label">Line Set</div>
+        <div class="photo-status">Required</div>
+      </div>
+      <div class="photo-item" id="photo-penetration" onclick="capturePhoto('photo-penetration', 'Wall Penetration')">
+        <img class="photo-preview" id="prev-photo-penetration">
+        <div class="photo-icon">📷</div>
+        <div class="photo-label">Wall Penetration</div>
+        <div class="photo-status">Required</div>
+      </div>
+      <div class="photo-item" id="photo-drainpan" onclick="capturePhoto('photo-drainpan', 'Drain Pan')">
+        <img class="photo-preview" id="prev-photo-drainpan">
+        <div class="photo-icon">📷</div>
+        <div class="photo-label">Drain Pan</div>
+        <div class="photo-status">Required</div>
+      </div>
+      <div class="photo-item" id="photo-drainline" onclick="capturePhoto('photo-drainline', 'Drain Line Routing')">
+        <img class="photo-preview" id="prev-photo-drainline">
+        <div class="photo-icon">📷</div>
+        <div class="photo-label">Drain Line</div>
+        <div class="photo-status">Required</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 6: ELECTRICAL -->
+<!-- ============================================================ -->
+<div class="section" id="section-6">
+  <div class="section-header">
+    <div class="section-title">Electrical</div>
+    <div class="section-desc">Electrical mismatches cause the most install day delays. Capture everything here so the right disconnect, wire, and breaker are on the truck.</div>
+  </div>
+
+  <div class="diagram-card">
+    <div class="diagram-title">⚡ Electrical terms explained</div>
+    <svg class="diagram-svg" width="320" height="130" viewBox="0 0 320 130">
+      <rect x="10" y="10" width="90" height="110" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+      <text x="55" y="28" text-anchor="middle" font-size="10" font-weight="700" fill="#92400e">PANEL</text>
+      <rect x="20" y="35" width="70" height="12" rx="2" fill="#d97706"/>
+      <text x="55" y="45" text-anchor="middle" font-size="8" fill="white">Main Breaker</text>
+      <rect x="20" y="52" width="30" height="10" rx="1" fill="#fbbf24"/>
+      <rect x="55" y="52" width="30" height="10" rx="1" fill="#fbbf24"/>
+      <text x="35" y="61" text-anchor="middle" font-size="7" fill="#92400e">Breaker</text>
+      <text x="70" y="61" text-anchor="middle" font-size="7" fill="#92400e">Breaker</text>
+      <rect x="20" y="67" width="30" height="10" rx="1" fill="#fbbf24"/>
+      <rect x="55" y="67" width="30" height="10" rx="1" fill="#fbbf24"/>
+      <rect x="20" y="82" width="70" height="28" rx="2" fill="#fde68a"/>
+      <text x="55" y="94" text-anchor="middle" font-size="8" fill="#92400e">Count blank slots</text>
+      <text x="55" y="106" text-anchor="middle" font-size="8" fill="#92400e">for new circuits</text>
+      <rect x="130" y="10" width="85" height="50" rx="6" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+      <text x="172" y="28" text-anchor="middle" font-size="10" font-weight="700" fill="#1e40af">MCA</text>
+      <text x="172" y="42" text-anchor="middle" font-size="9" fill="#1e40af">Min Circuit Amps</text>
+      <text x="172" y="54" text-anchor="middle" font-size="8" fill="#374151">= min wire size</text>
+      <rect x="230" y="10" width="85" height="50" rx="6" fill="#dcfce7" stroke="#22c55e" stroke-width="1.5"/>
+      <text x="272" y="28" text-anchor="middle" font-size="10" font-weight="700" fill="#15803d">MOCP</text>
+      <text x="272" y="42" text-anchor="middle" font-size="9" fill="#15803d">Max Overcurrent</text>
+      <text x="272" y="54" text-anchor="middle" font-size="8" fill="#374151">= max breaker size</text>
+      <rect x="130" y="75" width="185" height="45" rx="6" fill="#f3f4f6" stroke="#d1d5db" stroke-width="1.5"/>
+      <text x="222" y="93" text-anchor="middle" font-size="9" fill="#374151">Both MCA and MOCP are on the</text>
+      <text x="222" y="106" text-anchor="middle" font-size="9" fill="#374151">condenser/air handler nameplate.</text>
+      <text x="222" y="116" text-anchor="middle" font-size="9" fill="#374151">Record EXISTING values here.</text>
+    </svg>
+    <div class="diagram-note">💡 The breaker for the condenser must be between MCA and MOCP of the new unit. The wire gauge must handle MCA. Wrong disconnect = install day delay. This is the #3 cause of install day problems.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Electrical Panel</div>
+    <div class="field-row col2">
+      <div class="field">
+        <label>Panel brand / manufacturer</label>
+        <select id="panelBrand">
+          <option value="">Select...</option>
+          <option>Square D</option><option>Eaton / Cutler-Hammer</option>
+          <option>Siemens</option><option>Leviton</option>
+          <option>Federal Pacific</option><option>Zinsco</option>
+          <option>GE</option><option>Other</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Main breaker size <span class="label-hint">amps</span></label>
+        <select id="mainBreaker">
+          <option value="">Select...</option>
+          <option>100A</option><option>150A</option><option>200A</option>
+          <option>225A</option><option>400A</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-row col2">
+      <div class="field">
+        <label>Panel location</label>
+        <select id="panelLocation">
+          <option value="">Select...</option>
+          <option>Garage</option><option>Utility room</option>
+          <option>Hallway</option><option>Exterior</option><option>Other</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Available blank slots</label>
+        <input type="number" id="blankSlots" placeholder="Count open breaker slots">
+      </div>
+    </div>
+    <div class="field">
+      <label>Panel condition</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" onclick="toggle(this,'panelGood','panelFair panelPoor')">Good</button>
+        <button class="toggle-btn" onclick="toggle(this,'panelFair','panelGood panelPoor')">Fair</button>
+        <button class="toggle-btn" onclick="toggle(this,'panelPoor','panelGood panelFair')">Concern — note below</button>
+      </div>
+    </div>
+    <div class="info-yellow" style="font-size:12px; margin-top:10px;">⚠️ Federal Pacific and Zinsco panels are known safety concerns. Flag these for the install manager immediately.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Condenser Disconnect</div>
+    <div class="field-row col2">
+      <div class="field">
+        <label>Existing disconnect amperage</label>
+        <select id="discAmp">
+          <option value="">Select...</option>
+          <option>30A</option><option>40A</option><option>50A</option>
+          <option>60A</option><option>70A</option><option>100A</option>
+          <option>No disconnect present</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Disconnect type</label>
+        <select id="discType">
+          <option value="">Select...</option>
+          <option>Fused</option><option>Non-fused</option>
+          <option>Breaker type</option><option>Unknown</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Distance — panel to condenser <span class="label-hint">feet</span></label>
+      <input type="number" id="distPanelCond" placeholder="Approximate feet of wire run">
+    </div>
+    <div class="field">
+      <label>Existing wire gauge — panel to condenser</label>
+      <select id="wireGaugeCond">
+        <option value="">Select...</option>
+        <option>#14 AWG</option><option>#12 AWG</option><option>#10 AWG</option>
+        <option>#8 AWG</option><option>#6 AWG</option><option>#4 AWG</option>
+        <option>Unknown</option>
+      </select>
+    </div>
+    <div class="info-blue" style="font-size:12px;">Wire gauge capacity: #14=15A, #12=20A, #10=30A, #8=40A, #6=55A, #4=70A. Wire must handle the new unit's MCA.</div>
+  </div>
+
+  <div class="card" id="ahElecCard">
+    <div class="card-title">Indoor Unit / Air Handler Electrical</div>
+    <div class="field-row col2">
+      <div class="field">
+        <label>Breaker size for air handler <span class="label-hint">amps</span></label>
+        <input type="number" id="ahBreaker" placeholder="e.g. 15">
+      </div>
+      <div class="field">
+        <label>Wire gauge to air handler</label>
+        <select id="wireGaugeAH">
+          <option value="">Select...</option>
+          <option>#14 AWG</option><option>#12 AWG</option><option>#10 AWG</option>
+          <option>#8 AWG</option><option>Unknown</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Distance — panel to air handler <span class="label-hint">feet</span></label>
+      <input type="number" id="distPanelAH" placeholder="Approximate feet">
+    </div>
+    <div class="field">
+      <label>Dedicated circuit for air handler?</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" onclick="toggle(this,'ahDedYes','ahDedNo ahDedUnk')">Yes — dedicated</button>
+        <button class="toggle-btn" onclick="toggle(this,'ahDedNo','ahDedYes ahDedUnk')">No — shared</button>
+        <button class="toggle-btn" onclick="toggle(this,'ahDedUnk','ahDedYes ahDedNo')">Unknown</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="lowVoltCard">
+    <div class="card-title">Low Voltage / Control Wiring</div>
+    <div class="field-row col2">
+      <div class="field">
+        <label>Thermostat wire gauge</label>
+        <select id="tstatWireGauge">
+          <option value="">Select...</option>
+          <option>18/5</option><option>18/6</option><option>18/7</option>
+          <option>18/8</option><option>Unknown</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>C-wire present at thermostat?</label>
+        <div class="toggle-group" style="margin-top:5px;">
+          <button class="toggle-btn" onclick="toggle(this,'cwireYes','cwireNo')">Yes</button>
+          <button class="toggle-btn" onclick="toggle(this,'cwireNo','cwireYes')">No</button>
+        </div>
+      </div>
+    </div>
+    <div class="field"><label>Electrical notes</label><textarea id="electricalNotes" placeholder="Any concerns about the electrical — panel issues, old wiring, disconnect concerns..."></textarea></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Required Photos — Electrical</div>
+    <div class="photo-grid">
+      <div class="photo-item" id="photo-panel" onclick="capturePhoto('photo-panel', 'Electrical Panel Interior')">
+        <img class="photo-preview" id="prev-photo-panel">
+        <div class="photo-icon">📷</div>
+        <div class="photo-label">Panel Interior</div>
+        <div class="photo-status">Required</div>
+      </div>
+      <div class="photo-item" id="photo-disconnect" onclick="capturePhoto('photo-disconnect', 'Existing Disconnect')">
+        <img class="photo-preview" id="prev-photo-disconnect">
+        <div class="photo-icon">📷</div>
+        <div class="photo-label">Disconnect Label</div>
+        <div class="photo-status">Required</div>
+      </div>
+      <div class="photo-item" id="photo-tstat-wiring" onclick="capturePhoto('photo-tstat-wiring', 'Thermostat Base Wiring')">
+        <img class="photo-preview" id="prev-photo-tstat-wiring">
+        <div class="photo-icon">📷</div>
+        <div class="photo-label">T-Stat Base Wiring</div>
+        <div class="photo-status">Required</div>
+      </div>
+      <div class="photo-item" id="photo-wire-entry" onclick="capturePhoto('photo-wire-entry', 'Wire Entry at Air Handler')">
+        <img class="photo-preview" id="prev-photo-wire-entry">
+        <div class="photo-icon">📷</div>
+        <div class="photo-label">Wire at Air Handler</div>
+        <div class="photo-status">Required</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 7: CONDENSER PLACEMENT -->
+<!-- ============================================================ -->
+<div class="section" id="section-7">
+  <div class="section-header">
+    <div class="section-title">Condenser Placement</div>
+    <div class="section-desc">Capture placement details and orientation recommendation. This determines which model can be specified.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Placement Details</div>
+    <div class="field">
+      <label>Which side of house is the condenser on?</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" onclick="toggle(this,'sideN','sideS sideE sideW')">North</button>
+        <button class="toggle-btn" onclick="toggle(this,'sideS','sideN sideE sideW')">South</button>
+        <button class="toggle-btn" onclick="toggle(this,'sideE','sideN sideS sideW')">East</button>
+        <button class="toggle-btn" onclick="toggle(this,'sideW','sideN sideS sideE')">West</button>
+      </div>
+    </div>
+    <div class="field" style="margin-top:10px;">
+      <label>Sun exposure at condenser location</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" onclick="toggle(this,'sunFull','sunPartial sunShade')">Full sun most of day</button>
+        <button class="toggle-btn" onclick="toggle(this,'sunPartial','sunFull sunShade')">Partial shade</button>
+        <button class="toggle-btn" onclick="toggle(this,'sunShade','sunFull sunPartial')">Mostly shaded</button>
+      </div>
+    </div>
+    <div class="field" style="margin-top:10px;">
+      <label>Recommended discharge direction</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" onclick="toggle(this,'discUp','discHoriz discEither')">Vertical upward ↑</button>
+        <button class="toggle-btn" onclick="toggle(this,'discHoriz','discUp discEither')">Horizontal side →</button>
+        <button class="toggle-btn" onclick="toggle(this,'discEither','discUp discHoriz')">Either works</button>
+      </div>
+    </div>
+    <div class="field" style="margin-top:10px;">
+      <label>If horizontal — which direction should discharge face?</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" onclick="toggle(this,'discFaceN','discFaceS discFaceE discFaceW')">North</button>
+        <button class="toggle-btn" onclick="toggle(this,'discFaceS','discFaceN discFaceE discFaceW')">South</button>
+        <button class="toggle-btn" onclick="toggle(this,'discFaceE','discFaceN discFaceS discFaceW')">East</button>
+        <button class="toggle-btn" onclick="toggle(this,'discFaceW','discFaceN discFaceS discFaceE')">West</button>
+      </div>
+    </div>
+    <div class="field" style="margin-top:10px;"><label>Placement notes <span class="label-hint">obstructions, neighbor proximity, HOA screening, anything unusual</span></label><textarea id="placementNotes" placeholder="e.g. South wall with 8-inch clearance to block wall, HOA requires screening on street-facing side..."></textarea></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Pad / Mount Details</div>
+    <div class="field">
+      <label>New pad needed?</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" onclick="toggle(this,'padNew','padReuse padRoof')">Yes — new pad</button>
+        <button class="toggle-btn" onclick="toggle(this,'padReuse','padNew padRoof')">Reuse existing</button>
+        <button class="toggle-btn" onclick="toggle(this,'padRoof','padNew padReuse')">Rooftop curb</button>
+      </div>
+    </div>
+    <div class="field" style="margin-top:10px;">
+      <label>Ground slope at pad location</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" onclick="toggle(this,'slopeFlat','slopeMinor slopeSig')">Level / flat</button>
+        <button class="toggle-btn" onclick="toggle(this,'slopeMinor','slopeFlat slopeSig')">Minor slope</button>
+        <button class="toggle-btn" onclick="toggle(this,'slopeSig','slopeFlat slopeMinor')">Significant slope — needs leveling</button>
+      </div>
+    </div>
+    <div class="field" style="margin-top:10px;"><label>Additional placement notes</label><textarea id="padNotes" placeholder="Any notes about mounting, leveling, or access for the install team..."></textarea></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Required Photos — Placement</div>
+    <div class="photo-grid">
+      <div class="photo-item" id="photo-pad-full" onclick="capturePhoto('photo-pad-full', 'Pad Full View with Measurements')">
+        <img class="photo-preview" id="prev-photo-pad-full">
+        <div class="photo-icon">📷</div>
+        <div class="photo-label">Pad Full View</div>
+        <div class="photo-status">Required</div>
+      </div>
+      <div class="photo-item" id="photo-overhead-clear" onclick="capturePhoto('photo-overhead-clear', 'Overhead Clearance')">
+        <img class="photo-preview" id="prev-photo-overhead-clear">
+        <div class="photo-icon">📷</div>
+        <div class="photo-label">Overhead Clearance</div>
+        <div class="photo-status">Required</div>
+      </div>
+      <div class="photo-item" id="photo-cond-east" onclick="capturePhoto('photo-cond-east', 'East Side Clearance')">
+        <img class="photo-preview" id="prev-photo-cond-east">
+        <div class="photo-icon">📷</div>
+        <div class="photo-label">East Clearance</div>
+        <div class="photo-status">Required</div>
+      </div>
+      <div class="photo-item" id="photo-cond-west" onclick="capturePhoto('photo-cond-west', 'West Side Clearance')">
+        <img class="photo-preview" id="prev-photo-cond-west">
+        <div class="photo-icon">📷</div>
+        <div class="photo-label">West Clearance</div>
+        <div class="photo-status">Required</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 8: MINI-SPLIT DETAILS -->
+<!-- ============================================================ -->
+<div class="section" id="section-8">
+  <div class="section-header">
+    <div class="section-title">Mini-Split Details</div>
+    <div class="section-desc">Capture indoor head unit locations, wall details, and line set routing for each zone.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">System Configuration</div>
+    <div class="field">
+      <label>Number of indoor head units (zones)</label>
+      <div class="toggle-group" id="zoneCount">
+        <button class="toggle-btn" onclick="setZones(1,this)">1 zone</button>
+        <button class="toggle-btn" onclick="setZones(2,this)">2 zones</button>
+        <button class="toggle-btn" onclick="setZones(3,this)">3 zones</button>
+        <button class="toggle-btn" onclick="setZones(4,this)">4 zones</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="headUnitsContainer"></div>
+
+  <div class="card">
+    <div class="card-title">Outdoor Unit — Mini-Split</div>
+    <div class="field-row col2">
+      <div class="field"><label>Available space W <span class="label-hint">inches</span></label><input type="number" id="msOutdoorW" placeholder="e.g. 36"></div>
+      <div class="field"><label>Available space D <span class="label-hint">inches</span></label><input type="number" id="msOutdoorD" placeholder="e.g. 36"></div>
+    </div>
+    <div class="field">
+      <label>Mount type</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" onclick="toggle(this,'msMountGround','msMountWall msMountRoof')">Ground pad</button>
+        <button class="toggle-btn" onclick="toggle(this,'msMountWall','msMountGround msMountRoof')">Wall bracket</button>
+        <button class="toggle-btn" onclick="toggle(this,'msMountRoof','msMountGround msMountWall')">Rooftop</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 9: COMPLIANCE & NOTES -->
+<!-- ============================================================ -->
+<div class="section" id="section-9">
+  <div class="section-header">
+    <div class="section-title">Compliance & Notes</div>
+    <div class="section-desc">Permit requirements, HOA restrictions, rebate eligibility, and any job-specific notes.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Permit & Compliance</div>
+    <div class="field">
+      <label>Permit required for this job?</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" onclick="toggle(this,'permitReqY','permitReqN permitReqUnk')">Yes</button>
+        <button class="toggle-btn" onclick="toggle(this,'permitReqN','permitReqY permitReqUnk')">No</button>
+        <button class="toggle-btn" onclick="toggle(this,'permitReqUnk','permitReqY permitReqN')">Confirm with office</button>
+      </div>
+    </div>
+    <div class="field" style="margin-top:10px;">
+      <label>Municipality / jurisdiction</label>
+      <select id="municipality">
+        <option value="">Select...</option>
+        <option>City of Glendale</option><option>City of Peoria</option>
+        <option>City of Phoenix</option><option>City of Surprise</option>
+        <option>City of Scottsdale</option><option>Unincorporated Maricopa County</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>HOA restrictions noted?</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" onclick="toggle(this,'hoaRestrict','hoaNoRestrict hoaUnkRestrict')">Yes — note below</button>
+        <button class="toggle-btn" onclick="toggle(this,'hoaNoRestrict','hoaRestrict hoaUnkRestrict')">No restrictions</button>
+        <button class="toggle-btn" onclick="toggle(this,'hoaUnkRestrict','hoaRestrict hoaNoRestrict')">Unknown</button>
+      </div>
+    </div>
+    <div class="field" style="margin-top:10px;"><label>HOA notes <span class="label-hint">screening, color, placement restrictions</span></label><textarea id="hoaNotes" placeholder="Any HOA requirements for equipment placement, screening, color..."></textarea></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Utility Rebates</div>
+    <div class="field">
+      <label>Utility provider</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" onclick="toggle(this,'utilAPS','utilSRP utilOther')">APS</button>
+        <button class="toggle-btn" onclick="toggle(this,'utilSRP','utilAPS utilOther')">SRP</button>
+        <button class="toggle-btn" onclick="toggle(this,'utilOther','utilAPS utilSRP')">Other</button>
+      </div>
+    </div>
+    <div class="field" style="margin-top:10px;">
+      <label>Rebate eligibility check</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" onclick="toggle(this,'rebateCheck','rebateNo rebateUnk')">Check for rebates</button>
+        <button class="toggle-btn" onclick="toggle(this,'rebateNo','rebateCheck rebateUnk')">Not applicable</button>
+        <button class="toggle-btn" onclick="toggle(this,'rebateUnk','rebateCheck rebateNo')">Office to confirm</button>
+      </div>
+    </div>
+    <div class="info-blue" style="font-size:12px;">APS and SRP both offer HVAC rebates for qualifying high-efficiency equipment. Minimum SEER2 requirements apply. Office to confirm eligibility based on selected equipment.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Job Notes</div>
+    <div class="field"><label>Scope of work summary</label><textarea id="scopeNotes" rows="4" placeholder="Brief description of what is being replaced or installed..."></textarea></div>
+    <div class="field"><label>Customer concerns or special requests</label><textarea id="customerNotes" placeholder="Anything the customer mentioned — noise concerns, budget, timeline, preferences..."></textarea></div>
+    <div class="field"><label>Install complexity notes</label><textarea id="complexityNotes" placeholder="Anything that makes this job more complex than typical — tight spaces, old wiring, custom ductwork needed..."></textarea></div>
+    <div class="field"><label>Items to confirm before ordering equipment</label><textarea id="confirmNotes" placeholder="List anything that needs to be verified before equipment is ordered..."></textarea></div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 10: PHOTO CHECKLIST -->
+<!-- ============================================================ -->
+<div class="section" id="section-10">
+  <div class="section-header">
+    <div class="section-title">Photo Checklist</div>
+    <div class="section-desc">Review all required photos. Green = captured. Any missing required photos should be taken before leaving the job site.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Photo Status Review</div>
+    <div id="photoChecklist"></div>
+    <div class="field" style="margin-top:16px;">
+      <label>Additional photos</label>
+      <div class="photo-grid">
+        <div class="photo-item" id="photo-add1" onclick="capturePhoto('photo-add1', 'Additional Photo 1')">
+          <img class="photo-preview" id="prev-photo-add1">
+          <div class="photo-icon">📷</div>
+          <div class="photo-label">Additional 1</div>
+          <div class="photo-status">Optional</div>
+        </div>
+        <div class="photo-item" id="photo-add2" onclick="capturePhoto('photo-add2', 'Additional Photo 2')">
+          <img class="photo-preview" id="prev-photo-add2">
+          <div class="photo-icon">📷</div>
+          <div class="photo-label">Additional 2</div>
+          <div class="photo-status">Optional</div>
+        </div>
+        <div class="photo-item" id="photo-add3" onclick="capturePhoto('photo-add3', 'Additional Photo 3')">
+          <img class="photo-preview" id="prev-photo-add3">
+          <div class="photo-icon">📷</div>
+          <div class="photo-label">Additional 3</div>
+          <div class="photo-status">Optional</div>
+        </div>
+        <div class="photo-item" id="photo-add4" onclick="capturePhoto('photo-add4', 'Additional Photo 4')">
+          <img class="photo-preview" id="prev-photo-add4">
+          <div class="photo-icon">📷</div>
+          <div class="photo-label">Additional 4</div>
+          <div class="photo-status">Optional</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 11: SUMMARY & FLAGS -->
+<!-- ============================================================ -->
+<div class="section" id="section-11">
+  <div class="section-header">
+    <div class="section-title">Survey Summary</div>
+    <div class="section-desc">Review all captured data and flags before submitting to the install manager.</div>
+  </div>
+
+  <div id="flagsContainer"></div>
+  <div id="summaryContainer"></div>
+
+  <div class="card" style="text-align:center; padding:24px;">
+    <div style="font-size:14px; color:var(--gray-600); margin-bottom:16px;">Survey complete — share or print this summary</div>
+    <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+      <button class="btn btn-primary" onclick="window.print()" style="flex:none; width:auto;">🖨️ Print / Save PDF</button>
+      <button class="btn btn-secondary" onclick="copyToClipboard()" style="flex:none; width:auto;">📋 Copy Summary Text</button>
+      <button class="btn btn-secondary" onclick="startNew()" style="flex:none; width:auto;">+ New Survey</button>
+    </div>
+  </div>
+</div>
+
+<!-- NAV BAR -->
+<div class="nav-bar">
+  <button class="btn btn-secondary" id="btnBack" onclick="navigate(-1)" style="display:none;">← Back</button>
+  <button class="btn btn-primary" id="btnNext" onclick="navigate(1)">Continue →</button>
+</div>
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+let currentSection = 1;
+let totalSections = 11;
+let jobType = '';
+let furnaceEfficiency = '';
+let newFurnaceEfficiency = '';
+let activePhotoTarget = '';
+let photos = {};
+let toggleState = {};
+
+const SECTION_NAMES = [
+  '', 'Job Setup', 'Existing Equipment', 'Space Assessment',
+  'Duct System', 'Refrigerant & Piping', 'Electrical',
+  'Condenser Placement', 'Mini-Split Details', 'Compliance & Notes',
+  'Photo Checklist', 'Summary & Flags'
+];
+
+// ============================================================
+// INIT
+// ============================================================
+window.onload = function() {
+  document.getElementById('surveyDate').value = new Date().toLocaleDateString('en-US');
+  updateProgress();
+  buildProgressSteps();
+};
+
+function buildProgressSteps() {
+  const container = document.getElementById('progressSteps');
+  container.innerHTML = '';
+  for (let i = 1; i <= totalSections; i++) {
+    const div = document.createElement('div');
+    div.className = 'progress-step' + (i < currentSection ? ' done' : i === currentSection ? ' active' : '');
+    div.id = 'step-' + i;
+    container.appendChild(div);
+  }
+}
+
+function updateProgress() {
+  document.getElementById('progressCurrent').textContent = currentSection;
+  document.getElementById('progressTotal').textContent = totalSections;
+  document.getElementById('progressName').textContent = SECTION_NAMES[currentSection] || '';
+  buildProgressSteps();
+  document.getElementById('btnBack').style.display = currentSection > 1 ? 'block' : 'none';
+  document.getElementById('btnNext').textContent = currentSection === totalSections ? '✓ Complete Survey' : 'Continue →';
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function navigate(dir) {
+  const next = currentSection + dir;
+  if (next < 1 || next > totalSections) return;
+
+  let skip = false;
+  if (jobType === 'minisplit' && next === 4) skip = true;
+  if (jobType !== 'minisplit' && next === 8) skip = true;
+
+  document.getElementById('section-' + currentSection).classList.remove('active');
+  currentSection = skip ? next + dir : next;
+  if (currentSection < 1) currentSection = 1;
+  if (currentSection > totalSections) {
+    completeSurvey();
+    return;
+  }
+  const nextSection = document.getElementById('section-' + currentSection);
+  if (nextSection) {
+    nextSection.classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  // Re-apply job type visibility every time we navigate
+  if (jobType) applyJobTypeVisibility(jobType);
+
+  updateProgress();
+}
+
+// ============================================================
+// JOB TYPE
+// ============================================================
+function selectJobType(type, el) {
+  jobType = type;
+  document.querySelectorAll('.job-type-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+
+  const names = {
+    split_hp: 'Split Heat Pump System',
+    split_ac: 'Split AC + Gas Furnace',
+    packaged: 'Packaged Unit',
+    minisplit: 'Mini-Split System'
+  };
+
+  document.getElementById('jobTypeSelected').style.display = 'block';
+  document.getElementById('jobTypeConfirm').textContent = '✓ Selected: ' + names[type];
+  document.getElementById('headerJobType').textContent = names[type];
+
+  applyJobTypeVisibility(type);
+}
+
+function selectFurnaceEfficiency(rating, btn) {
+  furnaceEfficiency = rating;
+  document.querySelectorAll('#furnaceEfficiencyFields .toggle-btn')
+    .forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  const ventFields = document.getElementById('furnaceVentFields');
+  const ventSizeFields = document.getElementById('furnaceVentSizeFields');
+  const condensateFields = document.getElementById('furnaceCondensateFields');
+  const combAirFields = document.getElementById('furnaceCombAirFields');
+
+  if (ventFields) ventFields.style.display = 'block';
+  if (ventSizeFields) ventSizeFields.style.display = 'block';
+
+  if (rating === '90') {
+    if (condensateFields) condensateFields.style.display = 'block';
+    if (combAirFields) combAirFields.style.display = 'block';
+  } else {
+    if (condensateFields) condensateFields.style.display = 'none';
+    if (combAirFields) combAirFields.style.display = 'none';
+  }
+
+  checkFurnaceVentWarning();
+}
+
+function checkFurnaceVentWarning() {
+  const warning = document.getElementById('furnaceVentWarning');
+  if (!warning) return;
+  if (furnaceEfficiency === '80') {
+    warning.style.display = 'block';
+    warning.className = 'info-yellow';
+    warning.textContent = '⚠️ Existing furnace is 80% AFUE. If replacing with 90%+ unit, new PVC venting, condensate drain, and combustion air intake are required. Confirm new equipment efficiency before ordering.';
+  } else if (furnaceEfficiency === '90') {
+    warning.style.display = 'block';
+    warning.className = 'info-green';
+    warning.innerHTML = '✅ Existing furnace is 90%+ AFUE — existing PVC venting and condensate drain may be reusable. Verify pipe diameter matches new equipment requirements.';
+  } else {
+    warning.style.display = 'none';
+  }
+}
+
+function applyJobTypeVisibility(type) {
+
+  // Helper functions
+  function show(id) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'block';
+  }
+  function hide(id) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  }
+  function showGrid(id) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'grid';
+  }
+
+  const isSplit = type === 'split_hp' || type === 'split_ac';
+  const isPackaged = type === 'packaged';
+  const isMiniSplit = type === 'minisplit';
+  const hasDucts = isSplit || isPackaged;
+  const hasIndoorUnit = isSplit;
+  const hasLineset = isSplit || isMiniSplit;
+
+  // ============================================================
+  // SECTION 2 — Existing Equipment
+  // ============================================================
+
+  // Condenser card — split and minisplit only
+  if (isSplit || isMiniSplit) show('existingCondenser');
+  else hide('existingCondenser');
+
+  // Indoor unit card — split only
+  if (isSplit) {
+    show('existingIndoor');
+    document.getElementById('indoorCardTitle').textContent =
+      type === 'split_ac' ? 'Existing Indoor Unit (Furnace)' : 'Existing Indoor Unit (Air Handler)';
+    // Show furnace efficiency fields for gas furnace only
+    const furnEffFields = document.getElementById('furnaceEfficiencyFields');
+    if (furnEffFields) {
+      furnEffFields.style.display = type === 'split_ac' ? 'block' : 'none';
+    }
+  } else {
+    hide('existingIndoor');
+  }
+
+  // Packaged unit card — packaged only
+  if (isPackaged) show('existingPackaged');
+  else hide('existingPackaged');
+
+  // Photo grid items
+  const photoAHNameplate = document.getElementById('photo-ah-nameplate');
+  const photoAHUnit = document.getElementById('photo-ah-unit');
+  const photoPkgNameplate = document.getElementById('photo-packaged-nameplate');
+  const photoPkgUnit = document.getElementById('photo-packaged-unit');
+
+  if (photoAHNameplate) photoAHNameplate.style.display = isSplit ? 'block' : 'none';
+  if (photoAHUnit) photoAHUnit.style.display = isSplit ? 'block' : 'none';
+  if (photoPkgNameplate) photoPkgNameplate.style.display = isPackaged ? 'block' : 'none';
+  if (photoPkgUnit) photoPkgUnit.style.display = isPackaged ? 'block' : 'none';
+
+  // ============================================================
+  // SECTION 3 — Space Assessment
+  // ============================================================
+
+  // Condenser space — all types have an outdoor unit
+  show('spaceCondenser');
+
+  // Indoor unit space — split only
+  if (isSplit) show('spaceIndoor');
+  else hide('spaceIndoor');
+
+  // Attic access — split only
+  const atticField = document.getElementById('atticAccessField');
+  if (atticField) atticField.style.display = isSplit ? 'block' : 'none';
+
+  // Space photos
+  const photoIndoorSpace = document.getElementById('photo-indoor-space');
+  const photoAtticAccess = document.getElementById('photo-attic-access');
+  const photoPath = document.getElementById('photo-path');
+  if (photoIndoorSpace) photoIndoorSpace.style.display = isSplit ? 'block' : 'none';
+  if (photoAtticAccess) photoAtticAccess.style.display = isSplit ? 'block' : 'none';
+  if (photoPath) photoPath.style.display = isSplit ? 'block' : 'none';
+
+  // ============================================================
+  // SECTION 4 — Duct System
+  // ============================================================
+
+  // Full plenum section — split only
+  if (isSplit) show('ductPlenumsCard');
+  else hide('ductPlenumsCard');
+
+  // Packaged duct connections — packaged only
+  if (isPackaged) show('ductPackagedCard');
+  else hide('ductPackagedCard');
+
+  // Duct photos — ducted systems only
+  const ductPhotoIds = ['photo-sup-plenum','photo-ret-plenum','photo-filter','photo-duct-cond'];
+  ductPhotoIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = hasDucts ? 'block' : 'none';
+  });
+
+  // ============================================================
+  // SECTION 5 — Refrigerant & Piping
+  // ============================================================
+
+  // Line set card — split and minisplit only
+  if (hasLineset) show('lineSetCard');
+  else hide('lineSetCard');
+
+  // Condensate section — all ducted systems
+  const condensateCard = document.getElementById('condensateCard');
+  if (condensateCard) {
+    condensateCard.style.display = hasDucts ? 'block' : 'none';
+  }
+
+  // Piping photos
+  const photoLineset = document.getElementById('photo-lineset');
+  const photoPenetration = document.getElementById('photo-penetration');
+  const photoDrainpan = document.getElementById('photo-drainpan');
+  const photoDrainline = document.getElementById('photo-drainline');
+  if (photoLineset) photoLineset.style.display = hasLineset ? 'block' : 'none';
+  if (photoPenetration) photoPenetration.style.display = hasLineset ? 'block' : 'none';
+  if (photoDrainpan) photoDrainpan.style.display = hasDucts ? 'block' : 'none';
+  if (photoDrainline) photoDrainline.style.display = hasDucts ? 'block' : 'none';
+
+  // ============================================================
+  // SECTION 6 — Electrical
+  // ============================================================
+
+  // Indoor unit electrical — split only
+  const ahElecCard = document.getElementById('ahElecCard');
+  if (ahElecCard) ahElecCard.style.display = isSplit ? 'block' : 'none';
+
+  // Low voltage / thermostat wiring — all ducted, not minisplit
+  const lowVoltCard = document.getElementById('lowVoltCard');
+  if (lowVoltCard) lowVoltCard.style.display = hasDucts ? 'block' : 'none';
+
+  // ============================================================
+  // SECTION 7 — Condenser Placement
+  // ============================================================
+  // All job types have an outdoor unit so section 7 shows fully for all
+
+  // ============================================================
+  // SECTION 8 — Mini-Split Details
+  // ============================================================
+  // Handled by navigate() skip logic — section 8 only shown for minisplit
+
+  // ============================================================
+  // SECTION 5 — Mini-split specific lineset photos
+  // ============================================================
+  // Mini-split uses line set but no drain pan
+  if (isMiniSplit) {
+    if (photoDrainpan) photoDrainpan.style.display = 'none';
+    if (photoDrainline) photoDrainline.style.display = 'none';
+  }
+}
+
+// ============================================================
+// TOGGLES
+// ============================================================
+function toggle(btn, onId, offIds) {
+  btn.classList.toggle('active');
+  toggleState[onId] = btn.classList.contains('active');
+  if (offIds) {
+    offIds.split(' ').forEach(id => { toggleState[id] = false; });
+  }
+}
+
+// ============================================================
+// PHOTOS
+// ============================================================
+function capturePhoto(photoId, label) {
+  activePhotoTarget = photoId;
+  const input = document.getElementById('fileInput');
+  input.click();
+}
+
+function handlePhotoCapture(event) {
+  const file = event.target.files[0];
+  if (!file || !activePhotoTarget) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    photos[activePhotoTarget] = {
+      data: e.target.result,
+      name: activePhotoTarget,
+      timestamp: new Date().toLocaleString()
+    };
+    const item = document.getElementById(activePhotoTarget);
+    const preview = document.getElementById('prev-' + activePhotoTarget);
+    if (item) item.classList.add('captured');
+    if (preview) {
+      preview.src = e.target.result;
+      preview.style.display = 'block';
+    }
+    const statusEl = item ? item.querySelector('.photo-status') : null;
+    if (statusEl) statusEl.textContent = '✓ Captured';
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+}
+
+// ============================================================
+// ADD DUCT CONNECTION
+// ============================================================
+let connCount = 4;
+function addConnection() {
+  connCount++;
+  const container = document.getElementById('supplyConnections');
+  const div = document.createElement('div');
+  div.className = 'field-row col2';
+  div.style.marginBottom = '8px';
+  div.innerHTML = `
+    <div class="field"><label style="font-size:11px;">Connection ${connCount} — diameter (inches)</label>
+    <input type="number" placeholder="e.g. 6" class="sup-conn"></div>
+    <div class="field"><label style="font-size:11px;">Duct type</label>
+    <select class="sup-conn-type"><option>Flex</option><option>Metal round</option><option>Metal rectangular</option></select>
+    </div>`;
+  container.appendChild(div);
+}
+
+// ============================================================
+// COMPLETE SURVEY
+// ============================================================
+function completeSurvey() {
+  document.getElementById('section-' + currentSection).classList.remove('active');
+  currentSection = totalSections;
+  const summarySection = document.getElementById('section-' + totalSections);
+  if (summarySection) {
+    summarySection.classList.add('active');
+    generateSummary();
+    window.scrollTo(0, 0);
+  }
+  updateProgress();
+}
+
+// ============================================================
+// MINI-SPLIT ZONES
+// ============================================================
+function setZones(count, btn) {
+  document.querySelectorAll('#zoneCount .toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const container = document.getElementById('headUnitsContainer');
+  container.innerHTML = '';
+  for (let i = 1; i <= count; i++) {
+    container.innerHTML += `
+      <div class="card head-unit-card">
+        <div class="head-unit-title">
+          Zone ${i} — Indoor Head Unit
+        </div>
+        <div class="field">
+          <label>Room / location</label>
+          <input type="text" placeholder="e.g. Master Bedroom, Living Room">
+        </div>
+        <div class="field-row col2">
+          <div class="field"><label>Wall material</label>
+            <select>
+              <option>Drywall</option><option>Stucco exterior</option>
+              <option>Block / CMU</option><option>Other</option>
+            </select>
+          </div>
+          <div class="field"><label>Wall thickness <span class="label-hint">inches</span></label>
+            <input type="number" placeholder="e.g. 5">
+          </div>
+        </div>
+        <div class="field-row col2">
+          <div class="field"><label>Head unit height from floor <span class="label-hint">inches</span></label>
+            <input type="number" placeholder="e.g. 84">
+          </div>
+          <div class="field"><label>Distance to outdoor unit <span class="label-hint">feet</span></label>
+            <input type="number" placeholder="e.g. 25">
+          </div>
+        </div>
+        <div class="field">
+          <label>Ceiling type</label>
+          <div class="toggle-group">
+            <button class="toggle-btn" onclick="this.classList.toggle('active')">Flat drywall</button>
+            <button class="toggle-btn" onclick="this.classList.toggle('active')">Vaulted</button>
+            <button class="toggle-btn" onclick="this.classList.toggle('active')">Tray</button>
+            <button class="toggle-btn" onclick="this.classList.toggle('active')">Exposed beam</button>
+          </div>
+        </div>
+        <div class="field" style="margin-top:10px;">
+          <label>Line set routing for this zone</label>
+          <textarea placeholder="Describe how the line set will run from this head unit to the outdoor unit..."></textarea>
+        </div>
+        <div class="field">
+          <label>Stud finder needed / stud location known?</label>
+          <div class="toggle-group">
+            <button class="toggle-btn" onclick="this.classList.toggle('active')">Studs located</button>
+            <button class="toggle-btn" onclick="this.classList.toggle('active')">Need to locate</button>
+            <button class="toggle-btn" onclick="this.classList.toggle('active')">Metal studs</button>
+          </div>
+        </div>
+      </div>`;
+  }
+}
+
+// ============================================================
+// PHOTO CHECKLIST GENERATOR
+// ============================================================
+function buildPhotoChecklist() {
+  const required = [
+    { id: 'photo-cond-nameplate', label: 'Condenser Nameplate', section: 'Existing Equipment' },
+    { id: 'photo-cond-unit', label: 'Condenser Full View', section: 'Existing Equipment' },
+    { id: 'photo-ah-nameplate', label: 'Air Handler Nameplate', section: 'Existing Equipment' },
+    { id: 'photo-ah-unit', label: 'Air Handler Full View', section: 'Existing Equipment' },
+    { id: 'photo-tstat', label: 'Thermostat Wiring', section: 'Existing Equipment' },
+    { id: 'photo-cond-space', label: 'Condenser Space', section: 'Space Assessment' },
+    { id: 'photo-cond-north', label: 'Condenser North Side', section: 'Space Assessment' },
+    { id: 'photo-cond-south', label: 'Condenser South Side', section: 'Space Assessment' },
+    { id: 'photo-indoor-space', label: 'Indoor Unit Space', section: 'Space Assessment' },
+    { id: 'photo-sup-plenum', label: 'Supply Plenum', section: 'Duct System' },
+    { id: 'photo-ret-plenum', label: 'Return Plenum', section: 'Duct System' },
+    { id: 'photo-filter', label: 'Filter and Rack', section: 'Duct System' },
+    { id: 'photo-duct-cond', label: 'Duct Condition', section: 'Duct System' },
+    { id: 'photo-lineset', label: 'Line Set', section: 'Refrigerant & Piping' },
+    { id: 'photo-penetration', label: 'Wall Penetration', section: 'Refrigerant & Piping' },
+    { id: 'photo-drainpan', label: 'Drain Pan', section: 'Refrigerant & Piping' },
+    { id: 'photo-drainline', label: 'Drain Line', section: 'Refrigerant & Piping' },
+    { id: 'photo-panel', label: 'Electrical Panel', section: 'Electrical' },
+    { id: 'photo-disconnect', label: 'Disconnect Label', section: 'Electrical' },
+    { id: 'photo-tstat-wiring', label: 'Thermostat Base Wiring', section: 'Electrical' },
+    { id: 'photo-wire-entry', label: 'Wire at Air Handler', section: 'Electrical' },
+    { id: 'photo-pad-full', label: 'Pad Full View', section: 'Condenser Placement' },
+    { id: 'photo-overhead-clear', label: 'Overhead Clearance', section: 'Condenser Placement' },
+  ];
+
+  const container = document.getElementById('photoChecklist');
+  let captured = 0;
+  let html = '';
+  let currentSec = '';
+
+  required.forEach(p => {
+    const isCaptured = !!photos[p.id];
+    if (isCaptured) captured++;
+    if (p.section !== currentSec) {
+      if (currentSec) html += '</div>';
+      html += `<div style="font-size:12px;font-weight:600;color:var(--gray-600);text-transform:uppercase;letter-spacing:0.05em;margin:14px 0 8px;">${p.section}</div><div>`;
+      currentSec = p.section;
+    }
+    html += `
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--gray-100);">
+        <span style="font-size:18px;">${isCaptured ? '✅' : '❌'}</span>
+        <span style="font-size:13px;color:${isCaptured ? 'var(--green)' : 'var(--red)'};">${p.label}</span>
+        <span style="font-size:11px;color:var(--gray-400);margin-left:auto;">Required</span>
+      </div>`;
+  });
+  html += '</div>';
+
+  const pct = Math.round((captured / required.length) * 100);
+  container.innerHTML = `
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:14px;background:${pct===100?'var(--green-light)':'var(--yellow-light)'};border-radius:var(--radius-sm);border:1px solid ${pct===100?'var(--green-border)':'var(--yellow-border)'};">
+      <span style="font-size:24px;">${pct===100?'✅':'📷'}</span>
+      <div>
+        <div style="font-size:14px;font-weight:600;color:${pct===100?'var(--green)':'var(--yellow)'};">${captured} of ${required.length} required photos captured (${pct}%)</div>
+        <div style="font-size:12px;color:var(--gray-600);margin-top:2px;">${pct===100?'All required photos captured — ready to submit':'Take missing photos before leaving the job site'}</div>
+      </div>
+    </div>
+    ${html}`;
+}
+
+// ============================================================
+// SUMMARY & FLAG GENERATOR
+// ============================================================
+function generateSummary() {
+  buildPhotoChecklist();
+
+  const flags = [];
+  const warnings = [];
+
+  const discAmp = parseInt(document.getElementById('discAmp')?.value) || 0;
+  if (discAmp === 60) {
+    warnings.push('Existing disconnect is 60A — verify new equipment MOCP. Most residential units need 30-40A. May need replacement.');
+  }
+  if (discAmp === 0) {
+    warnings.push('Disconnect amperage not captured — confirm before ordering.');
+  }
+
+  const wireGauge = document.getElementById('wireGaugeCond')?.value || '';
+  if (wireGauge === '#14 AWG') {
+    flags.push('⚠️ #14 AWG wire to condenser is only rated for 15A. Most condensers require #10 AWG minimum. Wire replacement likely needed.');
+  }
+  if (wireGauge === '#12 AWG') {
+    warnings.push('Existing #12 AWG wire to condenser rated for 20A. Verify new unit MCA does not exceed 20A.');
+  }
+
+  const overhead = parseInt(document.getElementById('clearOverhead')?.value) || 999;
+  if (overhead < 36 && overhead > 0) {
+    flags.push('🚨 Overhead clearance is less than 36 inches. Vertical discharge units require unrestricted overhead. Horizontal discharge model required for this location.');
+  } else if (overhead < 60 && overhead > 0) {
+    warnings.push('Overhead clearance is limited. Confirm vertical discharge is acceptable or specify horizontal discharge model.');
+  }
+
+  const clearN = parseInt(document.getElementById('clearN')?.value) || 0;
+  const clearS = parseInt(document.getElementById('clearS')?.value) || 0;
+  const clearE = parseInt(document.getElementById('clearE')?.value) || 0;
+  const clearW = parseInt(document.getElementById('clearW')?.value) || 0;
+  const minClear = Math.min(clearN || 999, clearS || 999, clearE || 999, clearW || 999);
+  if (minClear < 12 && minClear > 0) {
+    flags.push('🚨 One or more side clearances is less than 12 inches — below manufacturer minimums. Placement adjustment needed.');
+  }
+
+  const drainPan = document.getElementById('drainPanCondition')?.value || '';
+  if (drainPan.includes('Cracked')) {
+    flags.push('🚨 Drain pan is cracked or leaking — must be replaced. Attic water damage risk.');
+  }
+
+  const panelBrand = document.getElementById('panelBrand')?.value || '';
+  if (panelBrand === 'Federal Pacific' || panelBrand === 'Zinsco') {
+    flags.push('🚨 ' + panelBrand + ' panel identified — known safety concern. Flag for install manager and customer before proceeding.');
+  }
+
+  const custName = document.getElementById('custName')?.value || '';
+  if (!custName) {
+    warnings.push('Customer name not entered.');
+  }
+
+  if (!jobType) {
+    warnings.push('Job type not selected.');
+  }
+
+  const lineSetCond = document.getElementById('lineSetCondition')?.value || '';
+  if (lineSetCond === 'Poor — replace') {
+    flags.push('🚨 Line set condition is poor — replacement needed. Add to job scope and pricing.');
+  }
+
+  const refrig = document.getElementById('condRefrig')?.value || '';
+  if (refrig === 'R-22') {
+    warnings.push('Existing system uses R-22 (phased out). New system will use R-410A or R-454B. Line set flush or replacement may be required.');
+  }
+
+  // Flag: furnace efficiency tier change warning
+  if (furnaceEfficiency === '80') {
+    warnings.push('Existing furnace is 80% AFUE. Confirm new equipment efficiency — upgrading to 90%+ requires new PVC venting, condensate drain, and combustion air intake. Significant additional scope.');
+  }
+
+  const flagCount = flags.length;
+  const warnCount = warnings.length;
+  let complexity = 'Straightforward';
+  let complexityClass = 'complexity-simple';
+  if (flagCount >= 2 || (flagCount >= 1 && warnCount >= 2)) {
+    complexity = 'Complex — review before ordering';
+    complexityClass = 'complexity-complex';
+  } else if (flagCount >= 1 || warnCount >= 2) {
+    complexity = 'Moderate — review flags';
+    complexityClass = 'complexity-moderate';
+  }
+
+  const flagsContainer = document.getElementById('flagsContainer');
+  let flagsHTML = '';
+  if (flags.length > 0 || warnings.length > 0) {
+    flagsHTML += '<div class="card"><div class="card-title">⚑ Flags — Review Before Ordering</div>';
+    flags.forEach(f => {
+      flagsHTML += `<div class="flag-item flag-red"><span class="flag-icon">🚨</span><span>${f}</span></div>`;
+    });
+    warnings.forEach(w => {
+      flagsHTML += `<div class="flag-item flag-yellow"><span class="flag-icon">⚠️</span><span>${w}</span></div>`;
+    });
+    flagsHTML += '</div>';
+  } else {
+    flagsHTML = '<div class="card"><div class="info-green">✅ No flags generated. Review data below and confirm before ordering equipment.</div></div>';
+  }
+  flagsContainer.innerHTML = flagsHTML;
+
+  const v = id => document.getElementById(id)?.value || '—';
+  const summaryContainer = document.getElementById('summaryContainer');
+  summaryContainer.innerHTML = `
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div>
+          <div style="font-size:18px;font-weight:700;">${v('custName') || 'Customer Name'}</div>
+          <div style="font-size:13px;color:var(--gray-600);">${v('custAddress')}</div>
+          <div style="font-size:12px;color:var(--gray-400);margin-top:2px;">Survey: ${v('surveyDate')} · HCD: ${v('hcdName')}</div>
+        </div>
+        <span class="complexity-badge ${complexityClass}">${complexity}</span>
+      </div>
+
+      <div class="summary-section">
+        <div class="summary-section-title">Job Information</div>
+        <div class="summary-row"><span class="summary-label">Job type</span><span class="summary-value">${jobType ? {split_hp:'Split Heat Pump',split_ac:'Split AC + Furnace',packaged:'Packaged Unit',minisplit:'Mini-Split'}[jobType] : '—'}</span></div>
+        <div class="summary-row"><span class="summary-label">Year built</span><span class="summary-value">${v('yearBuilt')}</span></div>
+        <div class="summary-row"><span class="summary-label">Home size</span><span class="summary-value">${v('homeSqft')} sq ft</span></div>
+        <div class="summary-row"><span class="summary-label">Foundation</span><span class="summary-value">${v('homeFoundation')}</span></div>
+        <div class="summary-row"><span class="summary-label">Municipality</span><span class="summary-value">${v('municipality')}</span></div>
+      </div>
+
+      <div class="summary-section">
+        <div class="summary-section-title">Existing Equipment</div>
+        <div class="summary-row"><span class="summary-label">Condenser brand</span><span class="summary-value">${v('condBrand')}</span></div>
+        <div class="summary-row"><span class="summary-label">Condenser model</span><span class="summary-value">${v('condModel')}</span></div>
+        <div class="summary-row"><span class="summary-label">Condenser serial</span><span class="summary-value">${v('condSerial')}</span></div>
+        <div class="summary-row"><span class="summary-label">Existing tonnage</span><span class="summary-value">${v('condTons')}</span></div>
+        <div class="summary-row"><span class="summary-label">Refrigerant type</span><span class="summary-value">${v('condRefrig')}</span></div>
+        <div class="summary-row"><span class="summary-label">Existing MCA</span><span class="summary-value">${v('condMCA')} A</span></div>
+        <div class="summary-row"><span class="summary-label">Existing MOCP</span><span class="summary-value">${v('condMOCP')} A</span></div>
+        <div class="summary-row"><span class="summary-label">Air handler brand</span><span class="summary-value">${v('ahBrand')}</span></div>
+        <div class="summary-row"><span class="summary-label">Air handler model</span><span class="summary-value">${v('ahModel')}</span></div>
+        <div class="summary-row"><span class="summary-label">Air handler BTU</span><span class="summary-value">${v('ahBTU')}</span></div>
+        <div class="summary-row"><span class="summary-label">Air handler CFM</span><span class="summary-value">${v('ahCFM')}</span></div>
+        ${document.getElementById('furnaceEfficiencyFields')?.style.display !== 'none' ? `
+        <div class="summary-row">
+          <span class="summary-label">Furnace efficiency</span>
+          <span class="summary-value">${furnaceEfficiency ? furnaceEfficiency + '% AFUE' : '—'}</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Flue pipe size</span>
+          <span class="summary-value">${document.getElementById('flueDiameter')?.value || '—'}</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Flue pipe length</span>
+          <span class="summary-value">${document.getElementById('flueLength')?.value || '—'} ft</span>
+        </div>` : ''}
+      </div>
+
+      <div class="summary-section">
+        <div class="summary-section-title">Space & Footprint</div>
+        <div class="summary-row"><span class="summary-label">Condenser pad W×D</span><span class="summary-value">${v('padW')}" × ${v('padD')}"</span></div>
+        <div class="summary-row"><span class="summary-label">Existing condenser H</span><span class="summary-value">${v('condH')}"</span></div>
+        <div class="summary-row"><span class="summary-label">Clearances N/S/E/W</span><span class="summary-value">${v('clearN')}" / ${v('clearS')}" / ${v('clearE')}" / ${v('clearW')}"</span></div>
+        <div class="summary-row"><span class="summary-label">Overhead clearance</span><span class="summary-value">${v('clearOverhead')}"</span></div>
+        <div class="summary-row"><span class="summary-label">Indoor space W×D×H</span><span class="summary-value">${v('spaceW')}" × ${v('spaceD')}" × ${v('spaceH')}"</span></div>
+        <div class="summary-row"><span class="summary-label">Existing AH W×D×H</span><span class="summary-value">${v('ahW')}" × ${v('ahD')}" × ${v('ahH')}"</span></div>
+        <div class="summary-row"><span class="summary-label">Attic access W×H</span><span class="summary-value">${v('atticW')}" × ${v('atticH')}"</span></div>
+      </div>
+
+      <div class="summary-section">
+        <div class="summary-section-title">Duct System</div>
+        <div class="summary-row"><span class="summary-label">Supply plenum W×H×D</span><span class="summary-value">${v('supW')}" × ${v('supH')}" × ${v('supD')}"</span></div>
+        <div class="summary-row"><span class="summary-label">Return plenum W×H×D</span><span class="summary-value">${v('retW')}" × ${v('retH')}" × ${v('retD')}"</span></div>
+        <div class="summary-row"><span class="summary-label">Return drop W×H</span><span class="summary-value">${v('retDropW')}" × ${v('retDropH')}"</span></div>
+        <div class="summary-row"><span class="summary-label">Total supply connections</span><span class="summary-value">${v('supTotalConns')}</span></div>
+        <div class="summary-row"><span class="summary-label">Filter size</span><span class="summary-value">${v('filterSize')}</span></div>
+        <div class="summary-row"><span class="summary-label">Filter location</span><span class="summary-value">${v('filterLoc')}</span></div>
+      </div>
+
+      <div class="summary-section">
+        <div class="summary-section-title">Refrigerant & Piping</div>
+        <div class="summary-row"><span class="summary-label">Suction line size</span><span class="summary-value">${v('suctionSize')}</span></div>
+        <div class="summary-row"><span class="summary-label">Liquid line size</span><span class="summary-value">${v('liquidSize')}</span></div>
+        <div class="summary-row"><span class="summary-label">Line set length</span><span class="summary-value">${v('lineSetLength')} ft</span></div>
+        <div class="summary-row"><span class="summary-label">Line set condition</span><span class="summary-value">${v('lineSetCondition')}</span></div>
+        <div class="summary-row"><span class="summary-label">Drain pan condition</span><span class="summary-value">${v('drainPanCondition')}</span></div>
+        <div class="summary-row"><span class="summary-label">Drain pan W×L</span><span class="summary-value">${v('drainPanW')}" × ${v('drainPanL')}"</span></div>
+      </div>
+
+      <div class="summary-section">
+        <div class="summary-section-title">Electrical</div>
+        <div class="summary-row"><span class="summary-label">Panel brand</span><span class="summary-value">${v('panelBrand')}</span></div>
+        <div class="summary-row"><span class="summary-label">Main breaker</span><span class="summary-value">${v('mainBreaker')}</span></div>
+        <div class="summary-row"><span class="summary-label">Available slots</span><span class="summary-value">${v('blankSlots')}</span></div>
+        <div class="summary-row"><span class="summary-label">Disconnect amperage</span><span class="summary-value">${v('discAmp')}</span></div>
+        <div class="summary-row"><span class="summary-label">Disconnect type</span><span class="summary-value">${v('discType')}</span></div>
+        <div class="summary-row"><span class="summary-label">Wire gauge — condenser</span><span class="summary-value">${v('wireGaugeCond')}</span></div>
+        <div class="summary-row"><span class="summary-label">Distance panel→cond</span><span class="summary-value">${v('distPanelCond')} ft</span></div>
+        <div class="summary-row"><span class="summary-label">AH breaker size</span><span class="summary-value">${v('ahBreaker')} A</span></div>
+        <div class="summary-row"><span class="summary-label">Wire gauge — AH</span><span class="summary-value">${v('wireGaugeAH')}</span></div>
+        <div class="summary-row"><span class="summary-label">T-stat wire</span><span class="summary-value">${v('tstatWireGauge')}</span></div>
+      </div>
+
+      ${v('scopeNotes') !== '—' ? `
+      <div class="summary-section">
+        <div class="summary-section-title">Scope & Notes</div>
+        <div class="summary-row"><span class="summary-label">Scope of work</span><span class="summary-value" style="text-align:left;">${v('scopeNotes')}</span></div>
+        <div class="summary-row"><span class="summary-label">Customer notes</span><span class="summary-value" style="text-align:left;">${v('customerNotes')}</span></div>
+        <div class="summary-row"><span class="summary-label">Items to confirm</span><span class="summary-value" style="text-align:left;">${v('confirmNotes')}</span></div>
+      </div>` : ''}
+
+      <div class="summary-section">
+        <div class="summary-section-title">Photos</div>
+        <div class="summary-row"><span class="summary-label">Photos captured</span><span class="summary-value">${Object.keys(photos).length} photos</span></div>
+      </div>
+    </div>`;
+}
+
+// ============================================================
+// UTILITIES
+// ============================================================
+function copyToClipboard() {
+  const custName = document.getElementById('custName')?.value || 'Unknown';
+  const address = document.getElementById('custAddress')?.value || '';
+  const date = document.getElementById('surveyDate')?.value || '';
+  const hcd = document.getElementById('hcdName')?.value || '';
+  let text = `AIRE SERV INSTALL SURVEY\n`;
+  text += `Customer: ${custName}\nAddress: ${address}\nDate: ${date}\nHCD: ${hcd}\n\n`;
+  text += `Job Type: ${jobType || '—'}\n\n`;
+  text += `EXISTING EQUIPMENT\n`;
+  text += `Condenser: ${document.getElementById('condBrand')?.value||''} ${document.getElementById('condModel')?.value||''}\n`;
+  text += `Tonnage: ${document.getElementById('condTons')?.value||''}\n`;
+  text += `Refrigerant: ${document.getElementById('condRefrig')?.value||''}\n`;
+  text += `Air Handler: ${document.getElementById('ahBrand')?.value||''} ${document.getElementById('ahModel')?.value||''}\n\n`;
+  text += `ELECTRICAL\n`;
+  text += `Panel: ${document.getElementById('panelBrand')?.value||''} ${document.getElementById('mainBreaker')?.value||''}\n`;
+  text += `Disconnect: ${document.getElementById('discAmp')?.value||''} ${document.getElementById('discType')?.value||''}\n`;
+  text += `Wire to condenser: ${document.getElementById('wireGaugeCond')?.value||''}\n\n`;
+  text += `DUCT SYSTEM\n`;
+  text += `Supply plenum: ${document.getElementById('supW')?.value||''}W x ${document.getElementById('supH')?.value||''}H x ${document.getElementById('supD')?.value||''}D\n`;
+  text += `Return plenum: ${document.getElementById('retW')?.value||''}W x ${document.getElementById('retH')?.value||''}H x ${document.getElementById('retD')?.value||''}D\n\n`;
+  text += `Photos captured: ${Object.keys(photos).length}\n`;
+  navigator.clipboard.writeText(text).then(() => {
+    alert('Summary copied to clipboard — paste into email or ServiceTitan notes.');
+  });
+}
+
+function startNew() {
+  if (confirm('Start a new survey? Current data will be cleared.')) {
+    location.reload();
+  }
+}
+</script>
+</body>
+</html>
