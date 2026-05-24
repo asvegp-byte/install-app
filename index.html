@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Aire Serv Install Survey</title>
+<title>Aire Serv HCD Field Survey</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -160,6 +160,276 @@
     .photo-grid { grid-template-columns: 1fr 1fr; }
     .field-row.col2 { grid-template-columns: 1fr 1fr; }
   }
+
+/* ── MINI-SPLIT SPECIFIC ── */
+.app { max-width: 700px; margin: 0 auto; padding: 0 0 40px; }
+.hdr { background: #2E4057; color: white; padding: 18px 24px 0; border-radius: 14px 14px 0 0; }
+.hdr h1 { font-size: 1.25rem; font-weight: 800; }
+.hdr p  { font-size: 0.82rem; opacity: 0.75; margin-top: 3px; padding-bottom: 14px; }
+.prog { background: #1e2d3d; padding: 12px 24px; display: flex; align-items: center; gap: 0; }
+.pdot { width: 30px; height: 30px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.25);
+        color: rgba(255,255,255,0.4); font-size: 0.75rem; font-weight: 700;
+        display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all .3s; }
+.pdot.active { background: #4CAF50; border-color: #4CAF50; color: white; box-shadow: 0 0 0 3px rgba(76,175,80,.3); }
+.pdot.done   { background: rgba(255,255,255,.18); border-color: rgba(255,255,255,.5); color: white; }
+.pline { flex: 1; height: 2px; background: rgba(255,255,255,.15); transition: background .3s; }
+.pline.done { background: rgba(255,255,255,.5); }
+.plabel { color: rgba(255,255,255,.7); font-size: 0.78rem; margin-left: 10px; white-space: nowrap; }
+.ms-card { background: white; border-radius: 0 0 14px 14px; padding: 24px 28px;
+           box-shadow: 0 6px 24px rgba(0,0,0,.09); }
+.stitle { font-size: 1.05rem; font-weight: 800; color: #2E4057;
+          border-bottom: 2px solid #2E4057; padding-bottom: 8px; margin-bottom: 20px; }
+.hint-top { font-size: 0.82rem; color: #777; margin: -12px 0 16px; }
+.ms-field { margin-bottom: 16px; }
+.ms-field label { display: block; font-size: 0.83rem; font-weight: 700; color: #444; margin-bottom: 5px; }
+.ms-field input[type=text], .ms-field input[type=number], .ms-field select, .ms-field textarea {
+  width: 100%; padding: 11px 13px; border: 1.5px solid #ddd; border-radius: 9px;
+  font-size: 0.97rem; outline: none; background: #fafafa; transition: border-color .2s; font-family: inherit; }
+.ms-field input:focus, .ms-field select:focus, .ms-field textarea:focus { border-color: #2E4057; background: white; }
+.ms-hint { font-size: 0.76rem; color: #999; margin-top: 4px; }
+.ms-frow { display: flex; gap: 12px; }
+.ms-frow .ms-field { flex: 1; }
+.rbg { display: flex; gap: 8px; flex-wrap: wrap; }
+.rb  { flex: 1; min-width: 64px; }
+.rb input { display: none; }
+.rb label { display: flex; align-items: center; justify-content: center; padding: 10px 6px;
+             border: 1.5px solid #ddd; border-radius: 9px; cursor: pointer;
+             font-size: 0.9rem; font-weight: 700; text-align: center; transition: all .2s; }
+.rb input:checked + label { background: #2E4057; color: white; border-color: #2E4057; }
+.li { border: 1.5px solid #e4e4e4; border-radius: 11px; margin-bottom: 10px;
+      overflow: hidden; transition: border-color .2s; }
+.li.on { border-color: #2E4057; }
+.lh { display: flex; align-items: center; padding: 13px 16px; cursor: pointer;
+       background: #fafafa; gap: 12px; user-select: none; min-height: 50px; }
+.lh:active { background: #f0f2f5; }
+.lchk { width: 22px; height: 22px; border-radius: 6px; border: 2px solid #bbb;
+         background: white; flex-shrink: 0; display: flex; align-items: center;
+         justify-content: center; transition: all .2s; position: relative; }
+.li.on .lchk { background: #2E4057; border-color: #2E4057; }
+.li.on .lchk::after { content: ''; position: absolute; width: 11px; height: 7px;
+                        border-left: 2.5px solid white; border-bottom: 2.5px solid white;
+                        transform: rotate(-45deg) translateY(-1px); }
+.lname { font-weight: 700; font-size: 0.94rem; flex: 1; }
+.lsum  { font-size: 0.78rem; color: #999; white-space: nowrap; }
+.ldet  { padding: 12px 16px 14px; background: white; border-top: 1px solid #eee; display: none; }
+.li.on .ldet { display: block; }
+.ldet .ms-field { margin-bottom: 10px; }
+.ldet .ms-field:last-child { margin-bottom: 0; }
+.ms-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 28px; }
+.btn-pri  { background: #2E4057; color: white; }
+.btn-pri:hover  { background: #1d2e40; }
+.btn-sec  { background: #e8ecf0; color: #2E4057; }
+.btn-sec:hover  { background: #d8dce2; }
+.btn-go   { background: #1A6B1A; color: white; font-size: 1rem; }
+.btn-go:hover   { background: #145214; }
+.vbox { border-radius: 12px; padding: 18px 22px; margin-bottom: 20px; }
+.vgo  { background: #e8f5e9; border: 2px solid #1A6B1A; }
+.vwarn{ background: #fff8e1; border: 2px solid #F9A825; }
+.vno  { background: #ffebee; border: 2px solid #c62828; }
+.vlbl { font-size: 1.55rem; font-weight: 900; margin-bottom: 5px; }
+.vgo .vlbl  { color: #1A6B1A; }
+.vwarn .vlbl{ color: #E65100; }
+.vno .vlbl  { color: #c62828; }
+.vreason { font-size: 0.88rem; color: #333; line-height: 1.5; }
+.chips { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+.chip { flex: 1; min-width: 130px; border-radius: 9px; padding: 12px 14px;
+         border: 1.5px solid #e0e0e0; background: white; }
+.chip .clbl { font-size: 0.72rem; color: #999; font-weight: 700;
+               text-transform: uppercase; letter-spacing: .05em; }
+.chip .cval { font-size: 1.1rem; font-weight: 800; color: #2E4057; margin-top: 2px; }
+.chip.ok .cval { color: #1A6B1A; }
+.chip.warn .cval { color: #E65100; }
+.chip.bad .cval  { color: #c62828; }
+.csumbox { background: #f0f2f5; border-radius: 9px; padding: 14px 16px;
+            margin-bottom: 20px; font-size: 0.87rem; line-height: 1.8; }
+.csumbox b { color: #2E4057; }
+.ctab { width: 100%; border-collapse: collapse; font-size: 0.84rem; margin-bottom: 16px; }
+.ctab th { background: #2E4057; color: white; padding: 8px 10px; text-align: left;
+            font-size: 0.8rem; font-weight: 700; }
+.ctab td { padding: 7px 10px; border-bottom: 1px solid #eee; }
+.ctab tr:nth-child(even) td { background: #f8f9fa; }
+.ctab .secrow td { font-weight: 800; background: #e4e8ee; color: #2E4057;
+                    font-size: 0.8rem; text-transform: uppercase; letter-spacing: .04em; }
+.ctab .subrow td { font-weight: 700; background: #f0f2f5; }
+.ctab .totrow td { font-weight: 800; background: #d8dfe8; }
+.ilist { list-style: none; margin-bottom: 20px; }
+.ilist li { padding: 8px 12px; border-radius: 7px; margin-bottom: 6px;
+             font-size: 0.85rem; display: flex; gap: 8px; align-items: flex-start; }
+.ilist .ok   { background: #e8f5e9; color: #1A6B1A; }
+.ilist .warn { background: #fff8e1; color: #7B5E00; }
+.ilist .bad  { background: #ffebee; color: #c62828; }
+.ilist .icon { flex-shrink: 0; font-style: normal; }
+.pbtns { display: flex; gap: 10px; flex-wrap: wrap; }
+.pbtn { padding: 12px 20px; border: none; border-radius: 9px; font-size: 0.9rem;
+         font-weight: 700; cursor: pointer; font-family: inherit; transition: all .2s; }
+.pbtn:active { transform: scale(0.97); }
+.pbtn-permit { background: #2E4057; color: white; }
+.pbtn-permit:hover { background: #1d2e40; }
+.pbtn-cust   { background: #5B6E7C; color: white; }
+.pbtn-cust:hover   { background: #3d4f5c; }
+.pbtn-new    { background: #1A6B1A; color: white; }
+.pbtn-new:hover    { background: #145214; }
+.psection { display: none; }
+
+/* ── TAB SYSTEM ── */
+.tab-bar { background: #0f172a; display: flex; gap: 0; overflow-x: auto; position: sticky; top: 60px; z-index: 99; border-bottom: 2px solid #1e293b; }
+.tab { flex: 1; padding: 12px 8px; background: transparent; border: none; color: #94a3b8;
+       font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit;
+       border-bottom: 3px solid transparent; transition: all 0.15s; white-space: nowrap; }
+.tab:hover { color: #fff; background: rgba(255,255,255,0.05); }
+.tab.active { color: #fff; border-bottom-color: #3b82f6; background: rgba(59,130,246,0.1); }
+.tab.tab-disabled { color: #475569; cursor: not-allowed; opacity: 0.6; }
+.tab .coming-soon { font-size: 10px; background: #334155; color: #94a3b8; padding: 2px 5px; border-radius: 4px; margin-left: 4px; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ── SHARED INTAKE ── */
+#shared-intake { background: var(--gray-100); min-height: 100vh; }
+.intake-card { background: white; border-radius: var(--radius); border: 1px solid var(--gray-200);
+               padding: 18px 20px; margin-bottom: 16px; }
+.begin-bar { background: white; border-top: 1px solid var(--gray-200); padding: 16px 20px;
+             position: sticky; bottom: 0; z-index: 100; display: flex; gap: 12px; }
+
+
+  /* ── MANUAL J SPECIFIC ── */
+  .mj-design-bar { background: #1e293b; padding: 8px 20px; display: flex; gap: 24px; flex-wrap: wrap; }
+  .mj-design-item { font-size: 12px; color: #94a3b8; }
+  .mj-design-item span { color: #e2e8f0; font-weight: 500; }
+  .mj-mode-selector { max-width: 900px; margin: 20px auto; padding: 0 20px; }
+  .mj-mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .mj-mode-card { background: #fff; border: 2px solid var(--gray-200); border-radius: var(--radius); padding: 24px; cursor: pointer; transition: all 0.15s; text-align: center; }
+  .mj-mode-card:hover, .mj-mode-card.selected { border-color: var(--blue); background: var(--blue-light); }
+  .mj-mode-icon { font-size: 36px; margin-bottom: 10px; }
+  .mj-mode-name { font-size: 18px; font-weight: 700; color: var(--gray-900); margin-bottom: 6px; }
+  .mj-mode-desc { font-size: 13px; color: var(--gray-600); line-height: 1.5; }
+  .mj-mode-time { display: inline-block; margin-top: 10px; font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 20px; }
+  .mj-mode-card:not(.selected) .mj-mode-time { background: var(--gray-100); color: var(--gray-600); }
+  .mj-mode-card.selected .mj-mode-time { background: var(--blue); color: #fff; }
+  .mj-panel { display: none; max-width: 900px; margin: 0 auto; padding: 0 20px 40px; }
+  .mj-panel.active { display: block; }
+  .mj-card { background: #fff; border-radius: var(--radius); border: 1px solid var(--gray-200); padding: 20px 24px; margin-bottom: 16px; }
+  .mj-card-title { font-size: 13px; font-weight: 600; color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; }
+  .mj-field { margin-bottom: 14px; }
+  .mj-field:last-child { margin-bottom: 0; }
+  .mj-field label { display: block; font-size: 13px; font-weight: 500; color: #374151; margin-bottom: 5px; }
+  .mj-hint { font-size: 11px; color: var(--gray-400); font-weight: 400; margin-left: 4px; }
+  .mj-field input[type="text"], .mj-field input[type="number"], .mj-field select {
+    width: 100%; padding: 10px 14px; border: 1.5px solid var(--gray-300); border-radius: 8px;
+    font-size: 15px; color: var(--gray-900); background: #fff; outline: none;
+    transition: border 0.15s; -webkit-appearance: none; font-family: inherit; }
+  .mj-field input:focus, .mj-field select:focus { border-color: var(--blue); }
+  #content-mj .toggle-btn { line-height: 1.4; }
+  .mj-calc-btn { width: 100%; padding: 16px; background: var(--blue); color: #fff; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; transition: background 0.15s; margin-top: 8px; font-family: inherit; }
+  .mj-calc-btn:hover { background: var(--blue-dark,#1e40af); }
+  .mj-room-card { background: #f8fafc; border: 1.5px solid var(--gray-200); border-radius: var(--radius); padding: 18px; margin-bottom: 12px; }
+  .mj-room-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+  .mj-room-title { font-size: 15px; font-weight: 600; color: var(--gray-900); }
+  .mj-room-remove { font-size: 12px; color: #dc2626; cursor: pointer; background: none; border: none; padding: 4px 8px; border-radius: 4px; font-family: inherit; }
+  .mj-room-remove:hover { background: #fef2f2; }
+  .mj-wall-section { background: #fff; border: 1px solid var(--gray-200); border-radius: 8px; padding: 12px; margin-top: 10px; }
+  .mj-wall-title { font-size: 12px; font-weight: 600; color: var(--gray-600); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .mj-window-row { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 8px; align-items: end; margin-top: 8px; }
+  .mj-add-window-btn { font-size: 12px; color: var(--blue); cursor: pointer; background: none; border: 1px solid #bfdbfe; border-radius: 4px; padding: 4px 10px; margin-top: 6px; font-family: inherit; }
+  .mj-results-panel { margin-top: 24px; }
+  .mj-result-hero { background: #0f172a; border-radius: var(--radius); padding: 28px; text-align: center; margin-bottom: 16px; }
+  .mj-result-label { font-size: 13px; color: #94a3b8; margin-bottom: 8px; }
+  .mj-result-tons { font-size: 64px; font-weight: 800; color: #fff; letter-spacing: -2px; line-height: 1; }
+  .mj-result-tons-label { font-size: 18px; color: #94a3b8; margin-top: 4px; }
+  .mj-result-range { font-size: 13px; color: #64748b; margin-top: 8px; }
+  .mj-result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+  .mj-result-stat { background: #fff; border-radius: 8px; padding: 16px; border: 1px solid var(--gray-200); }
+  .mj-result-stat-label { font-size: 12px; color: var(--gray-600); margin-bottom: 4px; }
+  .mj-result-stat-value { font-size: 22px; font-weight: 700; color: var(--gray-900); }
+  .mj-result-stat-unit { font-size: 12px; color: var(--gray-400); margin-top: 2px; }
+  .mj-result-stat.blue .mj-result-stat-value { color: var(--blue); }
+  .mj-result-stat.red  .mj-result-stat-value { color: #dc2626; }
+  .mj-result-stat.green .mj-result-stat-value { color: #15803d; }
+  .mj-room-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .mj-room-table th { font-size: 11px; font-weight: 600; color: var(--gray-600); text-align: right; padding: 8px; border-bottom: 2px solid var(--gray-200); text-transform: uppercase; letter-spacing: 0.04em; }
+  .mj-room-table th:first-child { text-align: left; }
+  .mj-room-table td { padding: 8px; border-bottom: 1px solid var(--gray-100); text-align: right; }
+  .mj-room-table td:first-child { text-align: left; color: #374151; }
+  .mj-total-row td { font-weight: 600; color: var(--gray-900) !important; border-top: 2px solid var(--gray-200); }
+  .mj-bar-cell { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
+  .mj-mini-bar { height: 6px; border-radius: 3px; background: #bfdbfe; flex-shrink: 0; }
+  .mj-confidence-badge { display: inline-flex; align-items: center; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+  .conf-medium { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+  .conf-high   { background: #f0fdf4; color: #15803d; border: 1px solid #86efac; }
+  .conf-lower  { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+  .mj-assumption-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .mj-assumption-item { background: var(--gray-100); border-radius: 6px; padding: 10px 12px; }
+  .mj-assumption-label { font-size: 11px; color: var(--gray-400); margin-bottom: 3px; }
+  .mj-assumption-value { font-size: 13px; font-weight: 500; color: var(--gray-900); }
+  .mj-loading { display: none; text-align: center; padding: 40px; }
+  .mj-loading.active { display: block; }
+  .mj-spinner { width: 36px; height: 36px; border: 3px solid var(--gray-200); border-top-color: var(--blue); border-radius: 50%; animation: mj-spin 0.8s linear infinite; margin: 0 auto 12px; }
+  @keyframes mj-spin { to { transform: rotate(360deg); } }
+  .mj-error-box { background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 14px; color: #dc2626; font-size: 14px; margin-top: 16px; display: none; }
+  @media (max-width: 540px) {
+    .mj-mode-grid, .mj-result-grid, .mj-window-row { grid-template-columns: 1fr; }
+    .mj-assumption-grid { grid-template-columns: 1fr; }
+  }
+
+/* ── PRINT: Install Survey ── */
+/* Override the install survey's original print rule (which shows all sections) */
+@media print {
+  /* Default install-survey print: only show the summary section */
+  .header, .progress-bar, .nav-bar,
+  .tab-bar, #shared-intake, #install-progress,
+  #content-electrical, #content-mj { display: none !important; }
+  #content-install .section { display: none !important; }
+  #content-install #section-11 { display: block !important; padding: 12px; }
+  #content-install .card { break-inside: avoid; }
+
+  /* Mini-split permit doc print (body.pp class set by buildPDoc) */
+  body.pp #content-install,
+  body.pp #content-electrical,
+  body.pp #content-mj,
+  body.pp #shared-intake,
+  body.pp #main-screen,
+  body.pp .header { display: none !important; }
+  body.pp .permit-view { display: block !important; }
+
+  /* Mini-split customer doc print (body.pc class set by buildCDoc) */
+  body.pc #content-install,
+  body.pc #content-electrical,
+  body.pc #content-mj,
+  body.pc #shared-intake,
+  body.pc #main-screen,
+  body.pc .header { display: none !important; }
+  body.pc .customer-view { display: block !important; }
+
+  /* Permit/Customer doc typography */
+  .pdoc { font-family: Arial, sans-serif; font-size: 10pt; color: #000; padding: 0; }
+  .pdoc h1 { font-size: 13pt; color: #2E4057; border-bottom: 2pt solid #2E4057;
+              padding-bottom: 5pt; margin-bottom: 10pt; }
+  .pdoc h2 { font-size: 10.5pt; color: #2E4057; margin: 12pt 0 5pt;
+              border-left: 3pt solid #2E4057; padding-left: 6pt; }
+  .pinfo { background: #f5f5f5; border: 1pt solid #bbb; padding: 8pt; margin-bottom: 10pt; }
+  .pinfo p { margin: 2pt 0; font-size: 9.5pt; }
+  .ptab { width: 100%; border-collapse: collapse; font-size: 9pt; margin-bottom: 9pt; }
+  .ptab th { background: #2E4057; color: white; padding: 4pt 6pt; text-align: left; font-weight: bold; }
+  .ptab td { padding: 3.5pt 6pt; border: 0.5pt solid #ccc; }
+  .ptab tr:nth-child(even) td { background: #f5f5f5; }
+  .ptab .psub td { font-weight: bold; background: #e0e4ea; }
+  .ptab .ptot td { font-weight: bold; background: #cfd5df; font-size: 9.5pt; }
+  .ptab .psec td { font-weight: bold; background: #d0d8e4; color: #2E4057;
+                    text-transform: uppercase; font-size: 8pt; letter-spacing: .05em; }
+  .ptab .pnew td { font-weight: bold; color: #1A6B1A; }
+  .pnote { font-size: 8.5pt; margin: 3pt 0; color: #333; }
+  .psig  { margin-top: 20pt; border-top: 1pt solid #ccc; padding-top: 8pt; font-size: 9pt; }
+  .cdoc { font-family: Arial, sans-serif; color: #000; font-size: 10.5pt; }
+  .cohdr { background: #2E4057; color: white; padding: 12pt 16pt; margin-bottom: 12pt; }
+  .cohdr h1 { font-size: 15pt; font-weight: bold; }
+  .cohdr p  { font-size: 9.5pt; opacity: .85; margin-top: 2pt; }
+  .cvgo   { background: #e8f5e9; border: 1.5pt solid #1A6B1A; padding: 9pt; margin: 9pt 0; border-radius: 3pt; }
+  .cvwarn { background: #fff8e1; border: 1.5pt solid #E65100; padding: 9pt; margin: 9pt 0; border-radius: 3pt; }
+  .cvno   { background: #ffebee; border: 1.5pt solid #c62828; padding: 9pt; margin: 9pt 0; border-radius: 3pt; }
+  .ctab2 { width: 100%; border-collapse: collapse; font-size: 9.5pt; margin: 8pt 0; }
+  .ctab2 td { padding: 4pt 6pt; border: 0.5pt solid #ddd; vertical-align: top; }
+  .ctab2 td:first-child { font-weight: bold; color: #2E4057; width: 40%; background: #f5f5f5; }
+  .cdisclaim { font-size: 8.5pt; color: #666; margin-top: 16pt; border-top: 1pt solid #ddd; padding-top: 6pt; font-style: italic; }
+}
 </style>
 </head>
 <body>
@@ -168,122 +438,147 @@
 <div class="header">
   <div>
     <div class="header-logo">AIRE<span>SERV</span></div>
-    <div class="header-sub">East Glendale · Peoria</div>
+    <div class="header-sub">East Glendale &middot; Peoria</div>
   </div>
   <div style="text-align:right;">
-    <div class="header-title">Install Survey</div>
-    <div class="header-sub" id="headerJobType">HCD Pre-Sale Assessment</div>
+    <div class="header-title">HCD Field Survey</div>
+    <div class="header-sub" id="headerJobType">New Survey</div>
   </div>
 </div>
 
-<!-- PROGRESS -->
-<div class="progress-bar">
+<!-- ============================================================ -->
+<!-- SHARED INTAKE                                                -->
+<!-- ============================================================ -->
+<div id="shared-intake">
+  <div class="section active" style="display:block;padding:20px;max-width:800px;margin:0 auto;">
+    <div class="section-header">
+      <div class="section-title">New Survey</div>
+      <div class="section-desc">Enter customer and property information, then select the job type. You only need to fill this in once.</div>
+    </div>
+
+    <div class="intake-card">
+      <div class="card-title">Customer Information</div>
+      <div class="field"><label>Customer Name <span style="color:var(--red)">*</span></label>
+        <input type="text" id="custName" placeholder="Full name"></div>
+      <div class="field-row col2">
+        <div class="field"><label>Phone</label><input type="tel" id="custPhone" placeholder="(623) 555-0000"></div>
+        <div class="field"><label>Email</label><input type="email" id="custEmail" placeholder="email@example.com"></div>
+      </div>
+      <div class="field"><label>Service Address <span style="color:var(--red)">*</span></label>
+        <input type="text" id="custAddress" placeholder="Street address, city, state, zip"></div>
+      <div class="field-row col2">
+        <div class="field"><label>Survey Date</label><input type="date" id="surveyDate"></div>
+        <div class="field"><label>HCD / Sales Rep</label><input type="text" id="hcdName" placeholder="Your name"></div>
+      </div>
+    </div>
+
+    <div class="intake-card">
+      <div class="card-title">Property</div>
+      <div class="field-row col3">
+        <div class="field"><label>Year Built</label>
+          <input type="number" id="yearBuilt" placeholder="e.g. 1998" min="1940" max="2026"></div>
+        <div class="field"><label>Home Size <span class="label-hint">sq ft</span></label>
+          <input type="number" id="homeSqft" placeholder="e.g. 1800"></div>
+        <div class="field"><label>Stories</label>
+          <select id="homeStories">
+            <option value="">Select...</option>
+            <option>1 story</option><option>2 story</option><option>3+ story</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row col2">
+        <div class="field"><label>Foundation</label>
+          <select id="homeFoundation">
+            <option value="">Select...</option>
+            <option>Slab</option><option>Raised / Crawl space</option><option>Basement</option>
+          </select>
+        </div>
+        <div class="field"><label>AHJ / Permit Jurisdiction</label>
+          <input type="text" id="ahj" placeholder="e.g. City of Surprise, Maricopa County"></div>
+      </div>
+      <div class="field"><label>Zone / Space Being Conditioned <span class="label-hint">mini-split jobs</span></label>
+        <input type="text" id="ms_zone" placeholder="e.g. Attached garage, master bedroom addition"></div>
+      <div class="field">
+        <label>HOA?</label>
+        <div class="toggle-group">
+          <button class="toggle-btn" onclick="intakeToggle(this)">Yes &mdash; has restrictions</button>
+          <button class="toggle-btn" onclick="intakeToggle(this)">No HOA</button>
+          <button class="toggle-btn" onclick="intakeToggle(this)">Unknown</button>
+        </div>
+      </div>
+      <div class="field" style="margin-top:10px;">
+        <label>Permit Required?</label>
+        <div class="toggle-group">
+          <button class="toggle-btn" onclick="intakeToggle(this)">Yes</button>
+          <button class="toggle-btn" onclick="intakeToggle(this)">No</button>
+          <button class="toggle-btn" onclick="intakeToggle(this)">Check with office</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="intake-card">
+      <div class="card-title">Job Type <span style="color:var(--red)">*</span></div>
+      <div class="job-type-grid" id="jobTypeGrid">
+        <div class="job-type-card" onclick="selectJobType('split_hp', this)">
+          <div class="job-type-icon">&#x1F504;</div>
+          <div class="job-type-name">Split Heat Pump</div>
+          <div class="job-type-desc">Outdoor condenser + indoor air handler, heating and cooling</div>
+        </div>
+        <div class="job-type-card" onclick="selectJobType('split_ac', this)">
+          <div class="job-type-icon">&#x2744;&#xFE0F;</div>
+          <div class="job-type-name">Split AC + Furnace</div>
+          <div class="job-type-desc">Outdoor AC condenser + indoor furnace with coil</div>
+        </div>
+        <div class="job-type-card" onclick="selectJobType('packaged', this)">
+          <div class="job-type-icon">&#x1F4E6;</div>
+          <div class="job-type-name">Packaged Unit</div>
+          <div class="job-type-desc">Single cabinet &mdash; rooftop or ground mount</div>
+        </div>
+        <div class="job-type-card" onclick="selectJobType('minisplit', this)">
+          <div class="job-type-icon">&#x1F4A8;</div>
+          <div class="job-type-name">Mini-Split</div>
+          <div class="job-type-desc">Ductless &mdash; single or multi-zone</div>
+        </div>
+      </div>
+      <div id="jobTypeSelected" style="display:none;">
+        <div class="info-green" id="jobTypeConfirm"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="begin-bar">
+    <button class="btn btn-secondary" onclick="alert('Please select a job type to continue.')" id="beginBtn" style="flex:none;width:100%;">Begin Survey &rarr;</button>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- MAIN SURVEY (hidden until Begin clicked)                     -->
+<!-- ============================================================ -->
+<div id="main-screen" style="display:none;">
+
+<!-- PROGRESS BAR (Install Survey) -->
+<div class="progress-bar" id="install-progress">
   <div class="progress-steps" id="progressSteps"></div>
-  <div class="progress-label">Step <span id="progressCurrent">1</span> of <span id="progressTotal">11</span> — <span id="progressName">Job Setup</span></div>
+  <div class="progress-label">Step <span id="progressCurrent">1</span> of <span id="progressTotal">10</span> &mdash; <span id="progressName">Existing Equipment</span></div>
+</div>
+
+<!-- TAB BAR -->
+<div class="tab-bar">
+  <button class="tab active" id="tab-install" onclick="showTab('install')">
+    &#x1F4CB; Install Survey
+  </button>
+  <button class="tab tab-disabled" id="tab-electrical" onclick="showTab('electrical')" title="Select Mini-Split job type to enable">
+    &#x26A1; Electrical Survey
+  </button>
+  <button class="tab" id="tab-mj" onclick="showTab('mj')">
+    &#x1F4D0; Load Calc
+  </button>
 </div>
 
 <!-- ============================================================ -->
-<!-- SECTION 1: JOB SETUP -->
+<!-- TAB 1: INSTALL SURVEY                                       -->
 <!-- ============================================================ -->
-<div class="section active" id="section-1">
-  <div class="section-header">
-    <div class="section-title">Job Setup</div>
-    <div class="section-desc">Enter customer information and select the job type. This determines which sections appear next.</div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Customer Information</div>
-    <div class="field"><label>Customer Name <span style="color:var(--red)">*</span></label><input type="text" id="custName" placeholder="Full name"></div>
-    <div class="field-row col2">
-      <div class="field"><label>Phone</label><input type="tel" id="custPhone" placeholder="(623) 555-0000"></div>
-      <div class="field"><label>Email</label><input type="email" id="custEmail" placeholder="email@example.com"></div>
-    </div>
-    <div class="field"><label>Service Address <span style="color:var(--red)">*</span></label><input type="text" id="custAddress" placeholder="Street address, city, zip"></div>
-    <div class="field-row col2">
-      <div class="field"><label>Survey Date</label><input type="text" id="surveyDate" placeholder=""></div>
-      <div class="field"><label>HCD / Sales Rep</label><input type="text" id="hcdName" placeholder="Your name"></div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Job Type <span style="color:var(--red)">*</span></div>
-    <div class="job-type-grid" id="jobTypeGrid">
-      <div class="job-type-card" onclick="selectJobType('split_hp', this)">
-        <div class="job-type-icon">🔄</div>
-        <div class="job-type-name">Split Heat Pump</div>
-        <div class="job-type-desc">Outdoor condenser + indoor air handler, heating and cooling</div>
-      </div>
-      <div class="job-type-card" onclick="selectJobType('split_ac', this)">
-        <div class="job-type-icon">❄️</div>
-        <div class="job-type-name">Split AC + Furnace</div>
-        <div class="job-type-desc">Outdoor AC condenser + indoor furnace with coil</div>
-      </div>
-      <div class="job-type-card" onclick="selectJobType('packaged', this)">
-        <div class="job-type-icon">📦</div>
-        <div class="job-type-name">Packaged Unit</div>
-        <div class="job-type-desc">Single cabinet — rooftop or ground mount</div>
-      </div>
-      <div class="job-type-card" onclick="selectJobType('minisplit', this)">
-        <div class="job-type-icon">💨</div>
-        <div class="job-type-name">Mini-Split</div>
-        <div class="job-type-desc">Ductless — single or multi-zone</div>
-      </div>
-    </div>
-    <div class="field" id="jobTypeSelected" style="display:none;">
-      <div class="info-green" id="jobTypeConfirm"></div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Property Notes</div>
-    <div class="field-row col2">
-      <div class="field">
-        <label>Year Built <span class="label-hint">approx</span></label>
-        <input type="number" id="yearBuilt" placeholder="e.g. 1998" min="1940" max="2026">
-      </div>
-      <div class="field">
-        <label>Home Size <span class="label-hint">sq ft</span></label>
-        <input type="number" id="homeSqft" placeholder="e.g. 1800">
-      </div>
-    </div>
-    <div class="field-row col2">
-      <div class="field">
-        <label>Stories</label>
-        <select id="homeStories">
-          <option value="">Select...</option>
-          <option>1 story</option>
-          <option>2 story</option>
-          <option>3+ story</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Foundation</label>
-        <select id="homeFoundation">
-          <option value="">Select...</option>
-          <option>Slab</option>
-          <option>Raised / Crawl space</option>
-          <option>Basement</option>
-        </select>
-      </div>
-    </div>
-    <div class="field">
-      <label>HOA? <span class="label-hint">affects placement</span></label>
-      <div class="toggle-group">
-        <button class="toggle-btn" onclick="toggle(this,'hoaYes','hoaNo')">Yes — has restrictions</button>
-        <button class="toggle-btn" onclick="toggle(this,'hoaNo','hoaYes')">No HOA</button>
-        <button class="toggle-btn" onclick="toggle(this,'hoaUnk','hoaYes hoaNo')">Unknown</button>
-      </div>
-    </div>
-    <div class="field" style="margin-top:10px;">
-      <label>Permit Required?</label>
-      <div class="toggle-group">
-        <button class="toggle-btn" onclick="toggle(this,'permitY','permitN')">Yes</button>
-        <button class="toggle-btn" onclick="toggle(this,'permitN','permitY')">No</button>
-        <button class="toggle-btn" onclick="toggle(this,'permitUnk','permitY permitN')">Check with office</button>
-      </div>
-    </div>
-  </div>
-</div>
+<div id="content-install" class="tab-content active">
 
 <!-- ============================================================ -->
 <!-- SECTION 2: EXISTING EQUIPMENT -->
@@ -1683,18 +1978,691 @@
     </div>
   </div>
 </div>
-
 <!-- NAV BAR -->
 <div class="nav-bar">
   <button class="btn btn-secondary" id="btnBack" onclick="navigate(-1)" style="display:none;">← Back</button>
   <button class="btn btn-primary" id="btnNext" onclick="navigate(1)">Continue →</button>
 </div>
+</div><!-- end content-install -->
+
+<!-- ============================================================ -->
+<!-- TAB 2: MINI-SPLIT ELECTRICAL SURVEY                         -->
+<!-- ============================================================ -->
+<div id="content-electrical" class="tab-content">
+  <div style="max-width:700px;margin:0 auto;padding:0 0 40px;">
+
+  <!-- MS Header -->
+  <div class="hdr">
+    <h1 id="ms-step-title">Mini-Split Electrical Survey</h1>
+    <p id="ms-step-sub">Step 1 of 3 &mdash; Panel Information</p>
+  </div>
+  <div class="prog">
+    <div class="pdot active" id="ms-d1">1</div>
+    <div class="pline" id="ms-l1"></div>
+    <div class="pdot" id="ms-d2">2</div>
+    <div class="pline" id="ms-l2"></div>
+    <div class="pdot" id="ms-d3">3</div>
+    <div class="pline" id="ms-l3"></div>
+    <div class="pdot" id="ms-d4">4</div>
+    <div class="plabel" id="ms-plab">Panel Info</div>
+  </div>
+
+  <!-- MS STEP 1 (was s2): PANEL -->
+  <!-- ══ STEP 2: PANEL ══ -->
+  <div class="ms-card" id="ms-s2" style="display:none">
+    <div class="stitle">Electrical Panel Information</div>
+    <div class="ms-field">
+      <label>Service Size</label>
+      <div class="rbg">
+        <div class="rb"><input type="radio" name="svc" id="s100" value="100"><label for="s100">100A</label></div>
+        <div class="rb"><input type="radio" name="svc" id="s150" value="150"><label for="s150">150A</label></div>
+        <div class="rb"><input type="radio" name="svc" id="s200" value="200" checked><label for="s200">200A</label></div>
+        <div class="rb"><input type="radio" name="svc" id="soth" value="other"><label for="soth">Other</label></div>
+      </div>
+    </div>
+    <div class="ms-field" id="caf" style="display:none">
+      <label>Custom Service Size (amps)</label>
+      <input type="number" id="custAmps" placeholder="Enter amps" min="60" max="600">
+    </div>
+    <div class="ms-field">
+      <label>Panel Brand / Model <span style="font-weight:400;color:#aaa">(optional)</span></label>
+      <input type="text" id="panelModel" placeholder="e.g. Square D SC40M200S">
+    </div>
+    <div class="ms-field">
+      <label>How Many Open Breaker Slots?</label>
+      <div class="rbg">
+        <div class="rb"><input type="radio" name="slots" id="sl0" value="0" onchange="onSlots()"><label for="sl0">0</label></div>
+        <div class="rb"><input type="radio" name="slots" id="sl1" value="1" onchange="onSlots()"><label for="sl1">1</label></div>
+        <div class="rb"><input type="radio" name="slots" id="sl2" value="2" checked onchange="onSlots()"><label for="sl2">2</label></div>
+        <div class="rb"><input type="radio" name="slots" id="sl3" value="3" onchange="onSlots()"><label for="sl3">3</label></div>
+        <div class="rb"><input type="radio" name="slots" id="sl4" value="4" onchange="onSlots()"><label for="sl4">4</label></div>
+        <div class="rb"><input type="radio" name="slots" id="sl5" value="5" onchange="onSlots()"><label for="sl5">5+</label></div>
+      </div>
+      <div class="ms-hint">Count any blank spaces where no breaker is installed (both sides of panel)</div>
+    </div>
+    <div class="ms-field" id="adj-field">
+      <label>Are two of those open slots directly above/below each other?</label>
+      <div style="background:#f0f4f8;border-radius:9px;padding:10px 12px;margin:10px 0 4px">
+        <div style="font-size:0.78rem;font-weight:800;color:#2E4057;margin-bottom:8px;text-align:center">What &ldquo;adjacent&rdquo; means &mdash; look at a column of slots in the panel</div>
+        <svg viewBox="0 0 400 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:400px;display:block;margin:0 auto">
+          <!-- LEFT: ADJACENT = GOOD -->
+          <text x="100" y="14" text-anchor="middle" font-size="11" fill="#1A6B1A" font-family="Arial,sans-serif" font-weight="bold">ADJACENT  OK</text>
+          <rect x="20" y="22" width="160" height="130" fill="#dce0e6" rx="5"/>
+          <rect x="28" y="30" width="144" height="26" fill="#78909c" rx="3"/>
+          <text x="100" y="47" text-anchor="middle" font-size="9" fill="white" font-family="Arial">20A breaker</text>
+          <rect x="28" y="60" width="144" height="26" fill="#e8f5e9" rx="3" stroke="#1A6B1A" stroke-width="2"/>
+          <text x="100" y="77" text-anchor="middle" font-size="9" fill="#1A6B1A" font-family="Arial" font-weight="bold">OPEN</text>
+          <rect x="28" y="90" width="144" height="26" fill="#e8f5e9" rx="3" stroke="#1A6B1A" stroke-width="2"/>
+          <text x="100" y="107" text-anchor="middle" font-size="9" fill="#1A6B1A" font-family="Arial" font-weight="bold">OPEN</text>
+          <rect x="28" y="120" width="144" height="26" fill="#78909c" rx="3"/>
+          <text x="100" y="137" text-anchor="middle" font-size="9" fill="white" font-family="Arial">15A breaker</text>
+          <!-- bracket + label -->
+          <line x1="178" y1="60" x2="185" y2="60" stroke="#1A6B1A" stroke-width="1.5"/>
+          <line x1="185" y1="60" x2="185" y2="116" stroke="#1A6B1A" stroke-width="1.5"/>
+          <line x1="178" y1="116" x2="185" y2="116" stroke="#1A6B1A" stroke-width="1.5"/>
+          <text x="188" y="85" font-size="8.5" fill="#1A6B1A" font-family="Arial" font-weight="bold">2-pole</text>
+          <text x="188" y="97" font-size="8.5" fill="#1A6B1A" font-family="Arial" font-weight="bold">fits here</text>
+
+          <!-- RIGHT: NOT ADJACENT = BAD -->
+          <text x="300" y="14" text-anchor="middle" font-size="11" fill="#c62828" font-family="Arial,sans-serif" font-weight="bold">NOT ADJACENT  X</text>
+          <rect x="220" y="22" width="160" height="130" fill="#dce0e6" rx="5"/>
+          <rect x="228" y="30" width="144" height="26" fill="#ffebee" rx="3" stroke="#c62828" stroke-width="2"/>
+          <text x="300" y="47" text-anchor="middle" font-size="9" fill="#c62828" font-family="Arial" font-weight="bold">OPEN</text>
+          <rect x="228" y="60" width="144" height="26" fill="#78909c" rx="3"/>
+          <text x="300" y="77" text-anchor="middle" font-size="9" fill="white" font-family="Arial">20A breaker</text>
+          <rect x="228" y="90" width="144" height="26" fill="#ffebee" rx="3" stroke="#c62828" stroke-width="2"/>
+          <text x="300" y="107" text-anchor="middle" font-size="9" fill="#c62828" font-family="Arial" font-weight="bold">OPEN</text>
+          <rect x="228" y="120" width="144" height="26" fill="#78909c" rx="3"/>
+          <text x="300" y="137" text-anchor="middle" font-size="9" fill="white" font-family="Arial">15A breaker</text>
+          <!-- X annotation -->
+          <line x1="228" y1="56" x2="372" y2="90" stroke="#c62828" stroke-width="1.5" stroke-dasharray="5,3"/>
+          <text x="312" y="75" font-size="8" fill="#c62828" font-family="Arial">breaker blocked</text>
+          <text x="312" y="85" font-size="8" fill="#c62828" font-family="Arial">by middle slot</text>
+        </svg>
+        <p style="font-size:0.73rem;color:#666;text-align:center;margin-top:6px">A double-pole breaker is one unit that snaps into two slots directly above and below each other, contacting both L1 and L2 bus bars to get 120V+120V = 240V.</p>
+      </div>
+      <div class="rbg" style="max-width:200px;margin-top:8px">
+        <div class="rb"><input type="radio" name="adj" id="adjno" value="no"><label for="adjno">No</label></div>
+        <div class="rb"><input type="radio" name="adj" id="adjyes" value="yes" checked><label for="adjyes">Yes</label></div>
+      </div>
+    </div>
+    <div class="ms-field" id="sub-field" style="display:none">
+      <label>Is there a subpanel or secondary load center on the property?</label>
+      <div class="rbg" style="max-width:200px">
+        <div class="rb"><input type="radio" name="sub" id="subno" value="no" checked onchange="onSub()"><label for="subno">No</label></div>
+        <div class="rb"><input type="radio" name="sub" id="subyes" value="yes" onchange="onSub()"><label for="subyes">Yes</label></div>
+      </div>
+      <div class="ms-hint">A subpanel (often in a garage or workshop) may have open slots even when the main panel is full</div>
+    </div>
+    <div class="ms-field" id="subdet-field" style="display:none">
+      <label>Subpanel capacity / open slots <span style="font-weight:400;color:#aaa">(if visible)</span></label>
+      <input type="text" id="subNotes" placeholder="e.g. 60A subpanel in garage, 2 open slots">
+    </div>
+    <div class="ms-field">
+      <label>Solar PV Backfeed?</label>
+      <div class="rbg" style="max-width:180px">
+        <div class="rb"><input type="radio" name="sol" id="solno" value="no" checked><label for="solno">No</label></div>
+        <div class="rb"><input type="radio" name="sol" id="solyes" value="yes"><label for="solyes">Yes</label></div>
+      </div>
+    </div>
+    <div class="ms-field" id="saf" style="display:none">
+      <label>Solar Backfeed Breaker (amps)</label>
+      <input type="number" id="solAmps" placeholder="e.g. 32" min="1" max="200">
+      <div class="ms-hint">Labeled on the solar backfeed breaker in the panel</div>
+    </div>
+    <div class="ms-nav">
+      <button class="btn btn-sec" onclick="ms_go(1)">&larr; Back</button>
+      <button class="btn btn-pri" onclick="ms_go(3)">Next &rarr;</button>
+    </div>
+  </div>
+
+  <!-- MS STEP 2 (was s3): LOADS -->
+  <!-- ══ STEP 3: LOADS ══ -->
+  <div class="ms-card" id="ms-s3" style="display:none">
+    <div class="stitle">Existing Large Electrical Loads</div>
+    <p class="hint-top">Toggle on everything present in this home — estimates are pre-filled and editable.</p>
+    <div style="background:#e8f4fd;border:1.5px solid #90c8f0;border-radius:10px;padding:14px 16px;margin-bottom:18px;font-size:0.82rem;line-height:1.7;color:#1a3a52;">
+      <div style="font-weight:800;font-size:0.86rem;margin-bottom:6px;">&#x2139;&#xFE0F;&nbsp; What this calculation already includes (NEC 220.82 Optional Method)</div>
+      <div style="margin-bottom:8px;">The following are <strong>automatically calculated</strong> from the home's square footage — <em>do not add these again</em>:</div>
+      <ul style="margin:0 0 10px 16px;">
+        <li><strong>General lighting &amp; receptacles</strong> — all standard 15A/20A outlet and lighting circuits are covered by the 3 VA/sq ft general load (NEC 220.12). Individual receptacle or lighting circuits are <em>not</em> counted separately.</li>
+        <li><strong>Small appliance circuits ×2</strong> — the two required kitchen/dining branch circuits (NEC 220.52(A)) are pre-included at 3,000 VA.</li>
+        <li><strong>Laundry circuit</strong> — one dedicated laundry branch circuit (NEC 220.52(B)) is pre-included at 1,500 VA.</li>
+      </ul>
+      <div style="font-weight:700;margin-bottom:4px;">Add a load below <em>only</em> if it is a large or dedicated circuit not covered above:</div>
+      <ul style="margin:0 0 0 16px;">
+        <li>Electric range / wall oven (240V dedicated)</li>
+        <li>Electric dryer (240V dedicated)</li>
+        <li>Electric water heater (dedicated circuit)</li>
+        <li>Pool pump, spa, or hot tub</li>
+        <li>EV charger / Level 2 EVSE</li>
+        <li>Existing mini-split(s) or central A/C (nameplate MCA)</li>
+        <li>Any other large dedicated load not covered by standard 15/20A circuits</li>
+      </ul>
+    </div>
+
+    <div class="li" id="li-range">
+      <div class="lh" onclick="tog('range')">
+        <div class="lchk" id="chk-range"></div>
+        <div class="lname">Electric Range / Oven</div>
+        <div class="lsum" id="sum-range">50A / 12,000 VA</div>
+      </div>
+      <div class="ldet">
+        <div class="ms-field">
+          <label>Circuit Breaker Size (amps)</label>
+          <input type="number" id="rangeA" value="50" min="20" max="60" oninput="upSum('range')">
+        </div>
+      </div>
+    </div>
+
+    <div class="li" id="li-dryer">
+      <div class="lh" onclick="tog('dryer')">
+        <div class="lchk" id="chk-dryer"></div>
+        <div class="lname">Electric Dryer</div>
+        <div class="lsum" id="sum-dryer">60A / 14,400 VA</div>
+      </div>
+      <div class="ldet">
+        <div class="ms-field">
+          <label>Circuit Breaker Size</label>
+          <div class="rbg" style="max-width:220px">
+            <div class="rb"><input type="radio" name="dry" id="dry30" value="30"><label for="dry30">30A</label></div>
+            <div class="rb"><input type="radio" name="dry" id="dry60" value="60" checked><label for="dry60">60A</label></div>
+          </div>
+          <div class="ms-hint">60A if it has its own dedicated circuit; 30A if older 3-wire</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="li" id="li-wh">
+      <div class="lh" onclick="tog('wh')">
+        <div class="lchk" id="chk-wh"></div>
+        <div class="lname">Electric Water Heater</div>
+        <div class="lsum" id="sum-wh">4,500 W</div>
+      </div>
+      <div class="ldet">
+        <div class="ms-field">
+          <label>Nameplate Wattage (W)</label>
+          <input type="number" id="whW" value="4500" min="1000" max="12000" oninput="upSum('wh')">
+        </div>
+      </div>
+    </div>
+
+    <div class="li" id="li-pool">
+      <div class="lh" onclick="tog('pool')">
+        <div class="lchk" id="chk-pool"></div>
+        <div class="lname">Pool / Spa Equipment</div>
+        <div class="lsum" id="sum-pool">60A / 14,400 VA</div>
+      </div>
+      <div class="ldet">
+        <div class="ms-field">
+          <label>Circuit Breaker Size (amps)</label>
+          <input type="number" id="poolA" value="60" min="15" max="200" oninput="upSum('pool')">
+        </div>
+      </div>
+    </div>
+
+    <div class="li" id="li-hottub">
+      <div class="lh" onclick="tog('hottub')">
+        <div class="lchk" id="chk-hottub"></div>
+        <div class="lname">Hot Tub / Portable Spa</div>
+        <div class="lsum">6,000 VA standard est.</div>
+      </div>
+      <div class="ldet">
+        <div class="ms-hint" style="padding:4px 0">Standard hot tub load (25A at 240V) will be used.</div>
+      </div>
+    </div>
+
+    <div class="li" id="li-ev">
+      <div class="lh" onclick="tog('ev')">
+        <div class="lchk" id="chk-ev"></div>
+        <div class="lname">EV Charger (Level 2)</div>
+        <div class="lsum" id="sum-ev">48A &times; 125%</div>
+      </div>
+      <div class="ldet">
+        <div class="ms-field">
+          <label>Charger Amperage (amps)</label>
+          <input type="number" id="evA" value="48" min="16" max="80" oninput="upSum('ev')">
+          <div class="ms-hint">NEC 625.42 continuous load — 125% factor applied automatically</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="li" id="li-ac">
+      <div class="lh" onclick="tog('ac')">
+        <div class="lchk" id="chk-ac"></div>
+        <div class="lname">Existing Central A/C or Heat Pump</div>
+        <div class="lsum" id="sum-ac">50A MCA / 12,000 VA</div>
+      </div>
+      <div class="ldet">
+        <div class="ms-field">
+          <label>Unit MCA or Breaker Size (amps)</label>
+          <input type="number" id="acA" value="50" min="10" max="100" oninput="upSum('ac')">
+          <div class="ms-hint">Use nameplate MCA if available; otherwise use breaker size</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="li" id="li-ms">
+      <div class="lh" onclick="tog('ms')">
+        <div class="lchk" id="chk-ms"></div>
+        <div class="lname">Existing Mini-Split(s)</div>
+        <div class="lsum" id="sum-ms">15A MCA / 3,600 VA</div>
+      </div>
+      <div class="ldet">
+        <div class="ms-field">
+          <label>Total MCA of all existing mini-split circuits (amps)</label>
+          <input type="number" id="msA" value="15" min="1" max="100" oninput="upSum('ms')">
+        </div>
+      </div>
+    </div>
+
+    <div class="li" id="li-other">
+      <div class="lh" onclick="tog('other')">
+        <div class="lchk" id="chk-other"></div>
+        <div class="lname">Other Large Load</div>
+        <div class="lsum" id="sum-other">0 VA</div>
+      </div>
+      <div class="ldet">
+        <div class="ms-field">
+          <label>Description</label>
+          <input type="text" id="otherDesc" placeholder="e.g. Vacuum system, irrigation pump">
+        </div>
+        <div class="ms-field">
+          <label>Load (VA)</label>
+          <input type="number" id="otherVA" value="0" min="0" oninput="upSum('other')">
+        </div>
+      </div>
+    </div>
+
+    <div class="ms-nav">
+      <button class="btn btn-sec" onclick="ms_go(2)">&larr; Back</button>
+      <button class="btn btn-pri" onclick="ms_go(4)">Next &rarr;</button>
+    </div>
+  </div>
+
+  <!-- MS STEP 3 (was s4): EQUIPMENT -->
+  <!-- ══ STEP 4: EQUIPMENT ══ -->
+  <div class="ms-card" id="ms-s4" style="display:none">
+    <div class="stitle">Proposed Mini-Split Equipment</div>
+    <div class="ms-field">
+      <label>Brand</label>
+      <div class="rbg">
+        <div class="rb"><input type="radio" name="brand" id="br-acp" value="AC Pro" onchange="onBrand()"><label for="br-acp">AC Pro</label></div>
+        <div class="rb"><input type="radio" name="brand" id="br-mit" value="Mitsubishi" onchange="onBrand()"><label for="br-mit">Mitsubishi</label></div>
+        <div class="rb"><input type="radio" name="brand" id="br-dai" value="Daikin" onchange="onBrand()"><label for="br-dai">Daikin</label></div>
+        <div class="rb"><input type="radio" name="brand" id="br-oth" value="Other" onchange="onBrand()"><label for="br-oth">Other</label></div>
+      </div>
+    </div>
+    <div class="ms-field" id="f-model" style="display:none">
+      <label>Outdoor Unit Model</label>
+      <select id="modelSel" onchange="onModelSel()">
+        <option value="">— Select model —</option>
+      </select>
+    </div>
+    <div id="volt-warn" style="display:none;background:#fff3cd;border:1.5px solid #f0a500;border-radius:9px;padding:10px 14px;margin-bottom:16px;font-size:0.85rem;color:#7B5E00">
+      &#9888; <b>115V unit selected.</b> This requires a single-pole 15A or 20A circuit at 120V — not a standard 240V mini-split circuit. Verify install requirements carefully.
+    </div>
+    <div class="ms-frow">
+      <div class="ms-field">
+        <label>Outdoor Unit MCA (amps)</label>
+        <input type="number" id="mca" value="" placeholder="—" min="1" max="80">
+        <div class="ms-hint">Auto-filled from model &mdash; <b>verify from nameplate</b></div>
+      </div>
+      <div class="ms-field">
+        <label>Outdoor Unit MOCP (amps)</label>
+        <input type="number" id="mocp" value="" placeholder="—" min="1" max="80">
+        <div class="ms-hint">Max breaker size &mdash; <b>verify from nameplate</b></div>
+      </div>
+    </div>
+    <div class="ms-field" id="f-disc">
+      <label>Disconnect Type</label>
+      <select id="disc">
+        <option value="30f">30A Fusible NEMA 3R w/ 20A fuses</option>
+        <option value="30f25">30A Fusible NEMA 3R w/ 25A fuses</option>
+        <option value="30f30">30A Fusible NEMA 3R w/ 30A fuses</option>
+        <option value="40f35">40A Fusible NEMA 3R w/ 35A fuses</option>
+        <option value="40f40">40A Fusible NEMA 3R w/ 40A fuses</option>
+        <option value="60f50">60A Fusible NEMA 3R w/ 50A fuses</option>
+        <option value="60f60">60A Fusible NEMA 3R w/ 60A fuses</option>
+        <option value="20nf">20A Non-Fusible NEMA 3R</option>
+        <option value="30nf">30A Non-Fusible NEMA 3R</option>
+        <option value="40nf">40A Non-Fusible NEMA 3R</option>
+        <option value="115v">Single-pole safety switch (115V unit)</option>
+      </select>
+    </div>
+    <div class="ms-frow">
+      <div class="ms-field">
+        <label>EMT Run Length (ft)</label>
+        <input type="number" id="runFt" value="30" min="1" max="500">
+        <div class="ms-hint">Panel to disconnect</div>
+      </div>
+      <div class="ms-field">
+        <label>Flex Whip Length (ft)</label>
+        <input type="number" id="whipFt" value="6" min="1" max="10">
+        <div class="ms-hint">Disconnect to outdoor unit</div>
+      </div>
+    </div>
+    <div class="ms-field">
+      <label>Conduit Routing</label>
+      <select id="routing">
+        <option value="ext">Exterior wall, surface-mounted EMT</option>
+        <option value="int">Interior wall / concealed</option>
+        <option value="attic">Through attic</option>
+        <option value="ug">Underground / trenched</option>
+      </select>
+    </div>
+    <div class="ms-field">
+      <label>Site Notes <span style="font-weight:400;color:#aaa">(optional)</span></label>
+      <textarea id="notes" rows="3" placeholder="Access constraints, unusual routing, customer concerns, permit flags..."></textarea>
+    </div>
+    <div class="ms-nav">
+      <button class="btn btn-sec" onclick="ms_go(3)">&larr; Back</button>
+      <button class="btn btn-go" onclick="ms_go(5)">Calculate Results &#10003;</button>
+    </div>
+  </div>
+
+  <!-- MS STEP 4 (was s5): RESULTS -->
+  <!-- ══ STEP 5: RESULTS ══ -->
+  <div class="ms-card" id="ms-s5" style="display:none">
+    <div id="vbox" class="vbox vgo">
+      <div class="vlbl" id="vlbl">GO</div>
+      <div class="vreason" id="vreason">Calculating...</div>
+    </div>
+    <div class="chips">
+      <div class="chip ok" id="chip-cap">
+        <div class="clbl">Available Capacity</div>
+        <div class="cval" id="cv-cap">—</div>
+      </div>
+      <div class="chip ok" id="chip-slot">
+        <div class="clbl">Panel Slots</div>
+        <div class="cval" id="cv-slot">—</div>
+      </div>
+      <div class="chip" id="chip-sol">
+        <div class="clbl">Solar / NEC 705</div>
+        <div class="cval" id="cv-sol">N/A</div>
+      </div>
+    </div>
+    <div class="stitle">Recommended Circuit</div>
+    <div class="csumbox" id="csum"></div>
+    <div class="stitle">NEC 220.82 Load Calculation</div>
+    <div id="ctab"></div>
+    <ul class="ilist" id="ilist"></ul>
+    <div class="pbtns">
+      <button class="pbtn pbtn-permit" onclick="pv('p')">&#128196; Print Permit Load Calc</button>
+      <button class="pbtn pbtn-cust"   onclick="pv('c')">&#128203; Print Customer Summary</button>
+      <button class="pbtn pbtn-new"    onclick="ms_nr()">&#43; New Survey</button>
+    </div>
+    <div class="ms-nav" style="margin-top:20px">
+      <button class="btn btn-sec" onclick="ms_go(4)">&larr; Edit Equipment</button>
+    </div>
+  </div>
+</div>
+
+  </div><!-- end ms inner div -->
+</div><!-- end content-electrical -->
+
+<!-- ============================================================ -->
+<!-- TAB 3: MANUAL J LOAD CALCULATOR                             -->
+<!-- ============================================================ -->
+<div id="content-mj" class="tab-content">
+
+  <!-- AZ Design Conditions bar -->
+  <div class="mj-design-bar">
+    <div class="mj-design-item">Cooling: <span>108&deg;F DB / 76&deg;F WB outdoor</span></div>
+    <div class="mj-design-item">Indoor: <span>75&deg;F / 50% RH</span></div>
+    <div class="mj-design-item">Heating: <span>34&deg;F outdoor / 70&deg;F indoor</span></div>
+    <div class="mj-design-item">&Delta;T Cool/Heat: <span>33&deg;F / 36&deg;F</span></div>
+  </div>
+
+  <!-- Mode selector -->
+  <div class="mj-mode-selector">
+    <div class="mj-mode-grid">
+      <div class="mj-mode-card" id="modeQuickCard" onclick="mjSelectMode('quick')">
+        <div class="mj-mode-icon">&#x26A1;</div>
+        <div class="mj-mode-name">Quick Estimate</div>
+        <div class="mj-mode-desc">Whole-house estimate from minimal inputs. Good for phone quotes and initial conversations.</div>
+        <div class="mj-mode-time">~60 seconds</div>
+      </div>
+      <div class="mj-mode-card" id="modeFullCard" onclick="mjSelectMode('full')">
+        <div class="mj-mode-icon">&#x1F4CB;</div>
+        <div class="mj-mode-name">Full Manual J</div>
+        <div class="mj-mode-desc">Room-by-room calculation with actual dimensions and exposures. Accurate for equipment specification.</div>
+        <div class="mj-mode-time">5&ndash;15 minutes</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUICK ESTIMATE PANEL -->
+  <div class="mj-panel" id="panelQuick">
+    <div class="mj-card">
+      <div class="mj-card-title">House Information</div>
+      <div class="field-row col2">
+        <div class="mj-field">
+          <label>Total conditioned area <span class="mj-hint">sq ft &mdash; auto-filled from intake</span></label>
+          <input type="number" id="mj_q_sqft" placeholder="e.g. 1800" min="200" max="10000">
+        </div>
+        <div class="mj-field">
+          <label>Year built <span class="mj-hint">auto-filled from intake</span></label>
+          <input type="number" id="mj_q_year" placeholder="e.g. 2005" min="1940" max="2026">
+        </div>
+      </div>
+      <div class="field-row col2">
+        <div class="mj-field">
+          <label>Stories</label>
+          <select id="mj_q_stories"><option value="1">1 story</option><option value="2">2 story</option></select>
+        </div>
+        <div class="mj-field">
+          <label>Foundation</label>
+          <select id="mj_q_foundation">
+            <option value="slab">Slab (most AZ homes)</option>
+            <option value="raised">Raised / crawl space</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="mj-card">
+      <div class="mj-card-title">Construction &amp; Insulation</div>
+      <div class="mj-field">
+        <label>Insulation level</label>
+        <div class="toggle-group">
+          <button class="toggle-btn" onclick="mjSetToggle('mj_q_insulation','poor',this)">Poor<br><span style="font-size:10px;">Pre-1980</span></button>
+          <button class="toggle-btn active" onclick="mjSetToggle('mj_q_insulation','average',this)">Average<br><span style="font-size:10px;">1980&ndash;2005</span></button>
+          <button class="toggle-btn" onclick="mjSetToggle('mj_q_insulation','good',this)">Good<br><span style="font-size:10px;">2005&ndash;2015</span></button>
+          <button class="toggle-btn" onclick="mjSetToggle('mj_q_insulation','excellent',this)">Excellent<br><span style="font-size:10px;">2015+</span></button>
+        </div>
+        <input type="hidden" id="mj_q_insulation" value="average">
+      </div>
+      <div class="mj-field" style="margin-top:14px;">
+        <label>Construction tightness</label>
+        <div class="toggle-group">
+          <button class="toggle-btn" onclick="mjSetToggle('mj_q_construction','leaky',this)">Leaky<br><span style="font-size:10px;">Pre-1990</span></button>
+          <button class="toggle-btn active" onclick="mjSetToggle('mj_q_construction','average',this)">Average<br><span style="font-size:10px;">1990&ndash;2010</span></button>
+          <button class="toggle-btn" onclick="mjSetToggle('mj_q_construction','tight',this)">Tight<br><span style="font-size:10px;">2010+</span></button>
+        </div>
+        <input type="hidden" id="mj_q_construction" value="average">
+      </div>
+    </div>
+    <div class="mj-card">
+      <div class="mj-card-title">Windows &amp; Solar Exposure</div>
+      <div class="mj-field">
+        <label>Window exposure</label>
+        <div class="toggle-group">
+          <button class="toggle-btn" onclick="mjSetToggle('mj_q_window_exposure','minimal',this)">Minimal<br><span style="font-size:10px;">~8% floor area</span></button>
+          <button class="toggle-btn active" onclick="mjSetToggle('mj_q_window_exposure','average',this)">Average<br><span style="font-size:10px;">~12% floor area</span></button>
+          <button class="toggle-btn" onclick="mjSetToggle('mj_q_window_exposure','heavy',this)">Heavy<br><span style="font-size:10px;">~18% floor area</span></button>
+        </div>
+        <input type="hidden" id="mj_q_window_exposure" value="average">
+      </div>
+      <div class="mj-field" style="margin-top:14px;">
+        <label>Primary glass orientation <span class="mj-hint">where is most glass facing?</span></label>
+        <div class="toggle-group">
+          <button class="toggle-btn" onclick="mjSetToggle('mj_q_orientation','n_s',this)">North/South<br><span style="font-size:10px;">Better</span></button>
+          <button class="toggle-btn active" onclick="mjSetToggle('mj_q_orientation','mixed',this)">Mixed<br><span style="font-size:10px;">Typical</span></button>
+          <button class="toggle-btn" onclick="mjSetToggle('mj_q_orientation','e_w',this)">East/West<br><span style="font-size:10px;">Worse</span></button>
+          <button class="toggle-btn" onclick="mjSetToggle('mj_q_orientation','worst',this)">Heavy West<br><span style="font-size:10px;">Worst case</span></button>
+        </div>
+        <input type="hidden" id="mj_q_orientation" value="mixed">
+      </div>
+    </div>
+    <div class="mj-card">
+      <div class="mj-card-title">Ceiling Height</div>
+      <div class="toggle-group">
+        <button class="toggle-btn" onclick="mjSetToggle('mj_q_ceiling_height','8',this)">8 ft<br><span style="font-size:10px;">Standard</span></button>
+        <button class="toggle-btn active" onclick="mjSetToggle('mj_q_ceiling_height','9',this)">9 ft<br><span style="font-size:10px;">Common</span></button>
+        <button class="toggle-btn" onclick="mjSetToggle('mj_q_ceiling_height','10',this)">10 ft<br><span style="font-size:10px;">Higher end</span></button>
+        <button class="toggle-btn" onclick="mjSetToggle('mj_q_ceiling_height','12',this)">12 ft<br><span style="font-size:10px;">Vaulted</span></button>
+      </div>
+      <input type="hidden" id="mj_q_ceiling_height" value="9">
+    </div>
+    <button class="mj-calc-btn" onclick="mjRunQuickCalc()">&#x26A1; Calculate Quick Estimate</button>
+    <div class="mj-loading" id="mjQuickLoading"><div class="mj-spinner"></div><div style="color:var(--gray-600);">Calculating...</div></div>
+    <div class="mj-error-box" id="mjQuickError"></div>
+    <div id="mjQuickResults"></div>
+  </div><!-- end panelQuick -->
+
+  <!-- FULL MANUAL J PANEL -->
+  <div class="mj-panel" id="panelFull">
+    <div class="mj-card">
+      <div class="mj-card-title">Job &amp; House Info</div>
+      <div class="mj-field">
+        <label>Job name / address <span class="mj-hint">auto-filled from intake</span></label>
+        <input type="text" id="mj_f_job_name" placeholder="e.g. Smith — 123 Main St Glendale">
+      </div>
+      <div class="field-row col2">
+        <div class="mj-field">
+          <label>Foundation</label>
+          <select id="mj_f_foundation">
+            <option value="slab">Slab</option>
+            <option value="raised">Raised / crawl space</option>
+          </select>
+        </div>
+        <div class="mj-field">
+          <label>Slab perimeter <span class="mj-hint">ft — for heat loss</span></label>
+          <input type="number" id="mj_f_slab_perimeter" placeholder="e.g. 170" min="0">
+        </div>
+      </div>
+      <div class="mj-field">
+        <label>Overall construction tightness</label>
+        <div class="toggle-group">
+          <button class="toggle-btn" onclick="mjSetToggle('mj_f_construction','leaky',this)">Leaky<br><span style="font-size:10px;">Pre-1990</span></button>
+          <button class="toggle-btn active" onclick="mjSetToggle('mj_f_construction','average',this)">Average<br><span style="font-size:10px;">1990&ndash;2010</span></button>
+          <button class="toggle-btn" onclick="mjSetToggle('mj_f_construction','tight',this)">Tight<br><span style="font-size:10px;">2010+</span></button>
+        </div>
+        <input type="hidden" id="mj_f_construction" value="average">
+      </div>
+    </div>
+    <div class="mj-card">
+      <div class="mj-card-title">Defaults for New Rooms</div>
+      <div class="field-row col3">
+        <div class="mj-field">
+          <label>Wall assembly</label>
+          <select id="mj_f_default_wall">
+            <option value="2x4_r13">2&times;4 R-13 (standard)</option>
+            <option value="2x4_r15">2&times;4 R-15</option>
+            <option value="2x6_r19">2&times;6 R-19</option>
+            <option value="2x6_r21">2&times;6 R-21</option>
+            <option value="block_r0">Block &mdash; uninsulated</option>
+            <option value="block_r4">Block &mdash; R-4 insulated</option>
+            <option value="icf">ICF</option>
+          </select>
+        </div>
+        <div class="mj-field">
+          <label>Attic / ceiling insulation</label>
+          <select id="mj_f_default_ceiling">
+            <option value="r19">R-19</option><option value="r30" selected>R-30</option>
+            <option value="r38">R-38</option><option value="r49">R-49</option><option value="r60">R-60</option>
+          </select>
+        </div>
+        <div class="mj-field">
+          <label>Default window type</label>
+          <select id="mj_f_default_glass">
+            <option value="single">Single pane</option>
+            <option value="double">Double pane</option>
+            <option value="double_lowe" selected>Double low-e (most AZ)</option>
+            <option value="triple_lowe">Triple low-e</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div id="mjRoomsContainer"></div>
+    <button class="toggle-btn" onclick="mjAddRoom()" style="width:100%;padding:14px;border-radius:8px;margin-bottom:16px;font-size:14px;background:var(--gray-100);border-color:var(--gray-300);color:var(--gray-900);">+ Add Room</button>
+    <button class="mj-calc-btn" onclick="mjRunFullCalc()">&#x1F4CB; Calculate Full Manual J</button>
+    <div class="mj-loading" id="mjFullLoading"><div class="mj-spinner"></div><div style="color:var(--gray-600);">Calculating room-by-room loads...</div></div>
+    <div class="mj-error-box" id="mjFullError"></div>
+    <div id="mjFullResults"></div>
+  </div><!-- end panelFull -->
+
+</div>
+
+</div><!-- end main-screen -->
+
+<!-- PRINT SECTIONS (mini-split permit + customer docs) -->
+<!-- PRINT: PERMIT -->
+<div class="psection permit-view">
+  <div class="pdoc" id="pdoc"></div>
+</div>
+
+<!-- PRINT: CUSTOMER -->
+<div class="psection customer-view">
+  <div class="cdoc" id="cdoc"></div>
+</div>
 
 <script>
+
+// ── SHARED HELPERS ────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const fv = id => { const e = $(id); return e ? e.value : ''; };
+const fn = id => { const e = $(id); return e ? (parseFloat(e.value) || 0) : 0; };
+const rc = (name, def) => { const e = document.querySelector('input[name="'+name+'"]:checked'); return e ? e.value : def; };
+
+// ── INTAKE RADIO TOGGLES (HOA / Permit groups) ──
+function intakeToggle(btn) {
+  var group = btn.closest('.toggle-group');
+  if (group) { group.querySelectorAll('.toggle-btn').forEach(function(b){ b.classList.remove('active'); }); }
+  btn.classList.add('active');
+}
+
+// ── INTAKE & TAB NAVIGATION ───────────────────────────────────
+function beginSurvey() {
+  if (!jobType) { alert('Please select a job type to continue.'); return; }
+  document.getElementById('shared-intake').style.display = 'none';
+  document.getElementById('main-screen').style.display = 'block';
+  updateProgress();
+  buildProgressSteps();
+  if (jobType === 'minisplit') {
+    showTab('electrical');
+  } else {
+    showTab('install');
+  }
+  window.scrollTo(0,0);
+}
+
+function showTab(tab) {
+  ['install','electrical','mj'].forEach(t => {
+    const btn     = document.getElementById('tab-'+t);
+    const content = document.getElementById('content-'+t);
+    if (btn)     btn.classList.toggle('active', t === tab);
+    if (content) content.classList.toggle('active', t === tab);
+  });
+  const ipb = document.getElementById('install-progress');
+  if (ipb) ipb.style.display = (tab === 'install') ? 'block' : 'none';
+  window.scrollTo(0,0);
+  if (tab === 'mj') mjPrefillFromIntake();
+}
+
+// Activated once a job type is selected
+function activateBeginBtn() {
+  const btn = document.getElementById('beginBtn');
+  if (btn) {
+    btn.onclick = beginSurvey;
+    btn.style.background = 'var(--blue)';
+    btn.style.color = 'white';
+  }
+}
 // ============================================================
 // STATE
 // ============================================================
-let currentSection = 1;
+let currentSection = 2;
 let totalSections = 11;
 let jobType = '';
 let furnaceEfficiency = '';
@@ -1714,9 +2682,9 @@ const SECTION_NAMES = [
 // INIT
 // ============================================================
 window.onload = function() {
-  document.getElementById('surveyDate').value = new Date().toLocaleDateString('en-US');
-  updateProgress();
-  buildProgressSteps();
+  const _d=new Date(); document.getElementById('surveyDate').value = _d.getFullYear()+'-'+String(_d.getMonth()+1).padStart(2,'0')+'-'+String(_d.getDate()).padStart(2,'0');
+  document.getElementById('shared-intake').style.display = 'block';
+  document.getElementById('main-screen').style.display = 'none';
 };
 
 function buildProgressSteps() {
@@ -1731,11 +2699,11 @@ function buildProgressSteps() {
 }
 
 function updateProgress() {
-  document.getElementById('progressCurrent').textContent = currentSection;
-  document.getElementById('progressTotal').textContent = totalSections;
+  document.getElementById('progressCurrent').textContent = currentSection - 1;
+  document.getElementById('progressTotal').textContent = totalSections - 1;
   document.getElementById('progressName').textContent = SECTION_NAMES[currentSection] || '';
   buildProgressSteps();
-  document.getElementById('btnBack').style.display = currentSection > 1 ? 'block' : 'none';
+  document.getElementById('btnBack').style.display = currentSection > 2 ? 'block' : 'none';
   document.getElementById('btnNext').textContent = currentSection === totalSections ? '✓ Complete Survey' : 'Continue →';
 }
 
@@ -1744,7 +2712,7 @@ function updateProgress() {
 // ============================================================
 function navigate(dir) {
   const next = currentSection + dir;
-  if (next < 1 || next > totalSections) return;
+  if (next < 2 || next > totalSections) return;
 
   let skip = false;
   if (jobType === 'minisplit' && next === 4) skip = true;
@@ -1773,6 +2741,19 @@ function navigate(dir) {
 // JOB TYPE
 // ============================================================
 function selectJobType(type, el) {
+  // Enable/disable Electrical Survey tab based on job type
+  const elTab = document.getElementById('tab-electrical');
+  if (elTab) {
+    if (type === 'minisplit') {
+      elTab.classList.remove('tab-disabled');
+      elTab.title = '';
+    } else {
+      elTab.classList.add('tab-disabled');
+      elTab.title = 'Select Mini-Split job type to enable';
+    }
+  }
+  // Activate the Begin Survey button
+  activateBeginBtn();
   jobType = type;
   document.querySelectorAll('.job-type-card').forEach(c => c.classList.remove('selected'));
   el.classList.add('selected');
@@ -2316,7 +3297,7 @@ function generateSummary() {
         <div class="summary-row"><span class="summary-label">Year built</span><span class="summary-value">${v('yearBuilt')}</span></div>
         <div class="summary-row"><span class="summary-label">Home size</span><span class="summary-value">${v('homeSqft')} sq ft</span></div>
         <div class="summary-row"><span class="summary-label">Foundation</span><span class="summary-value">${v('homeFoundation')}</span></div>
-        <div class="summary-row"><span class="summary-label">Municipality</span><span class="summary-value">${v('municipality')}</span></div>
+        <div class="summary-row"><span class="summary-label">Municipality / AHJ</span><span class="summary-value">${v('municipality') || document.getElementById('ahj')?.value || '&#x2014;'}</span></div>
       </div>
 
       <div class="summary-section">
@@ -2441,6 +3422,830 @@ function startNew() {
     location.reload();
   }
 }
+
+
+// ── MINI-SPLIT JS ─────────────────────────────────────────────
+// ── CONFIG ────────────────────────────────────────────────
+const CO = { name: 'Your Company', phone: '', email: '' };
+
+// ── MODEL DATABASE ────────────────────────────────────────
+// MCA/MOCP are reference values — always verify from outdoor unit nameplate before permit submission.
+// v=voltage (115 or 230). 115V units require a single-pole 120V circuit.
+const MODELS = [
+  // AC Pro J-Series Single Zone
+  {b:'AC Pro',s:'J-Series',       n:'J-Series 9K 115V  (MHPC-J-009ASB)', m:'MHPC-J-009ASB', btu:9000,  v:115,mca:15,mocp:20},
+  {b:'AC Pro',s:'J-Series',       n:'J-Series 9K 230V  (MHPC-J-009BSB)', m:'MHPC-J-009BSB', btu:9000,  v:230,mca:15,mocp:20},
+  {b:'AC Pro',s:'J-Series',       n:'J-Series 12K 115V (MHPC-J-012ASB)', m:'MHPC-J-012ASB', btu:12000, v:115,mca:15,mocp:20},
+  {b:'AC Pro',s:'J-Series',       n:'J-Series 12K 230V (MHPC-J-012BSB)', m:'MHPC-J-012BSB', btu:12000, v:230,mca:15,mocp:20},
+  {b:'AC Pro',s:'J-Series',       n:'J-Series 18K 230V (MHPC-J-018BSB)', m:'MHPC-J-018BSB', btu:18000, v:230,mca:15,mocp:20},
+  {b:'AC Pro',s:'J-Series',       n:'J-Series 24K 230V (MHPC-J-024BSB)', m:'MHPC-J-024BSB', btu:24000, v:230,mca:20,mocp:30},
+  {b:'AC Pro',s:'J-Series',       n:'J-Series 30K 230V (MHPC-J-030BSB)', m:'MHPC-J-030BSB', btu:30000, v:230,mca:20,mocp:30},
+  {b:'AC Pro',s:'J-Series',       n:'J-Series 36K 230V (MHPC-J-036BSB)', m:'MHPC-J-036BSB', btu:36000, v:230,mca:25,mocp:35},
+  // AC Pro H-Series Single Zone
+  {b:'AC Pro',s:'H-Series',       n:'H-Series 9K 230V  (MHPC-H-009BSB)', m:'MHPC-H-009BSB', btu:9000,  v:230,mca:15,mocp:20},
+  {b:'AC Pro',s:'H-Series',       n:'H-Series 12K 115V (MHPC-H-012ASB)', m:'MHPC-H-012ASB', btu:12000, v:115,mca:15,mocp:20},
+  {b:'AC Pro',s:'H-Series',       n:'H-Series 12K 230V (MHPC-H-012BSB)', m:'MHPC-H-012BSB', btu:12000, v:230,mca:15,mocp:20},
+  {b:'AC Pro',s:'H-Series',       n:'H-Series 18K 230V (MHPC-H-018BSB)', m:'MHPC-H-018BSB', btu:18000, v:230,mca:15,mocp:20},
+  {b:'AC Pro',s:'H-Series',       n:'H-Series 24K 230V (MHPC-H-024BSB)', m:'MHPC-H-024BSB', btu:24000, v:230,mca:20,mocp:30},
+  {b:'AC Pro',s:'H-Series',       n:'H-Series 36K 230V (MHPC-H-036BSB)', m:'MHPC-H-036BSB', btu:36000, v:230,mca:25,mocp:40},
+  {b:'AC Pro',s:'H-Series',       n:'H-Series 48K 230V (MHPC-H-048BSB)', m:'MHPC-H-048BSB', btu:48000, v:230,mca:35,mocp:50},
+  {b:'AC Pro',s:'H-Series',       n:'H-Series 60K 230V (MHPC-H-060BSB)', m:'MHPC-H-060BSB', btu:60000, v:230,mca:40,mocp:60},
+  // AC Pro H-Series Multi Zone
+  {b:'AC Pro',s:'H-Series Multi', n:'H-Series MZ 18K (MHPC-H-018BMB)',   m:'MHPC-H-018BMB', btu:18000, v:230,mca:15,mocp:20},
+  {b:'AC Pro',s:'H-Series Multi', n:'H-Series MZ 27K (MHPC-H-027BMB)',   m:'MHPC-H-027BMB', btu:27000, v:230,mca:20,mocp:30},
+  {b:'AC Pro',s:'H-Series Multi', n:'H-Series MZ 36K (MHPC-H-036BMB)',   m:'MHPC-H-036BMB', btu:36000, v:230,mca:25,mocp:35},
+  {b:'AC Pro',s:'H-Series Multi', n:'H-Series MZ 48K (MHPC-H-048BMB)',   m:'MHPC-H-048BMB', btu:48000, v:230,mca:35,mocp:50},
+  {b:'AC Pro',s:'H-Series Multi', n:'H-Series MZ 60K (MHPC-H-060BMB)',   m:'MHPC-H-060BMB', btu:60000, v:230,mca:40,mocp:60},
+  // AC Pro D-Series Single Zone
+  {b:'AC Pro',s:'D-Series',       n:'D-Series 9K 115V  (MHPC-D-009ASB)', m:'MHPC-D-009ASB', btu:9000,  v:115,mca:15,mocp:20},
+  {b:'AC Pro',s:'D-Series',       n:'D-Series 9K 230V  (MHPC-D-009BSB)', m:'MHPC-D-009BSB', btu:9000,  v:230,mca:15,mocp:20},
+  {b:'AC Pro',s:'D-Series',       n:'D-Series 12K 115V (MHPC-D-012ASB)', m:'MHPC-D-012ASB', btu:12000, v:115,mca:15,mocp:20},
+  {b:'AC Pro',s:'D-Series',       n:'D-Series 12K 230V (MHPC-D-012BSB)', m:'MHPC-D-012BSB', btu:12000, v:230,mca:15,mocp:20},
+  {b:'AC Pro',s:'D-Series',       n:'D-Series 18K 230V (MHPC-D-018BSB)', m:'MHPC-D-018BSB', btu:18000, v:230,mca:15,mocp:20},
+  {b:'AC Pro',s:'D-Series',       n:'D-Series 24K 230V (MHPC-D-024BSB)', m:'MHPC-D-024BSB', btu:24000, v:230,mca:20,mocp:30},
+  {b:'AC Pro',s:'D-Series',       n:'D-Series 30K 230V (MHPC-D-030BSB)', m:'MHPC-D-030BSB', btu:30000, v:230,mca:20,mocp:30},
+  {b:'AC Pro',s:'D-Series',       n:'D-Series 36K 230V (MHPC-D-036BSB)', m:'MHPC-D-036BSB', btu:36000, v:230,mca:25,mocp:35},
+  // AC Pro D-Series Multi Zone
+  {b:'AC Pro',s:'D-Series Multi', n:'D-Series MZ 18K (MHPC-D-018BMC)',   m:'MHPC-D-018BMC', btu:18000, v:230,mca:15,mocp:20},
+  {b:'AC Pro',s:'D-Series Multi', n:'D-Series MZ 24K (MHPC-D-024BMC)',   m:'MHPC-D-024BMC', btu:24000, v:230,mca:20,mocp:30},
+  {b:'AC Pro',s:'D-Series Multi', n:'D-Series MZ 30K (MHPC-D-030BMC)',   m:'MHPC-D-030BMC', btu:30000, v:230,mca:20,mocp:30},
+  {b:'AC Pro',s:'D-Series Multi', n:'D-Series MZ 36K (MHPC-D-036BMC)',   m:'MHPC-D-036BMC', btu:36000, v:230,mca:25,mocp:35},
+  {b:'AC Pro',s:'D-Series Multi', n:'D-Series MZ 42K (MHPC-D-042BMC)',   m:'MHPC-D-042BMC', btu:42000, v:230,mca:30,mocp:40},
+  {b:'AC Pro',s:'D-Series Multi', n:'D-Series MZ 48K (MHPC-D-048BMC)',   m:'MHPC-D-048BMC', btu:48000, v:230,mca:35,mocp:50},
+  // Mitsubishi WX Entry Level
+  {b:'Mitsubishi',s:'WX Entry',    n:'WX 9K  (MUZ-WX09NL)',  m:'MUZ-WX09NL',  btu:9000,  v:230,mca:15,mocp:20},
+  {b:'Mitsubishi',s:'WX Entry',    n:'WX 12K (MUZ-WX12NL)',  m:'MUZ-WX12NL',  btu:12000, v:230,mca:15,mocp:20},
+  {b:'Mitsubishi',s:'WX Entry',    n:'WX 18K (MUZ-WX18NL)',  m:'MUZ-WX18NL',  btu:18000, v:230,mca:15,mocp:20},
+  {b:'Mitsubishi',s:'WX Entry',    n:'WX 24K (MUZ-WX24NL)',  m:'MUZ-WX24NL',  btu:24000, v:230,mca:20,mocp:30},
+  // Mitsubishi GX Standard
+  {b:'Mitsubishi',s:'GX Standard', n:'GX 9K  (MUZ-GX09NL)',  m:'MUZ-GX09NL',  btu:9000,  v:230,mca:15,mocp:20},
+  {b:'Mitsubishi',s:'GX Standard', n:'GX 12K (MUZ-GX12NL)',  m:'MUZ-GX12NL',  btu:12000, v:230,mca:15,mocp:20},
+  {b:'Mitsubishi',s:'GX Standard', n:'GX 15K (MUZ-GX15NL)',  m:'MUZ-GX15NL',  btu:15000, v:230,mca:15,mocp:20},
+  {b:'Mitsubishi',s:'GX Standard', n:'GX 18K (MUZ-GX18NL)',  m:'MUZ-GX18NL',  btu:18000, v:230,mca:20,mocp:25},
+  {b:'Mitsubishi',s:'GX Standard', n:'GX 24K (MUZ-GX24NL)',  m:'MUZ-GX24NL',  btu:24000, v:230,mca:20,mocp:30},
+  {b:'Mitsubishi',s:'GX Standard', n:'GX 30K (MUZ-GX30NL)',  m:'MUZ-GX30NL',  btu:30000, v:230,mca:25,mocp:35},
+  {b:'Mitsubishi',s:'GX Standard', n:'GX 36K (MUZ-GX36NL)',  m:'MUZ-GX36NL',  btu:36000, v:230,mca:30,mocp:40},
+  // Mitsubishi FX Hyper-Heat
+  {b:'Mitsubishi',s:'FX Hyper-Heat',n:'FX 6K  (MUZ-FX06NLHZ)',m:'MUZ-FX06NLHZ',btu:6000, v:230,mca:15,mocp:20},
+  {b:'Mitsubishi',s:'FX Hyper-Heat',n:'FX 9K  (MUZ-FX09NLHZ)',m:'MUZ-FX09NLHZ',btu:9000, v:230,mca:15,mocp:20},
+  {b:'Mitsubishi',s:'FX Hyper-Heat',n:'FX 12K (MUZ-FX12NLHZ)',m:'MUZ-FX12NLHZ',btu:12000,v:230,mca:15,mocp:20},
+  {b:'Mitsubishi',s:'FX Hyper-Heat',n:'FX 15K (MUZ-FX15NLHZ)',m:'MUZ-FX15NLHZ',btu:15000,v:230,mca:15,mocp:20},
+  {b:'Mitsubishi',s:'FX Hyper-Heat',n:'FX 18K (MUZ-FX18NLHZ)',m:'MUZ-FX18NLHZ',btu:18000,v:230,mca:20,mocp:25},
+  // Mitsubishi AA
+  {b:'Mitsubishi',s:'AA',          n:'AA 9K  (SUZ-AA09NL)',   m:'SUZ-AA09NL',  btu:9000,  v:230,mca:15,mocp:20},
+  {b:'Mitsubishi',s:'AA',          n:'AA 12K (SUZ-AA12NL)',   m:'SUZ-AA12NL',  btu:12000, v:230,mca:15,mocp:20},
+  {b:'Mitsubishi',s:'AA',          n:'AA 15K (SUZ-AA15NL)',   m:'SUZ-AA15NL',  btu:15000, v:230,mca:20,mocp:25},
+  {b:'Mitsubishi',s:'AA',          n:'AA 18K (SUZ-AA18NL)',   m:'SUZ-AA18NL',  btu:18000, v:230,mca:20,mocp:25},
+  // Mitsubishi MXZ-D Multi Zone
+  {b:'Mitsubishi',s:'MXZ-D Multi', n:'MXZ-D 20K 2-Zone',     m:'MXZ-D20NA',   btu:20000, v:230,mca:20,mocp:30},
+  {b:'Mitsubishi',s:'MXZ-D Multi', n:'MXZ-D 24K 3-Zone',     m:'MXZ-D24NA',   btu:24000, v:230,mca:25,mocp:35},
+  {b:'Mitsubishi',s:'MXZ-D Multi', n:'MXZ-D 30K 4-Zone',     m:'MXZ-D30NA',   btu:30000, v:230,mca:30,mocp:40},
+  {b:'Mitsubishi',s:'MXZ-D Multi', n:'MXZ-D 36K 5-Zone',     m:'MXZ-D36NA',   btu:36000, v:230,mca:35,mocp:50},
+  {b:'Mitsubishi',s:'MXZ-D Multi', n:'MXZ-D 42K 5-Zone',     m:'MXZ-D42NA',   btu:42000, v:230,mca:35,mocp:50},
+  // Daikin AURORA
+  {b:'Daikin',s:'AURORA',          n:'AURORA 12K (RXL12WM)',  m:'RXL12WM',     btu:12000, v:230,mca:15,mocp:20},
+  {b:'Daikin',s:'AURORA',          n:'AURORA 15K (RXL15WM)',  m:'RXL15WM',     btu:15000, v:230,mca:15,mocp:20},
+  {b:'Daikin',s:'AURORA',          n:'AURORA 18K (RXL18WM)',  m:'RXL18WM',     btu:18000, v:230,mca:15,mocp:20},
+  // Daikin VISTA
+  {b:'Daikin',s:'VISTA',           n:'VISTA 12K (RX12WMV)',   m:'RX12WMV',     btu:12000, v:230,mca:15,mocp:20},
+  {b:'Daikin',s:'VISTA',           n:'VISTA 15K (RX15WMV)',   m:'RX15WMV',     btu:15000, v:230,mca:15,mocp:20},
+  {b:'Daikin',s:'VISTA',           n:'VISTA 18K (RX18WMV)',   m:'RX18WMV',     btu:18000, v:230,mca:15,mocp:20},
+  // Daikin ENTRA
+  {b:'Daikin',s:'ENTRA',           n:'ENTRA 12K (RXB12BXV)',  m:'RXB12BXV',    btu:12000, v:230,mca:15,mocp:20},
+  {b:'Daikin',s:'ENTRA',           n:'ENTRA 18K (RXB18BXV)',  m:'RXB18BXV',    btu:18000, v:230,mca:15,mocp:20},
+  // Daikin OTERRA
+  {b:'Daikin',s:'OTERRA',          n:'OTERRA 12K (RXF12AX)',  m:'RXF12AX',     btu:12000, v:230,mca:15,mocp:20},
+  {b:'Daikin',s:'OTERRA',          n:'OTERRA 18K (RXF18AX)',  m:'RXF18AX',     btu:18000, v:230,mca:15,mocp:20},
+  // Daikin Multi Zone
+  {b:'Daikin',s:'MXS/MXL Multi',   n:'MXS 18K 2-Zone (2MXS18WMVJU)',m:'2MXS18WMVJU',btu:18000,v:230,mca:15,mocp:20},
+  {b:'Daikin',s:'MXS/MXL Multi',   n:'MXL AURORA 18K 2-Zone',        m:'2MXL18WMVJU',btu:18000,v:230,mca:15,mocp:20},
+];
+
+// ── LOAD STATE ────────────────────────────────────────────
+const LD = {};
+
+// ── HELPERS ───────────────────────────────────────────────
+
+function today() {
+  const d = new Date();
+  return (d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear();
+}
+
+// ── NAVIGATION ────────────────────────────────────────────
+const LABS = ['','','Panel Info','Existing Loads','Equipment','Results'];
+function ms_go(n) {
+  if (n === 5) calc();
+  for (let i = 1; i <= 5; i++) {
+    const s = $('ms-s'+i); if (s) s.style.display = i===n ? 'block' : 'none';
+  }
+  const dotN = n - 1; // steps 2-5 map to dots 1-4
+  for (let i = 1; i <= 4; i++) {
+    const d = $('ms-d'+i);
+    if (d) d.className = 'pdot' + (i<dotN?' done':i===dotN?' active':'');
+  }
+  for (let i = 1; i <= 3; i++) {
+    const l = $('ms-l'+i); if (l) l.className = 'pline' + (i<dotN?' done':'');
+  }
+  $('ms-step-title').textContent = n < 5 ? 'Mini-Split Electrical Survey' : 'Electrical Survey Results';
+  $('ms-step-sub').textContent   = n < 5 ? ('Step '+(n-1)+' of 3 — '+LABS[n]) : ('Results — '+(document.getElementById('custName')?.value||'Customer'));
+  $('ms-plab').textContent = LABS[n] || '';
+  window.scrollTo(0,0);
+}
+
+// ── TOGGLE LOADS ──────────────────────────────────────────
+function tog(id) {
+  const el = $('li-'+id);
+  el.classList.toggle('on');
+  LD[id] = el.classList.contains('on');
+  upSum(id);
+}
+
+function upSum(id) {
+  const el = $('sum-'+id);
+  if (!el) return;
+  const map = {
+    range:  () => { const a=fn('rangeA')||50; return a+'A / '+(a*240).toLocaleString()+' VA'; },
+    wh:     () => { const w=fn('whW')||4500; return w.toLocaleString()+' W'; },
+    pool:   () => { const a=fn('poolA')||60; return a+'A / '+(a*240).toLocaleString()+' VA'; },
+    ev:     () => { const a=fn('evA')||48; return a+'A \xD7 125%'; },
+    ac:     () => { const a=fn('acA')||50; return a+'A MCA / '+(a*240).toLocaleString()+' VA'; },
+    ms:     () => { const a=fn('msA')||15; return a+'A MCA / '+(a*240).toLocaleString()+' VA'; },
+    other:  () => { const v=fn('otherVA')||0; return v.toLocaleString()+' VA'; },
+    dryer:  () => { const a=parseInt(rc('dry','60')); return a+'A / '+(a*240).toLocaleString()+' VA'; }
+  };
+  if (map[id]) el.textContent = map[id]();
+}
+
+// ── PANEL / SOLAR TOGGLES ─────────────────────────────────
+document.querySelectorAll('input[name="svc"]').forEach(r =>
+  r.addEventListener('change', function() {
+    $('caf').style.display = this.value==='other' ? 'block' : 'none';
+  })
+);
+document.querySelectorAll('input[name="sol"]').forEach(r =>
+  r.addEventListener('change', function() {
+    $('saf').style.display = this.value==='yes' ? 'block' : 'none';
+  })
+);
+
+// ── SLOT / SUBPANEL TOGGLES ───────────────────────────────
+function onSlots() {
+  const n = parseInt(rc('slots', '2')) || 0;
+  $('adj-field').style.display = n >= 2 ? 'block' : 'none';
+  $('sub-field').style.display = n <= 1  ? 'block' : 'none';
+  if (n >= 2) { $('subdet-field').style.display = 'none'; }
+}
+function onSub() {
+  $('subdet-field').style.display = rc('sub','no')==='yes' ? 'block' : 'none';
+}
+
+// ── BRAND / MODEL CASCADE ─────────────────────────────────
+function onBrand() {
+  const brand = rc('brand', '');
+  const sel = $('modelSel');
+  $('f-model').style.display = brand ? 'block' : 'none';
+  sel.innerHTML = '<option value="">— Select model —</option>';
+  $('mca').value = '';
+  $('mocp').value = '';
+  $('volt-warn').style.display = 'none';
+
+  if (!brand || brand === 'Other') return;
+
+  // Group models by series
+  const filtered = MODELS.filter(m => m.b === brand);
+  const seen = [];
+  filtered.forEach(m => { if (!seen.includes(m.s)) seen.push(m.s); });
+
+  seen.forEach(s => {
+    const og = document.createElement('optgroup');
+    og.label = s;
+    filtered.filter(m => m.s === s).forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = MODELS.indexOf(m);
+      opt.textContent = m.n;
+      og.appendChild(opt);
+    });
+    sel.appendChild(og);
+  });
+}
+
+function onModelSel() {
+  const idx = parseInt($('modelSel').value);
+  if (isNaN(idx) || idx < 0 || idx >= MODELS.length) {
+    $('mca').value = '';
+    $('mocp').value = '';
+    $('volt-warn').style.display = 'none';
+    return;
+  }
+  const mdl = MODELS[idx];
+  $('mca').value  = mdl.mca;
+  $('mocp').value = mdl.mocp;
+
+  const is115 = mdl.v === 115;
+  $('volt-warn').style.display = is115 ? 'block' : 'none';
+  // Auto-recommend disconnect based on MCA, MOCP, voltage
+  $('disc').value = recDisc(mdl.mca, mdl.mocp, mdl.v);
+}
+
+// ── SERVICE AMPS ──────────────────────────────────────────
+function svcAmps() {
+  const v = rc('svc','200');
+  return v==='other' ? (parseInt(fv('custAmps'))||200) : parseInt(v);
+}
+
+// ── WIRE SIZING ───────────────────────────────────────────
+function wireSize(mca) {
+  if (mca <= 20) return '12 AWG Cu';
+  if (mca <= 30) return '10 AWG Cu';
+  if (mca <= 40) return '8 AWG Cu';
+  return '6 AWG Cu';
+}
+
+// ── DISCONNECT LABEL ──────────────────────────────────────
+const DISC_LABELS = {
+  '30f':   '30A Fusible NEMA 3R w/ 20A fuses',
+  '30f25': '30A Fusible NEMA 3R w/ 25A fuses',
+  '30f30': '30A Fusible NEMA 3R w/ 30A fuses',
+  '40f35': '40A Fusible NEMA 3R w/ 35A fuses',
+  '40f40': '40A Fusible NEMA 3R w/ 40A fuses',
+  '60f50': '60A Fusible NEMA 3R w/ 50A fuses',
+  '60f60': '60A Fusible NEMA 3R w/ 60A fuses',
+  '20nf':  '20A Non-Fusible NEMA 3R',
+  '30nf':  '30A Non-Fusible NEMA 3R',
+  '40nf':  '40A Non-Fusible NEMA 3R',
+  '115v':  'Single-pole safety switch (115V)',
+};
+function discLabel(v) { return DISC_LABELS[v] || v; }
+
+// ── DISCONNECT RECOMMENDATION ─────────────────────────────
+// Returns the correct disconnect code per NEC 440.14 (body >= 115% MCA)
+// and NEC 440.22 (fuse <= MOCP). Minimum 30A body per company standard.
+function recDisc(mca, mocp, v) {
+  if (v === 115) return '115v';
+  const minBody = Math.max(mca * 1.15, 30);
+  const body = minBody <= 30 ? 30 : minBody <= 40 ? 40 : 60;
+  const maxFuse = Math.min(mocp, body);
+  const std = [15, 20, 25, 30, 35, 40, 45, 50, 60];
+  const fuse = std.reduce((best, f) => f <= maxFuse ? f : best, 15);
+  if (body === 30 && fuse <= 20) return '30f';
+  if (body === 30 && fuse === 25) return '30f25';
+  if (body === 30) return '30f30';
+  if (body === 40 && fuse <= 35) return '40f35';
+  if (body === 40) return '40f40';
+  if (fuse <= 50) return '60f50';
+  return '60f60';
+}
+
+// ── MAIN CALCULATION ──────────────────────────────────────
+let RES = null;
+function calc() {
+  const svc  = svcAmps();
+  const sqft = parseFloat(document.getElementById('homeSqft')?.value) || 0;
+
+  // ── General loads ──
+  const gen = [
+    { desc: 'General Lighting & Receptacles ('+sqft.toLocaleString()+' sq ft \xD7 3 VA/sq ft)', va: sqft*3 },
+    { desc: 'Small Appliance Circuits \xD72 — NEC 220.52(A)', va: 3000 },
+    { desc: 'Laundry Circuit — NEC 220.52(B)', va: 1500 }
+  ];
+  if (LD.range)  gen.push({ desc:'Electric Range ('+fn('rangeA')+'A \xD7 240V)', va: fn('rangeA')*240 });
+  if (LD.dryer)  { const a=parseInt(rc('dry','60')); gen.push({ desc:'Electric Dryer ('+a+'A \xD7 240V)', va: a*240 }); }
+  if (LD.wh)     gen.push({ desc:'Electric Water Heater ('+fn('whW').toLocaleString()+' W)', va: fn('whW') });
+  if (LD.pool)   gen.push({ desc:'Pool / Spa Equipment ('+fn('poolA')+'A \xD7 240V)', va: fn('poolA')*240 });
+  if (LD.hottub) gen.push({ desc:'Hot Tub / Portable Spa (standard est.)', va: 6000 });
+  if (LD.ev)     { const a=fn('evA'); gen.push({ desc:'EV Charger ('+a+'A \xD7 240V \xD7 125% cont.)', va: Math.round(a*240*1.25) }); }
+  if (LD.other && fn('otherVA')>0) gen.push({ desc: fv('otherDesc')||'Other Load', va: fn('otherVA') });
+
+  const subGen = gen.reduce((s,x)=>s+x.va, 0);
+  const demGen = subGen<=10000 ? subGen : 10000+Math.round((subGen-10000)*0.40);
+
+  // ── HVAC loads ──
+  const hvac = [];
+  if (LD.ac) hvac.push({ desc:'Existing Central A/C (MCA '+fn('acA')+'A \xD7 240V)', va: fn('acA')*240 });
+  if (LD.ms) hvac.push({ desc:'Existing Mini-Split(s) (total MCA '+fn('msA')+'A \xD7 240V)', va: fn('msA')*240 });
+  // Resolve selected model
+  const selIdx   = parseInt($('modelSel').value);
+  const selMdl   = (!isNaN(selIdx) && selIdx >= 0 && selIdx < MODELS.length) ? MODELS[selIdx] : null;
+  const mca      = fn('mca') || 15;
+  const mocp     = fn('mocp') || 20;
+  const btu      = selMdl ? selMdl.btu : 18000;
+  const mdlV     = selMdl ? selMdl.v : 230;
+  const mdlBrand = selMdl ? (selMdl.b + ' ' + selMdl.s) : (rc('brand', '') || 'Proposed Brand');
+  const mdlNum   = selMdl ? selMdl.m : '—';
+  const btuL     = (btu / 1000) + 'K BTU';
+  const circV    = mdlV === 115 ? 120 : 240;
+  hvac.push({ desc:'NEW Mini-Split — '+btuL+' (MCA '+mca+'A \xD7 '+circV+'V)', va: mca*circV, isNew:true });
+  const subHVAC = hvac.reduce((s,x)=>s+x.va,0);
+
+  // ── Totals ──
+  const grand = demGen+subHVAC;
+  const grandA = grand/240;
+  const avail  = svc*240 - grand;
+  const availA = avail/240;
+
+  // ── Solar ──
+  const hasSol  = rc('sol','no')==='yes';
+  const solA    = hasSol ? fn('solAmps') : 0;
+  const solTot  = svc+solA;
+  const solLim  = svc*1.20;
+  const solOK   = !hasSol || solTot<=solLim;
+
+  // ── Slots ──
+  const slotsN = parseInt(rc('slots','2')) || 0;
+  const adjOK  = rc('adj','no') === 'yes';
+  const hasSub = rc('sub','no') === 'yes';
+  // 115V unit only needs 1 single-pole slot; 240V needs two confirmed adjacent slots
+  const slotOK = circV === 120 ? slotsN >= 1 : (slotsN >= 2 && adjOK);
+
+  // ── Wire / disc ──
+  const ws   = wireSize(mca);
+  const disc = fv('disc');
+  const run  = fv('runFt');
+  const whip = fv('whipFt');
+
+  // ── Verdict ──
+  let vclass, vlbl, vreason;
+  if (availA >= mca+5) {
+    vclass='vgo'; vlbl='&#9989;&nbsp; GO';
+    vreason='Panel has '+availA.toFixed(1)+'A available — sufficient for the new '+mca+'A mini-split circuit with margin.';
+  } else if (availA >= mca) {
+    vclass='vwarn'; vlbl='&#9888;&#65039;&nbsp; CAUTION';
+    vreason='Panel has '+availA.toFixed(1)+'A available — tight. New circuit needs '+mca+'A. Verify all nameplate loads before quoting.';
+  } else {
+    vclass='vno'; vlbl='&#128683;&nbsp; NO-GO';
+    vreason='Only '+availA.toFixed(1)+'A available — insufficient for the '+mca+'A mini-split circuit. Panel upgrade or load management required before proceeding.';
+  }
+
+  // ── Issues ──
+  const issues = [];
+  if (availA >= mca) issues.push({t:'ok', m:'Available capacity: '+availA.toFixed(1)+'A — new circuit ('+mca+'A MCA) fits within service.'});
+  else issues.push({t:'bad', m:'Insufficient capacity: '+availA.toFixed(1)+'A available vs '+mca+'A required. Discuss panel upgrade with customer.'});
+  if (slotOK) {
+    const slotDesc = circV===120 ? slotsN+' open slot(s) -- single-pole circuit fits.' : 'Two adjacent open slots confirmed -- double-pole circuit fits.';
+    issues.push({t:'ok', m:'Panel slot check: '+slotDesc});
+  } else if (slotsN >= 2 && !adjOK) {
+    issues.push({t:'warn', m:''+slotsN+' open slot(s) found but none confirmed adjacent. A 240V double-pole breaker requires two slots directly above/below each other.'});
+  } else if (slotsN === 1 && circV !== 120) {
+    issues.push({t:'warn', m:'Only 1 open slot found. A 240V circuit needs two adjacent slots. Check whether a tandem (duplex) breaker can free up space.'});
+  } else if (slotsN === 0 && hasSub) {
+    issues.push({t:'warn', m:'Main panel is full -- subpanel noted. Verify subpanel has open adjacent slots and sufficient capacity for this circuit.'});
+  } else {
+    issues.push({t:'bad', m:'No open slots and no subpanel identified. A panel upgrade or new subpanel is required before installation can proceed.'});
+  }
+  if (hasSol) {
+    if (solOK) issues.push({t:'ok', m:'Solar backfeed ('+solA+'A + '+svc+'A service = '+solTot+'A) within NEC 705.12 busbar limit ('+solLim+'A).'});
+    else issues.push({t:'bad', m:'Solar backfeed may exceed NEC 705.12 busbar limit -- engineering review required before permit.'});
+  }
+  // Voltage drop check
+  const vd = (2*12.9*mca*parseFloat(run||30))/(mca<=20?6530:mca<=30?10380:16510);
+  const vdp = (vd/(circV)*100).toFixed(1);
+  if (parseFloat(vdp)<3) issues.push({t:'ok', m:'Voltage drop: ~'+vdp+'% at '+run+' ft run -- within NEC 3% guideline.'});
+  else issues.push({t:'warn', m:'Voltage drop: ~'+vdp+'% at '+run+' ft run. Consider upsizing conduit/wire one size.'});
+
+  RES = { svc, sqft, gen, subGen, demGen, hvac, subHVAC, grand, grandA, avail, availA,
+          mca, mocp, btu, btuL, mdlV, circV, mdlBrand, mdlNum, ws, disc, run, whip,
+          hasSol, solA, solOK, slotsN, adjOK, hasSub, slotOK,
+          vclass, vlbl, vreason, issues };
+
+  render();
+}
+
+// ── RENDER RESULTS ────────────────────────────────────────
+function render() {
+  const r = RES;
+  // Verdict
+  $('vbox').className = 'vbox '+r.vclass;
+  $('vlbl').innerHTML = r.vlbl;
+  $('vreason').textContent = r.vreason;
+
+  // Chips
+  const capOK = r.availA >= r.mca+5, capWarn = r.availA >= r.mca;
+  $('chip-cap').className  = 'chip '+(capOK?'ok':capWarn?'warn':'bad');
+  $('cv-cap').textContent  = r.availA.toFixed(1)+'A';
+  let slotCls, slotTxt;
+  if (r.slotOK) {
+    slotCls = 'ok';
+    slotTxt = r.circV === 120 ? r.slotsN+' open' : 'Adjacent OK';
+  } else if (r.slotsN === 0 && !r.hasSub) {
+    slotCls = 'bad'; slotTxt = 'Panel full';
+  } else if (r.slotsN === 0 && r.hasSub) {
+    slotCls = 'warn'; slotTxt = 'Subpanel?';
+  } else {
+    slotCls = 'warn'; slotTxt = r.slotsN+' open / adj?';
+  }
+  $('chip-slot').className = 'chip '+slotCls;
+  $('cv-slot').textContent = slotTxt;
+  if (!r.hasSol) {
+    $('chip-sol').className='chip'; $('cv-sol').textContent='N/A';
+  } else {
+    $('chip-sol').className='chip '+(r.solOK?'ok':'bad');
+    $('cv-sol').textContent = r.solOK ? 'OK' : 'Review';
+  }
+
+  // Circuit summary
+  const poleStr = r.mdlV === 115 ? '1-pole' : '2-pole';
+  const wireStr = r.mdlV === 115 ? '2-wire, 120V' : '3-wire, 240V';
+  $('csum').innerHTML =
+    '<b>Breaker:</b> '+r.mocp+'A '+poleStr+' HACR &nbsp;&bull;&nbsp; '+
+    '<b>Wire:</b> '+r.ws+', '+wireStr+' &nbsp;&bull;&nbsp; '+
+    '<b>Conduit:</b> 3/4-in. EMT ('+r.run+' ft) &nbsp;&bull;&nbsp; '+
+    '<b>Disconnect:</b> '+discLabel(r.disc)+' &nbsp;&bull;&nbsp; '+
+    '<b>Whip:</b> LFMC '+r.whip+' ft';
+
+  // Table
+  let t='<table class="ctab"><thead><tr><th>Load Description</th><th style="text-align:right;width:110px">VA</th></tr></thead><tbody>';
+  t+='<tr class="secrow"><td colspan="2">NEC 220.82(B) General Loads</td></tr>';
+  r.gen.forEach(x => { t+='<tr><td>'+x.desc+'</td><td style="text-align:right">'+x.va.toLocaleString()+'</td></tr>'; });
+  t+='<tr class="subrow"><td>Subtotal General Loads</td><td style="text-align:right">'+r.subGen.toLocaleString()+'</td></tr>';
+  t+='<tr class="subrow"><td>After Demand Factor (first 10,000 VA @ 100% + remainder @ 40%)</td><td style="text-align:right">'+Math.round(r.demGen).toLocaleString()+'</td></tr>';
+  t+='<tr class="secrow"><td colspan="2">NEC 220.82(C) HVAC Loads (100%)</td></tr>';
+  r.hvac.forEach(x => { t+='<tr'+(x.isNew?' style="font-weight:700;color:#1A6B1A"':'')+'>'+
+    '<td>'+x.desc+'</td><td style="text-align:right">'+x.va.toLocaleString()+'</td></tr>'; });
+  t+='<tr class="subrow"><td>Total HVAC Load</td><td style="text-align:right">'+r.subHVAC.toLocaleString()+'</td></tr>';
+  t+='<tr class="totrow"><td>Grand Total Demand</td><td style="text-align:right">'+Math.round(r.grand).toLocaleString()+' VA / '+r.grandA.toFixed(1)+'A</td></tr>';
+  t+='<tr class="totrow"><td>Service Capacity ('+r.svc+'A &times; 240V)</td><td style="text-align:right">'+(r.svc*240).toLocaleString()+' VA / '+r.svc+'A</td></tr>';
+  const ac = r.availA>=0?'#1A6B1A':'#c62828';
+  t+='<tr class="totrow" style="color:'+ac+'"><td>Available Capacity</td><td style="text-align:right">'+Math.round(r.avail).toLocaleString()+' VA / '+r.availA.toFixed(1)+'A</td></tr>';
+  t+='</tbody></table>';
+  $('ctab').innerHTML = t;
+
+  // Issues
+  $('ilist').innerHTML = r.issues.map(i=>'<li class="'+i.t+'"><span class="icon">'+(i.t==='ok'?'&#10003;':i.t==='warn'?'&#9888;':'&#10007;')+'</span>'+i.m+'</li>').join('');
+
+  buildPDoc();
+  buildCDoc();
+}
+
+// ── PERMIT PRINT DOC ──────────────────────────────────────
+function buildPDoc() {
+  const r   = RES;
+  const nm  = document.getElementById('custName')?.value||'--';
+  const adr = document.getElementById('custAddress')?.value||'--';
+  const ahj = document.getElementById('ahj')?.value||'--';
+  const pm  = fv('panelModel')||'--';
+  const mdlVstr = r.mdlV === 115 ? '115V/1ph' : '208-230V/1ph';
+  const mdlPole = r.mdlV === 115 ? '1-pole'   : '2-pole';
+  let h = '';
+  h+='<h1>NEC Article 220.82 Optional Method Load Calculation</h1>';
+  h+='<div class="pinfo">';
+  h+='<p><b>Owner:</b> '+nm+'</p>';
+  h+='<p><b>Site Address:</b> '+adr+'</p>';
+  h+='<p><b>AHJ / Permit Jurisdiction:</b> '+ahj+'</p>';
+  h+='<p><b>Panel:</b> '+pm+' &nbsp;|&nbsp; <b>Service:</b> '+r.svc+'A, 240V/1ph/60Hz</p>';
+  h+='<p><b>Calculation Date:</b> '+today()+'</p>';
+  h+='</div>';
+
+  h+='<h2>New Equipment to Be Installed</h2>';
+  h+='<table class="ptab"><thead><tr><th>Equipment</th><th>Voltage</th><th>MCA</th><th>MOCP</th><th>Circuit</th></tr></thead><tbody>';
+  h+='<tr class="pnew"><td>'+r.mdlBrand+' Outdoor Unit ('+r.btuL+') -- Model: '+r.mdlNum+'</td><td>'+mdlVstr+'</td><td>'+r.mca+'A</td><td>'+r.mocp+'A</td><td>'+r.mocp+'A '+mdlPole+'</td></tr>';
+  h+='<tr><td>'+r.mdlBrand+' Indoor Air Handler</td><td>Via comm cable from ODU</td><td colspan="3">-- No separate circuit required --</td></tr>';
+  h+='</tbody></table>';
+
+  h+='<h2>NEC 220.82(B) General Loads</h2>';
+  h+='<table class="ptab"><thead><tr><th>#</th><th>Description</th><th style="text-align:right">VA</th></tr></thead><tbody>';
+  r.gen.forEach((x,i)=>{h+='<tr><td>'+(i+1)+'</td><td>'+x.desc+'</td><td style="text-align:right">'+x.va.toLocaleString()+'</td></tr>';});
+  h+='<tr class="psub"><td colspan="2">Subtotal General Loads</td><td style="text-align:right">'+r.subGen.toLocaleString()+' VA</td></tr>';
+  h+='<tr class="psub"><td colspan="2">Demand Factor: First 10,000 VA @ 100% -- Remainder @ 40%</td><td style="text-align:right">'+Math.round(r.demGen).toLocaleString()+' VA</td></tr>';
+  h+='</tbody></table>';
+
+  h+='<h2>NEC 220.82(C) HVAC Loads -- 100% of nameplate</h2>';
+  h+='<table class="ptab"><thead><tr><th>Equipment</th><th style="text-align:right">VA</th></tr></thead><tbody>';
+  r.hvac.forEach(x=>{h+='<tr'+(x.isNew?' class="pnew"':'')+'>'+
+    '<td>'+x.desc+'</td><td style="text-align:right">'+x.va.toLocaleString()+'</td></tr>';});
+  h+='<tr class="psub"><td>Total HVAC Load</td><td style="text-align:right">'+r.subHVAC.toLocaleString()+' VA</td></tr>';
+  h+='</tbody></table>';
+
+  h+='<h2>Service Capacity Summary</h2>';
+  h+='<table class="ptab"><tbody>';
+  h+='<tr><td>Total Demand (General + HVAC)</td><td style="text-align:right">'+Math.round(r.grand).toLocaleString()+' VA &nbsp;/&nbsp; '+r.grandA.toFixed(1)+'A</td></tr>';
+  h+='<tr><td>Service Capacity ('+r.svc+'A &times; 240V)</td><td style="text-align:right">'+(r.svc*240).toLocaleString()+' VA &nbsp;/&nbsp; '+r.svc+'A</td></tr>';
+  h+='<tr class="ptot"><td>Available Capacity</td><td style="text-align:right">'+Math.round(r.avail).toLocaleString()+' VA &nbsp;/&nbsp; '+r.availA.toFixed(1)+'A</td></tr>';
+  h+='</tbody></table>';
+
+  h+='<h2>Conclusion</h2>';
+  h+='<p class="pnote">The existing '+r.svc+'A service has <b>'+r.availA.toFixed(1)+'A</b> of remaining capacity after all calculated demand loads. The proposed '+r.btuL+' mini-split (MCA '+r.mca+'A, MOCP '+r.mocp+'A) ';
+  h += r.availA>=r.mca ? 'can be accommodated on the existing service without an upgrade.' : '<b>EXCEEDS available capacity.</b> A service upgrade or load management study is required before installation.';
+  h+='</p>';
+
+  h+='<p class="pnote" style="margin-top:8pt"><b>Circuit:</b> '+r.mocp+'A '+mdlPole+' HACR breaker, '+r.ws+', 3/4-in. EMT ('+r.run+' ft), '+discLabel(r.disc)+', LFMC whip '+r.whip+' ft -- NEC 440.14 compliant.</p>';
+  if (r.hasSol) h+='<p class="pnote"><b>Solar Note:</b> Existing PV backfeed '+r.solA+'A; load-side connection per NEC 705.12 -- '+(r.solOK?'compliant':'REVIEW REQUIRED')+'.</p>';
+  if (fv('notes')) h+='<p class="pnote"><b>Site Notes:</b> '+fv('notes')+'</p>';
+
+  h+='<p class="pnote" style="margin-top:8pt"><b>Applicable Codes:</b> NEC 220.82 (Optional Method); NEC 440.4, 440.14; NEC 310.15; NEC 358 (EMT); '+
+     (r.hasSol?'NEC 705.12 (Solar PV); ':'')+' 2023 NEC.</p>';
+  h+='<p class="pnote"><i>Load values calculated per NEC Optional Method. Verify equipment nameplates on-site before final permit submission.</i></p>';
+
+  h+='<div class="psig"><b>Prepared by:</b> ______________________________ &nbsp;&nbsp; <b>Date:</b> ____________ &nbsp;&nbsp; <b>License #:</b> ____________</div>';
+  $('pdoc').innerHTML = h;
+}
+
+// ── CUSTOMER PRINT DOC ────────────────────────────────────
+function buildCDoc() {
+  const r = RES;
+  const nm  = document.getElementById('custName')?.value || 'Homeowner';
+  const adr = document.getElementById('custAddress')?.value || '--';
+  const zone= fv('zone') || document.getElementById('ms_zone')?.value || 'the proposed space';
+
+  const vcls = r.availA>=r.mca+5?'cvgo':r.availA>=r.mca?'cvwarn':'cvno';
+  const vtxt = r.availA>=r.mca+5
+    ? 'GO -- This installation is feasible on the existing service'
+    : r.availA>=r.mca
+    ? 'CAUTION -- Marginal capacity; verify loads before committing'
+    : 'NO-GO -- Electrical panel upgrade required';
+
+  const cpoleStr = r.mdlV === 115 ? '1-pole' : '2-pole';
+
+  let h='';
+  h+='<div class="cohdr"><h1>'+CO.name+'</h1>';
+  h+='<p>Mini-Split Site Survey &nbsp;--&nbsp; '+today()+'</p></div>';
+
+  h+='<div class="'+vcls+'"><b style="font-size:11.5pt">'+vtxt+'</b><br><span style="font-size:9.5pt">'+r.vreason+'</span></div>';
+
+  h+='<table class="ctab2">';
+  h+='<tr><td>Customer</td><td>'+nm+'</td></tr>';
+  h+='<tr><td>Address</td><td>'+adr+'</td></tr>';
+  h+='<tr><td>Zone / Space</td><td>'+zone+'</td></tr>';
+  h+='<tr><td>Proposed Equipment</td><td>'+r.mdlBrand+' '+r.btuL+' Mini-Split'+(r.mdlNum!=='--'?'<br><small style="color:#666">Model: '+r.mdlNum+'</small>':'')+'</td></tr>';
+  h+='<tr><td>New Circuit Required</td><td>'+r.mocp+'A '+cpoleStr+', '+r.ws+', 3/4-in. EMT, '+discLabel(r.disc)+'</td></tr>';
+  h+='<tr><td>Panel Available Capacity</td><td>'+r.availA.toFixed(1)+'A after all calculated loads</td></tr>';
+  h+='<tr><td>Panel Slots</td><td>'+r.slotsN+(r.slotsN>=3?'+':'')+' open 2-pole slot(s)</td></tr>';
+  if (r.hasSol) h+='<tr><td>Solar / NEC 705.12</td><td>'+(r.solOK?'Compliant':'Engineering review required')+'</td></tr>';
+  h+='</table>';
+
+  if (fv('notes')) h+='<p style="margin-top:8pt;font-size:9.5pt"><b>Site Notes:</b> '+fv('notes')+'</p>';
+
+  h+='<p style="margin-top:10pt;font-size:10pt"><b>Next Steps:</b></p>';
+  h+='<ul style="margin:4pt 0 0 16pt;font-size:9.5pt;line-height:1.8">';
+  if (r.availA>=r.mca) {
+    h+='<li>Submit permit application with load calculation and circuit diagram to '+(document.getElementById('ahj')?.value||'the AHJ')+'</li>';
+    h+='<li>Order equipment and schedule installation upon permit approval</li>';
+  } else {
+    h+='<li>Evaluate panel upgrade options or load-shed strategies</li>';
+    h+='<li>Re-run load calculation after electrical upgrade</li>';
+  }
+  h+='<li>Pull all required permits before work begins</li>';
+  h+='</ul>';
+
+  h+='<p class="cdisclaim">This summary is based on field observations and NEC 220.82 Optional Method calculations. Final determination is subject to on-site nameplate verification, AHJ review, and permit approval. This is not a guarantee of permit issuance or installation feasibility.</p>';
+  $('cdoc').innerHTML = h;
+}
+
+// ── PRINT ─────────────────────────────────────────────────
+function pv(which) {
+  document.body.className = which==='p' ? 'pp' : 'pc';
+  window.print();
+  setTimeout(()=>{ document.body.className=''; }, 1200);
+}
+
+// ── NEW SURVEY ────────────────────────────────────────────
+function ms_nr() {
+  if (confirm('Start a new survey? All current data will be cleared.')) location.reload();
+}
+
+
+
+// ── MANUAL J ENGINE ───────────────────────────────────────────
+// Phoenix/West Valley AZ — ACCA Manual J 8th Ed. (ported from Python)
+
+const MJ_SUMMER_DB=108,MJ_SUMMER_WB=76,MJ_INDOOR_DB=75;
+const MJ_WINTER_DB=34,MJ_INDOOR_WINTER=70;
+const MJ_SUMMER_DT=MJ_SUMMER_DB-MJ_INDOOR_DB;    // 33F
+const MJ_WINTER_DT=MJ_INDOOR_WINTER-MJ_WINTER_DB; // 36F
+const MJ_SOLAR={N:20,NE:50,E:95,SE:110,S:80,SW:140,W:150,NW:65};
+const MJ_SHGC={single:0.86,double:0.76,double_lowe:0.40,triple_lowe:0.27};
+const MJ_WALL_U={'2x4_r13':1/14.4,'2x4_r15':1/16.4,'2x6_r19':1/20.0,'2x6_r21':1/22.0,'block_r0':1/4.0,'block_r4':1/8.0,'icf':1/22.0};
+const MJ_CEIL_U={r19:1/21.0,r30:1/32.0,r38:1/40.0,r49:1/51.0,r60:1/62.0};
+const MJ_WIN_U={single:1.10,double:0.48,double_lowe:0.30,triple_lowe:0.22};
+const MJ_SLAB_F=0.64;
+const MJ_ACH={tight:0.25,average:0.50,leaky:1.00};
+const MJ_OD_GRAINS=82,MJ_IN_GRAINS=65;
+
+class MJRoom{
+  constructor(name,area,ch){this.name=name;this.floor_area=area;this.ch=ch||8.0;this.volume=area*this.ch;this.walls=[];this.windows=[];this.ceiling_type='r30';this.occupants=0;}
+  addWall(area,type,ext){this.walls.push({area,type,exterior:ext});}
+  addWindow(area,orient,glass){this.windows.push({area,orient,glass});}
+  coolingLoad(){
+    let L=0;
+    for(const w of this.walls) if(w.exterior) L+=(MJ_WALL_U[w.type]||MJ_WALL_U['2x4_r13'])*w.area*MJ_SUMMER_DT;
+    L+=(MJ_CEIL_U[this.ceiling_type]||MJ_CEIL_U.r30)*this.floor_area*50;
+    for(const w of this.windows){L+=(MJ_WIN_U[w.glass]||MJ_WIN_U.double_lowe)*w.area*MJ_SUMMER_DT;L+=w.area*(MJ_SOLAR[w.orient]||80)*(MJ_SHGC[w.glass]||MJ_SHGC.double_lowe);}
+    L+=this.occupants*250+this.floor_area*3.0;
+    return L;
+  }
+  heatingLoad(){
+    let L=0;
+    for(const w of this.walls) if(w.exterior) L+=(MJ_WALL_U[w.type]||MJ_WALL_U['2x4_r13'])*w.area*MJ_WINTER_DT;
+    L+=(MJ_CEIL_U[this.ceiling_type]||MJ_CEIL_U.r30)*this.floor_area*MJ_WINTER_DT;
+    for(const w of this.windows) L+=(MJ_WIN_U[w.glass]||MJ_WIN_U.double_lowe)*w.area*MJ_WINTER_DT;
+    return L;
+  }
+}
+class MJHouse{
+  constructor(foundation,construction){this.foundation=foundation||'slab';this.construction=construction||'average';this.rooms=[];this.slabPerimeter=0;}
+  addRoom(r){this.rooms.push(r);}
+  totalArea(){return this.rooms.reduce((s,r)=>s+r.floor_area,0);}
+  totalVolume(){return this.rooms.reduce((s,r)=>s+r.volume,0);}
+  infiltrationCooling(){const cfm=(this.totalVolume()*(MJ_ACH[this.construction]||0.5))/60;return[cfm*1.1*MJ_SUMMER_DT,cfm*0.68*(MJ_OD_GRAINS-MJ_IN_GRAINS)];}
+  infiltrationHeating(){const cfm=(this.totalVolume()*(MJ_ACH[this.construction]||0.5))/60;return cfm*1.1*MJ_WINTER_DT;}
+  slabHeating(){return(this.foundation==='slab'&&this.slabPerimeter>0)?MJ_SLAB_F*this.slabPerimeter*MJ_WINTER_DT:0;}
+  totalCooling(){const rs=this.rooms.reduce((s,r)=>s+r.coolingLoad(),0);const[is,il]=this.infiltrationCooling();return[rs+is,il*1.10];}
+  totalHeating(){return this.rooms.reduce((s,r)=>s+r.heatingLoad(),0)+this.infiltrationHeating()+this.slabHeating();}
+  recommendedTonnage(){const[s,l]=this.totalCooling(),total=s+l,raw=total/12000;for(const sz of[1.5,2,2.5,3,3.5,4,4.5,5,6,7.5,10])if(raw<=sz*1.15)return[sz,raw];return[Math.round(raw*2)/2,raw];}
+}
+
+function mjRunQuickEstimate(d){
+  let sqft=parseFloat(d.sqft)||1800,year=parseInt(d.year_built)||2000,construction=d.construction||'average';
+  const insMap={poor:['block_r0','r19'],average:['2x4_r13','r30'],good:['2x6_r19','r38'],excellent:['2x6_r21','r49']};
+  let[wall_type,ceiling_type]=insMap[d.insulation||'average']||insMap.average;
+  if(year<1980&&construction==='average')construction='leaky';
+  const winPct={minimal:0.08,average:0.12,heavy:0.18};
+  const totalWin=sqft*(winPct[d.window_exposure||'average']||0.12);
+  const orientDist={n_s:{N:0.25,S:0.35,E:0.20,W:0.20},e_w:{N:0.15,S:0.15,E:0.35,W:0.35},mixed:{N:0.20,S:0.25,E:0.25,W:0.30},worst:{N:0.10,S:0.20,E:0.20,W:0.50}};
+  const dist=orientDist[d.orientation||'mixed']||orientDist.mixed;
+  const glass=year<1985?'single':(year<2000?'double':'double_lowe');
+  const stories=parseInt(d.stories)||1,ch=parseFloat(d.ceiling_height)||9.0,foundation=d.foundation||'slab';
+  const house=new MJHouse(foundation,construction);
+  if(foundation==='slab')house.slabPerimeter=Math.round(Math.sqrt(sqft/stories)*4);
+  const perimeter=Math.sqrt(sqft/stories)*4,netWall=Math.max(0,perimeter*ch*stories-totalWin);
+  const mkRoom=(name,pct,wPct,wins,occ)=>{const r=new MJRoom(name,sqft*pct,ch);r.ceiling_type=ceiling_type;r.occupants=occ;r.addWall(netWall*wPct,wall_type,true);wins.forEach(([dir,wpct])=>r.addWindow(totalWin*wpct,dir,glass));return r;};
+  house.addRoom(mkRoom('Living/Dining/Kitchen',0.40,0.40,[['W',dist.W],['S',dist.S]],2));
+  house.addRoom(mkRoom('Master Bedroom',0.18,0.20,[['E',dist.E]],2));
+  house.addRoom(mkRoom('Bedrooms 2-3',0.22,0.25,[['N',dist.N]],2));
+  house.addRoom(mkRoom('Bathrooms/Hallways',0.20,0.15,[],0));
+  const[totS,totL]=house.totalCooling(),totC=totS+totL,totH=house.totalHeating();
+  const[recT,rawT]=house.recommendedTonnage(),shr=totC>0?totS/totC:0;
+  let confidence='Medium',confidence_note='Suitable for budgeting and initial conversations. Full room-by-room calculation recommended before ordering equipment.';
+  if(d.window_exposure==='heavy'||d.orientation==='worst'){confidence='Lower — complex exposure';confidence_note='High solar exposure increases uncertainty. Full Manual J strongly recommended before specifying equipment.';}
+  return{mode:'quick',sqft,year_built:year,wall_type,ceiling_type,glass_type:glass,construction,foundation,total_cooling:Math.round(totC),total_heating:Math.round(totH),total_sensible:Math.round(totS),total_latent:Math.round(totL),shr:Math.round(shr*1000)/1000,raw_tons:Math.round(rawT*100)/100,rec_tons:recT,range_low:Math.max(1.5,Math.round(rawT*0.85*2)/2),range_high:Math.round(rawT*1.15*2)/2,btusqft:Math.round(totC/sqft*10)/10,confidence,confidence_note,assumed_wall:wall_type,assumed_ceiling:ceiling_type,assumed_glass:glass,window_sqft:Math.round(totalWin)};
+}
+
+function mjRunFullEstimate(d){
+  const house=new MJHouse(d.foundation||'slab',d.construction||'average');
+  house.slabPerimeter=parseFloat(d.slab_perimeter)||0;
+  let idx=0;
+  while(true){
+    const pre='room_'+idx;if(!d[pre+'_name'])break;
+    const len=parseFloat(d[pre+'_length'])||0,wid=parseFloat(d[pre+'_width'])||0,area=len*wid;
+    if(area<=0){idx++;continue;}
+    const room=new MJRoom(d[pre+'_name'],area,parseFloat(d[pre+'_ceiling_height'])||8.0);
+    room.ceiling_type=d[pre+'_ceiling_type']||'r30';room.occupants=parseInt(d[pre+'_occupants'])||0;
+    const wallType=d[pre+'_wall_type']||'2x4_r13';
+    for(const dir of ['N','S','E','W']){
+      const wl=parseFloat(d[pre+'_wall_'+dir+'_length'])||0;
+      if(wl>0){
+        let winArea=0,wi=0;
+        while(d[pre+'_win_'+dir+'_'+wi+'_width']){winArea+=(parseFloat(d[pre+'_win_'+dir+'_'+wi+'_width'])||0)*(parseFloat(d[pre+'_win_'+dir+'_'+wi+'_height'])||4);wi++;}
+        room.addWall(Math.max(0,wl*room.ch-winArea),wallType,true);
+        wi=0;
+        while(d[pre+'_win_'+dir+'_'+wi+'_width']){const ww=parseFloat(d[pre+'_win_'+dir+'_'+wi+'_width'])||0;if(ww>0)room.addWindow(ww*(parseFloat(d[pre+'_win_'+dir+'_'+wi+'_height'])||4),dir,d[pre+'_win_'+dir+'_'+wi+'_glass']||'double_lowe');wi++;}
+      }
+    }
+    house.addRoom(room);idx++;
+  }
+  if(!house.rooms.length)return{error:'No rooms entered. Please add at least one room.'};
+  const[totS,totL]=house.totalCooling(),totC=totS+totL,totH=house.totalHeating();
+  const[recT,rawT]=house.recommendedTonnage(),shr=totC>0?totS/totC:0;
+  const[infS,infL]=house.infiltrationCooling(),infH=house.infiltrationHeating(),slab=house.slabHeating(),totA=house.totalArea();
+  const rooms=house.rooms.map(r=>({name:r.name,area:Math.round(r.floor_area),cooling:Math.round(r.coolingLoad()),heating:Math.round(r.heatingLoad()),cooling_pct:totC>0?Math.round(r.coolingLoad()/totC*100):0}));
+  return{mode:'full',name:d.job_name||'Manual J Calculation',total_area:Math.round(totA),foundation:house.foundation,construction:house.construction,rooms,infil_sensible:Math.round(infS),infil_latent:Math.round(infL),infil_heating:Math.round(infH),slab_heating:Math.round(slab),total_sensible:Math.round(totS),total_latent:Math.round(totL),total_cooling:Math.round(totC),total_heating:Math.round(totH),shr:Math.round(shr*1000)/1000,btusqft:totA>0?Math.round(totC/totA*10)/10:0,raw_tons:Math.round(rawT*100)/100,rec_tons:recT,room_count:house.rooms.length};
+}
+
+// ── MANUAL J UI ───────────────────────────────────────────────
+const MJ_WALL_LABELS={'2x4_r13':'2x4 R-13','2x4_r15':'2x4 R-15','2x6_r19':'2x6 R-19','2x6_r21':'2x6 R-21','block_r0':'Block uninsulated','block_r4':'Block R-4','icf':'ICF'};
+const MJ_GLASS_LABELS={single:'Single pane',double:'Double pane',double_lowe:'Double low-e',triple_lowe:'Triple low-e'};
+const MJ_CEIL_LABELS={r19:'R-19',r30:'R-30',r38:'R-38',r49:'R-49',r60:'R-60'};
+const MJ_ROOM_PRESETS=['Living Room','Kitchen','Master Bedroom','Bedroom 2','Bedroom 3','Bedroom 4','Master Bath','Hall Bath','Hallway / Entry','Dining Room','Laundry','Office','Family Room','Garage (conditioned)','Custom'];
+const MJ_DIRS=['N','S','E','W'];
+const MJ_DIR_LABELS={N:'North wall',S:'South wall',E:'East wall',W:'West wall'};
+let mjMode=null,mjRoomCount=0;
+const mjWinCounts={};
+
+function mjSelectMode(mode){
+  mjMode=mode;
+  document.getElementById('modeQuickCard').classList.toggle('selected',mode==='quick');
+  document.getElementById('modeFullCard').classList.toggle('selected',mode==='full');
+  document.getElementById('panelQuick').classList.toggle('active',mode==='quick');
+  document.getElementById('panelFull').classList.toggle('active',mode==='full');
+  window.scrollTo(0,0);
+  if(mode==='full'&&mjRoomCount===0)mjAddRoom();
+}
+function mjSetToggle(hiddenId,value,btn){
+  document.getElementById(hiddenId).value=value;
+  const group=btn.closest('.toggle-group')||btn.parentElement;
+  group.querySelectorAll('.toggle-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+function mjAddRoom(){
+  const idx=mjRoomCount++;
+  const container=document.getElementById('mjRoomsContainer');
+  const dW=document.getElementById('mj_f_default_wall')?.value||'2x4_r13';
+  const dC=document.getElementById('mj_f_default_ceiling')?.value||'r30';
+  const dG=document.getElementById('mj_f_default_glass')?.value||'double_lowe';
+  const div=document.createElement('div');
+  div.className='mj-room-card';div.id='mj_room_card_'+idx;
+  div.innerHTML=`<div class="mj-room-header"><div class="mj-room-title">Room ${idx+1}</div><button class="mj-room-remove" onclick="mjRemoveRoom(${idx})">&#x2715; Remove</button></div>
+    <div class="field-row col2"><div class="mj-field"><label>Room name</label><select id="mj_room_${idx}_name_sel" onchange="mjUpdateRoomName(${idx})">${MJ_ROOM_PRESETS.map(p=>`<option value="${p}">${p}</option>`).join('')}</select></div><div class="mj-field" id="mj_room_${idx}_custom_field" style="display:none;"><label>Custom name</label><input type="text" id="mj_room_${idx}_name" placeholder="Room name"></div></div>
+    <input type="hidden" id="mj_room_${idx}_name_hidden" value="${MJ_ROOM_PRESETS[0]}">
+    <div class="field-row col3"><div class="mj-field"><label>Length <span class="mj-hint">ft</span></label><input type="number" id="mj_room_${idx}_length" placeholder="e.g. 16" min="1"></div><div class="mj-field"><label>Width <span class="mj-hint">ft</span></label><input type="number" id="mj_room_${idx}_width" placeholder="e.g. 14" min="1"></div><div class="mj-field"><label>Ceiling ht <span class="mj-hint">ft</span></label><input type="number" id="mj_room_${idx}_ceiling_height" value="8" min="6" max="20"></div></div>
+    <div class="field-row col3"><div class="mj-field"><label>Wall assembly</label><select id="mj_room_${idx}_wall_type">${Object.entries(MJ_WALL_LABELS).map(([v,l])=>`<option value="${v}"${v===dW?' selected':''}>${l}</option>`).join('')}</select></div><div class="mj-field"><label>Ceiling insulation</label><select id="mj_room_${idx}_ceiling_type">${Object.entries(MJ_CEIL_LABELS).map(([v,l])=>`<option value="${v}"${v===dC?' selected':''}>${l}</option>`).join('')}</select></div><div class="mj-field"><label>Occupants</label><input type="number" id="mj_room_${idx}_occupants" value="0" min="0" max="20"></div></div>
+    <div class="mj-wall-section"><div class="mj-wall-title">Exterior Walls &amp; Windows</div><div style="font-size:12px;color:var(--gray-600);background:var(--blue-light);border:1px solid #bfdbfe;border-radius:6px;padding:10px 12px;margin-bottom:12px;">Enter the length of each exterior wall. Leave blank for interior walls. Add windows per wall.</div>${MJ_DIRS.map(dir=>mjBuildWallSection(idx,dir,dG)).join('')}</div>`;
+  container.appendChild(div);
+}
+function mjBuildWallSection(roomIdx,dir,dG){
+  return `<div style="margin-bottom:12px;"><div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;"><label style="margin:0;font-size:13px;color:#374151;min-width:100px;">${MJ_DIR_LABELS[dir]}</label><input type="number" id="mj_room_${roomIdx}_wall_${dir}_length" placeholder="Wall length (ft) — blank if interior" style="flex:1;padding:8px 12px;border:1.5px solid var(--gray-300);border-radius:6px;font-size:14px;font-family:inherit;"></div><div id="mj_room_${roomIdx}_windows_${dir}"></div><button class="mj-add-window-btn" onclick="mjAddWindow(${roomIdx},'${dir}')">+ Add window on ${dir} wall</button></div>`;
+}
+function mjUpdateRoomName(idx){
+  const sel=document.getElementById('mj_room_'+idx+'_name_sel'),cf=document.getElementById('mj_room_'+idx+'_custom_field'),hid=document.getElementById('mj_room_'+idx+'_name_hidden');
+  if(sel.value==='Custom'){cf.style.display='block';hid.value=document.getElementById('mj_room_'+idx+'_name')?.value||'Custom Room';}
+  else{cf.style.display='none';hid.value=sel.value;}
+}
+function mjRemoveRoom(idx){const c=document.getElementById('mj_room_card_'+idx);if(c)c.remove();}
+function mjAddWindow(roomIdx,dir){
+  const key=roomIdx+'_'+dir;if(!mjWinCounts[key])mjWinCounts[key]=0;
+  const wIdx=mjWinCounts[key]++;
+  const container=document.getElementById('mj_room_'+roomIdx+'_windows_'+dir);
+  const dG=document.getElementById('mj_f_default_glass')?.value||'double_lowe';
+  const div=document.createElement('div');div.className='mj-window-row';div.id='mj_win_row_'+roomIdx+'_'+dir+'_'+wIdx;
+  div.innerHTML=`<div class="mj-field" style="margin:0;"><label style="font-size:11px;">Width (ft)</label><input type="number" id="mj_room_${roomIdx}_win_${dir}_${wIdx}_width" placeholder="e.g. 4" min="0.5" step="0.5"></div><div class="mj-field" style="margin:0;"><label style="font-size:11px;">Height (ft)</label><input type="number" id="mj_room_${roomIdx}_win_${dir}_${wIdx}_height" value="4" min="0.5" step="0.5"></div><div class="mj-field" style="margin:0;"><label style="font-size:11px;">Glass type</label><select id="mj_room_${roomIdx}_win_${dir}_${wIdx}_glass">${Object.entries(MJ_GLASS_LABELS).map(([v,l])=>`<option value="${v}"${v===dG?' selected':''}>${l}</option>`).join('')}</select></div><button onclick="this.closest('.mj-window-row').remove()" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:18px;padding:0 4px;align-self:flex-end;margin-bottom:2px;">&times;</button>`;
+  container.appendChild(div);
+}
+function mjRunQuickCalc(){
+  const sqft=parseFloat(document.getElementById('mj_q_sqft')?.value)||0;
+  if(!sqft||sqft<100){mjShowError('mjQuickError','Please enter a valid square footage.');return;}
+  const payload={mode:'quick',sqft,year_built:parseInt(document.getElementById('mj_q_year')?.value)||2000,stories:parseInt(document.getElementById('mj_q_stories')?.value)||1,foundation:document.getElementById('mj_q_foundation')?.value||'slab',insulation:document.getElementById('mj_q_insulation')?.value||'average',construction:document.getElementById('mj_q_construction')?.value||'average',window_exposure:document.getElementById('mj_q_window_exposure')?.value||'average',orientation:document.getElementById('mj_q_orientation')?.value||'mixed',ceiling_height:parseFloat(document.getElementById('mj_q_ceiling_height')?.value)||9};
+  document.getElementById('mjQuickLoading').classList.add('active');
+  document.getElementById('mjQuickError').style.display='none';
+  document.getElementById('mjQuickResults').innerHTML='';
+  try{const data=mjRunQuickEstimate(payload);if(data.error)mjShowError('mjQuickError',data.error);else{document.getElementById('mjQuickResults').innerHTML=mjRenderQuickResults(data);document.getElementById('mjQuickResults').scrollIntoView({behavior:'smooth',block:'start'});}}
+  catch(e){mjShowError('mjQuickError','Calculation error: '+e.message);}
+  finally{document.getElementById('mjQuickLoading').classList.remove('active');}
+}
+function mjRunFullCalc(){
+  const sharedName=document.getElementById('custName')?.value||'',sharedAddr=document.getElementById('custAddress')?.value||'';
+  const jobName=document.getElementById('mj_f_job_name')?.value||[sharedName,sharedAddr].filter(Boolean).join(' — ')||'Manual J Calculation';
+  const payload={mode:'full',job_name:jobName,foundation:document.getElementById('mj_f_foundation')?.value||'slab',construction:document.getElementById('mj_f_construction')?.value||'average',slab_perimeter:parseFloat(document.getElementById('mj_f_slab_perimeter')?.value)||0};
+  let roomsFound=0;
+  for(let idx=0;idx<mjRoomCount;idx++){
+    const card=document.getElementById('mj_room_card_'+idx);if(!card)continue;
+    const nameHid=document.getElementById('mj_room_'+idx+'_name_hidden'),nameSel=document.getElementById('mj_room_'+idx+'_name_sel'),nameCus=document.getElementById('mj_room_'+idx+'_name');
+    let name=nameHid?.value||nameSel?.value||('Room '+(idx+1));
+    if(name==='Custom'&&nameCus)name=nameCus.value||'Custom Room';
+    const len=parseFloat(document.getElementById('mj_room_'+idx+'_length')?.value)||0,wid=parseFloat(document.getElementById('mj_room_'+idx+'_width')?.value)||0;
+    if(len<=0||wid<=0)continue;
+    const pre='room_'+roomsFound;
+    payload[pre+'_name']=name;payload[pre+'_length']=len;payload[pre+'_width']=wid;
+    payload[pre+'_ceiling_height']=parseFloat(document.getElementById('mj_room_'+idx+'_ceiling_height')?.value)||8;
+    payload[pre+'_wall_type']=document.getElementById('mj_room_'+idx+'_wall_type')?.value||'2x4_r13';
+    payload[pre+'_ceiling_type']=document.getElementById('mj_room_'+idx+'_ceiling_type')?.value||'r30';
+    payload[pre+'_occupants']=parseInt(document.getElementById('mj_room_'+idx+'_occupants')?.value)||0;
+    MJ_DIRS.forEach(dir=>{
+      const wl=parseFloat(document.getElementById('mj_room_'+idx+'_wall_'+dir+'_length')?.value)||0;
+      if(wl>0){payload[pre+'_wall_'+dir+'_length']=wl;const key=idx+'_'+dir;let winOut=0;
+        for(let w=0;w<(mjWinCounts[key]||0);w++){const wr=document.getElementById('mj_win_row_'+idx+'_'+dir+'_'+w);if(!wr)continue;const ww=parseFloat(document.getElementById('mj_room_'+idx+'_win_'+dir+'_'+w+'_width')?.value)||0;if(ww>0){payload[pre+'_win_'+dir+'_'+winOut+'_width']=ww;payload[pre+'_win_'+dir+'_'+winOut+'_height']=parseFloat(document.getElementById('mj_room_'+idx+'_win_'+dir+'_'+w+'_height')?.value)||4;payload[pre+'_win_'+dir+'_'+winOut+'_glass']=document.getElementById('mj_room_'+idx+'_win_'+dir+'_'+w+'_glass')?.value||'double_lowe';winOut++;}}
+      }
+    });
+    roomsFound++;
+  }
+  if(!roomsFound){mjShowError('mjFullError','Please add at least one room with dimensions before calculating.');return;}
+  document.getElementById('mjFullLoading').classList.add('active');
+  document.getElementById('mjFullError').style.display='none';
+  document.getElementById('mjFullResults').innerHTML='';
+  try{const data=mjRunFullEstimate(payload);if(data.error)mjShowError('mjFullError',data.error);else{document.getElementById('mjFullResults').innerHTML=mjRenderFullResults(data);document.getElementById('mjFullResults').scrollIntoView({behavior:'smooth',block:'start'});}}
+  catch(e){mjShowError('mjFullError','Calculation error: '+e.message);}
+  finally{document.getElementById('mjFullLoading').classList.remove('active');}
+}
+function mjRenderQuickResults(d){
+  const cc=d.confidence.includes('Lower')?'conf-lower':d.confidence.includes('Medium')?'conf-medium':'conf-high',shrOk=d.shr>=0.85;
+  return `<div class="mj-results-panel"><div class="mj-result-hero"><div class="mj-result-label">Recommended Equipment Size</div><div class="mj-result-tons">${d.rec_tons}</div><div class="mj-result-tons-label">tons</div><div class="mj-result-range">Acceptable range: ${d.range_low} &ndash; ${d.range_high} tons &nbsp;&middot;&nbsp; Raw calc: ${d.raw_tons} tons</div></div><div class="mj-result-grid"><div class="mj-result-stat blue"><div class="mj-result-stat-label">Total Cooling Load</div><div class="mj-result-stat-value">${d.total_cooling.toLocaleString()}</div><div class="mj-result-stat-unit">BTU/hr</div></div><div class="mj-result-stat red"><div class="mj-result-stat-label">Total Heating Load</div><div class="mj-result-stat-value">${d.total_heating.toLocaleString()}</div><div class="mj-result-stat-unit">BTU/hr</div></div><div class="mj-result-stat"><div class="mj-result-stat-label">BTU per sq ft</div><div class="mj-result-stat-value">${d.btusqft}</div><div class="mj-result-stat-unit">BTU/hr/sqft · Phoenix target 18–28</div></div><div class="mj-result-stat ${shrOk?'green':''}"><div class="mj-result-stat-label">Sensible Heat Ratio</div><div class="mj-result-stat-value">${d.shr}</div><div class="mj-result-stat-unit">${shrOk?'✓ Good for Phoenix dry climate':'⚠ Check latent load'}</div></div></div><div class="mj-card"><div class="mj-card-title">Confidence &amp; Assumptions</div><div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;"><span class="mj-confidence-badge ${cc}">${d.confidence}</span><span style="font-size:13px;color:var(--gray-600);">${d.confidence_note}</span></div><div class="mj-assumption-grid"><div class="mj-assumption-item"><div class="mj-assumption-label">Wall assembly assumed</div><div class="mj-assumption-value">${MJ_WALL_LABELS[d.assumed_wall]||d.assumed_wall}</div></div><div class="mj-assumption-item"><div class="mj-assumption-label">Ceiling insulation assumed</div><div class="mj-assumption-value">${MJ_CEIL_LABELS[d.assumed_ceiling]||d.assumed_ceiling}</div></div><div class="mj-assumption-item"><div class="mj-assumption-label">Glass type assumed</div><div class="mj-assumption-value">${MJ_GLASS_LABELS[d.assumed_glass]||d.assumed_glass}</div></div><div class="mj-assumption-item"><div class="mj-assumption-label">Total window area</div><div class="mj-assumption-value">${d.window_sqft} sq ft</div></div></div></div><div class="mj-card" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;"><span style="font-size:14px;color:var(--gray-600);">Want a more accurate result?</span><button class="toggle-btn" onclick="mjSelectMode('full')" style="background:var(--blue);border-color:var(--blue);color:#fff;">Switch to Full Manual J →</button></div></div>`;
+}
+function mjRenderFullResults(d){
+  const shrOk=d.shr>=0.85,maxCool=Math.max(...d.rooms.map(r=>r.cooling));
+  const rows=d.rooms.map(r=>`<tr><td>${r.name}</td><td>${r.area.toLocaleString()}</td><td><div class="mj-bar-cell"><div class="mj-mini-bar" style="width:${Math.round(r.cooling/maxCool*60)}px;"></div>${r.cooling.toLocaleString()}</div></td><td>${r.heating.toLocaleString()}</td><td>${r.cooling_pct}%</td></tr>`).join('');
+  return `<div class="mj-results-panel"><div class="mj-result-hero"><div class="mj-result-label">Recommended Equipment Size — ${d.name}</div><div class="mj-result-tons">${d.rec_tons}</div><div class="mj-result-tons-label">tons &nbsp;·&nbsp; ${d.room_count} rooms &nbsp;·&nbsp; ${d.total_area.toLocaleString()} sq ft</div><div class="mj-result-range">Raw calculated: ${d.raw_tons} tons</div></div><div class="mj-result-grid"><div class="mj-result-stat blue"><div class="mj-result-stat-label">Total Cooling Load</div><div class="mj-result-stat-value">${d.total_cooling.toLocaleString()}</div><div class="mj-result-stat-unit">BTU/hr</div></div><div class="mj-result-stat red"><div class="mj-result-stat-label">Total Heating Load</div><div class="mj-result-stat-value">${d.total_heating.toLocaleString()}</div><div class="mj-result-stat-unit">BTU/hr</div></div><div class="mj-result-stat"><div class="mj-result-stat-label">BTU per sq ft</div><div class="mj-result-stat-value">${d.btusqft}</div><div class="mj-result-stat-unit">BTU/hr/sqft</div></div><div class="mj-result-stat ${shrOk?'green':''}"><div class="mj-result-stat-label">Sensible Heat Ratio</div><div class="mj-result-stat-value">${d.shr}</div><div class="mj-result-stat-unit">${shrOk?'✓ Phoenix dry climate':'⚠ Check latent'}</div></div></div><div class="mj-card"><div class="mj-card-title">Room-by-Room Loads</div><table class="mj-room-table"><thead><tr><th style="text-align:left;">Room</th><th>Area (sf)</th><th>Cooling (BTU/hr)</th><th>Heating (BTU/hr)</th><th>% Total</th></tr></thead><tbody>${rows}<tr style="font-style:italic;color:var(--gray-400);"><td>Infiltration (sensible)</td><td>—</td><td>${d.infil_sensible.toLocaleString()}</td><td>${d.infil_heating.toLocaleString()}</td><td>—</td></tr><tr style="font-style:italic;color:var(--gray-400);"><td>Infiltration (latent)</td><td>—</td><td>${d.infil_latent.toLocaleString()}</td><td>—</td><td>—</td></tr>${d.slab_heating>0?`<tr style="font-style:italic;color:var(--gray-400);"><td>Slab perimeter</td><td>—</td><td>—</td><td>${d.slab_heating.toLocaleString()}</td><td>—</td></tr>`:''}<tr class="mj-total-row"><td>TOTAL</td><td>${d.total_area.toLocaleString()}</td><td>${d.total_cooling.toLocaleString()}</td><td>${d.total_heating.toLocaleString()}</td><td>100%</td></tr></tbody></table></div><div class="mj-card" style="text-align:center;"><button onclick="window.print()" style="padding:12px 24px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;">🖨️ Print / Save PDF</button></div></div>`;
+}
+function mjShowError(id,msg){const el=document.getElementById(id);if(el){el.textContent=msg;el.style.display='block';}}
+function mjPrefillFromIntake(){
+  const sqftEl=document.getElementById('mj_q_sqft'),yearEl=document.getElementById('mj_q_year'),nameEl=document.getElementById('mj_f_job_name');
+  const sharedSqft=document.getElementById('homeSqft')?.value||'',sharedYear=document.getElementById('yearBuilt')?.value||'';
+  const sharedName=document.getElementById('custName')?.value||'',sharedAddr=document.getElementById('custAddress')?.value||'';
+  if(sqftEl&&sharedSqft&&!sqftEl.value)sqftEl.value=sharedSqft;
+  if(yearEl&&sharedYear&&!yearEl.value)yearEl.value=sharedYear;
+  if(nameEl&&!nameEl.value){const parts=[sharedName,sharedAddr].filter(Boolean);if(parts.length)nameEl.value=parts.join(' — ');}
+}
+
+
+// ── INIT ─────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', function() {
+  // Hide ms steps 3-5 on load; show step 2 (panel info) as starting point
+  [2,3,4,5].forEach(i => {
+    const s = $('ms-s'+i);
+    if (s) s.style.display = i === 2 ? 'block' : 'none';
+  });
+  // Date field
+  const sd = document.getElementById('surveyDate');
+  if (sd) { const _d=new Date(); sd.value = _d.getFullYear()+'-'+String(_d.getMonth()+1).padStart(2,'0')+'-'+String(_d.getDate()).padStart(2,'0'); }
+});
+
 </script>
 </body>
 </html>
