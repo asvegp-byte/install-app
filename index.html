@@ -953,12 +953,12 @@
       <text x="145" y="104" text-anchor="middle" font-size="9" fill="#3b82f6" font-style="italic">front</text>
       <text x="160" y="130" text-anchor="middle" font-size="9" fill="#3b82f6" font-style="italic">side</text>
       <!-- WIDTH: extension lines + double-headed arrow below front-bottom edge -->
-      <line x1="115" y1="112" x2="108" y2="126" stroke="#1e40af" stroke-width="1"/>
-      <line x1="175" y1="142" x2="168" y2="156" stroke="#1e40af" stroke-width="1"/>
-      <line x1="110" y1="124" x2="170" y2="154" stroke="#1e40af" stroke-width="1.5" marker-end="url(#uf-arr)"/>
-      <line x1="170" y1="154" x2="110" y2="124" stroke="#1e40af" stroke-width="1.5" marker-end="url(#uf-arr)"/>
-      <text x="128" y="171" text-anchor="middle" font-size="12" fill="#1e40af" font-weight="700">WIDTH</text>
-      <text x="128" y="181" text-anchor="middle" font-size="9" fill="#1e40af">left to right</text>
+      <line x1="115" y1="112" x2="88" y2="136" stroke="#1e40af" stroke-width="1"/>
+      <line x1="175" y1="142" x2="148" y2="166" stroke="#1e40af" stroke-width="1"/>
+      <line x1="90" y1="134" x2="150" y2="164" stroke="#1e40af" stroke-width="1.5" marker-end="url(#uf-arr)"/>
+      <line x1="150" y1="164" x2="90" y2="134" stroke="#1e40af" stroke-width="1.5" marker-end="url(#uf-arr)"/>
+      <text x="105" y="181" text-anchor="middle" font-size="12" fill="#1e40af" font-weight="700">WIDTH</text>
+      <text x="105" y="191" text-anchor="middle" font-size="9" fill="#1e40af">left to right</text>
       <!-- DEPTH: right of right-bottom edge -->
       <line x1="175" y1="142" x2="191" y2="142" stroke="#1e40af" stroke-width="1"/>
       <line x1="138" y1="163" x2="154" y2="163" stroke="#1e40af" stroke-width="1"/>
@@ -987,34 +987,34 @@
     </div>
     <div class="card-title" style="margin-top:16px;">Clearances from unit to obstruction</div>
     <div class="diagram-card" style="margin-bottom:14px;">
-      <svg class="diagram-svg" width="280" height="220" viewBox="0 0 280 220">
+      <svg class="diagram-svg" width="300" height="240" viewBox="0 0 300 240">
         <defs>
-          <marker id="cl-arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-            <path d="M0,0 L6,3 L0,6 Z" fill="#374151"/>
+          <marker id="cl-arr" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+            <path d="M0,0 L7,3.5 L0,7 Z" fill="#374151"/>
           </marker>
         </defs>
-        <!-- Unit viewed from above: top face of 3D box (isometric top) -->
-        <!-- Parallelogram top: front-left(88,108) front-right(148,122) back-right(130,134) back-left(70,120) -->
-        <polygon points="88,104 152,118 134,132 70,118" fill="#dbeafe" stroke="#3b82f6" stroke-width="2" stroke-linejoin="round"/>
-        <!-- Slight depth on south/front face for 3D effect -->
-        <polygon points="88,104 152,118 152,126 88,112" fill="#bfdbfe" stroke="#3b82f6" stroke-width="1.5"/>
-        <!-- Slight depth on east face -->
-        <polygon points="152,118 134,132 134,140 152,126" fill="#93c5fd" stroke="#3b82f6" stroke-width="1.5"/>
-        <text x="111" y="122" text-anchor="middle" font-size="10" fill="#1e40af" font-weight="700">UNIT</text>
-        <!-- NORTH arrow (up) -->
-        <line x1="111" y1="12" x2="111" y2="102" stroke="#374151" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#cl-arr)"/>
-        <text x="111" y="10" text-anchor="middle" font-size="11" fill="#374151" font-weight="700">N</text>
-        <!-- SOUTH arrow (down) -->
-        <line x1="111" y1="134" x2="111" y2="200" stroke="#374151" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#cl-arr)"/>
-        <text x="111" y="214" text-anchor="middle" font-size="11" fill="#374151" font-weight="700">S</text>
-        <!-- WEST arrow (left) -->
-        <line x1="68" y1="118" x2="12" y2="118" stroke="#374151" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#cl-arr)"/>
-        <text x="6" y="122" text-anchor="end" font-size="11" fill="#374151" font-weight="700">W</text>
-        <!-- EAST arrow (right) -->
-        <line x1="154" y1="124" x2="268" y2="124" stroke="#374151" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#cl-arr)"/>
-        <text x="274" y="128" text-anchor="start" font-size="11" fill="#374151" font-weight="700">E</text>
-        <!-- Overhead note -->
-        <text x="140" y="8" text-anchor="middle" font-size="8" fill="#dc2626" font-weight="600">Overhead: measure to nearest obstruction above unit</text>
+        <!-- UNIT rectangle (centered 150,117) -->
+        <rect x="100" y="85" width="100" height="65" rx="4" fill="#dbeafe" stroke="#3b82f6" stroke-width="2.5"/>
+        <text x="150" y="122" text-anchor="middle" font-size="12" fill="#1e40af" font-weight="700">UNIT</text>
+        <!-- NORTH -->
+        <text x="150" y="13" text-anchor="middle" font-size="12" fill="#374151" font-weight="700">N</text>
+        <rect x="119" y="19" width="62" height="9" rx="2" fill="#9ca3af" opacity="0.75"/>
+        <line x1="150" y1="83" x2="150" y2="30" stroke="#374151" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#cl-arr)"/>
+        <!-- SOUTH -->
+        <line x1="150" y1="152" x2="150" y2="207" stroke="#374151" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#cl-arr)"/>
+        <rect x="119" y="207" width="62" height="9" rx="2" fill="#9ca3af" opacity="0.75"/>
+        <text x="150" y="227" text-anchor="middle" font-size="12" fill="#374151" font-weight="700">S</text>
+        <!-- WEST -->
+        <text x="13" y="121" text-anchor="middle" font-size="12" fill="#374151" font-weight="700">W</text>
+        <rect x="21" y="100" width="9" height="34" rx="2" fill="#9ca3af" opacity="0.75"/>
+        <line x1="98" y1="117" x2="32" y2="117" stroke="#374151" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#cl-arr)"/>
+        <!-- EAST -->
+        <line x1="202" y1="117" x2="268" y2="117" stroke="#374151" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#cl-arr)"/>
+        <rect x="270" y="100" width="9" height="34" rx="2" fill="#9ca3af" opacity="0.75"/>
+        <text x="288" y="121" text-anchor="middle" font-size="12" fill="#374151" font-weight="700">E</text>
+        <!-- Overhead callout -->
+        <rect x="10" y="228" width="280" height="11" rx="2" fill="#fef3c7" stroke="#fbbf24" stroke-width="1"/>
+        <text x="150" y="237" text-anchor="middle" font-size="9" fill="#92400e" font-weight="600">&#x2191; OVERHEAD: measure to nearest obstruction above unit</text>
       </svg>
     </div>
     <div class="field-row col2">
