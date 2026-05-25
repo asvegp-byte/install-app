@@ -2572,6 +2572,32 @@
           <button class="toggle-btn" onclick="toggle(this,'msd-mount-roof','msd-mount-ground msd-mount-wall')" id="msd-mount-roof">Rooftop</button>
         </div>
       </div>
+      <div class="field" style="margin-top:10px;">
+        <label>Side of house</label>
+        <div class="toggle-group">
+          <button class="toggle-btn" onclick="toggle(this,'msd-side-n','msd-side-s msd-side-e msd-side-w')" id="msd-side-n">North</button>
+          <button class="toggle-btn" onclick="toggle(this,'msd-side-s','msd-side-n msd-side-e msd-side-w')" id="msd-side-s">South</button>
+          <button class="toggle-btn" onclick="toggle(this,'msd-side-e','msd-side-n msd-side-s msd-side-w')" id="msd-side-e">East</button>
+          <button class="toggle-btn" onclick="toggle(this,'msd-side-w','msd-side-n msd-side-s msd-side-e')" id="msd-side-w">West</button>
+        </div>
+      </div>
+      <div class="field" style="margin-top:10px;">
+        <label>Sun exposure <span class="label-hint">at condenser location</span></label>
+        <div class="toggle-group">
+          <button class="toggle-btn" onclick="toggle(this,'msd-sun-full','msd-sun-partial msd-sun-shade')" id="msd-sun-full">Full sun</button>
+          <button class="toggle-btn" onclick="toggle(this,'msd-sun-partial','msd-sun-full msd-sun-shade')" id="msd-sun-partial">Partial shade</button>
+          <button class="toggle-btn" onclick="toggle(this,'msd-sun-shade','msd-sun-full msd-sun-partial')" id="msd-sun-shade">Full shade</button>
+        </div>
+      </div>
+      <div class="field" style="margin-top:10px;">
+        <label>Discharge direction <span class="label-hint">which way the condenser face points</span></label>
+        <div class="toggle-group">
+          <button class="toggle-btn" onclick="toggle(this,'msd-disc-n','msd-disc-s msd-disc-e msd-disc-w')" id="msd-disc-n">North</button>
+          <button class="toggle-btn" onclick="toggle(this,'msd-disc-s','msd-disc-n msd-disc-e msd-disc-w')" id="msd-disc-s">South</button>
+          <button class="toggle-btn" onclick="toggle(this,'msd-disc-e','msd-disc-n msd-disc-s msd-disc-w')" id="msd-disc-e">East</button>
+          <button class="toggle-btn" onclick="toggle(this,'msd-disc-w','msd-disc-n msd-disc-s msd-disc-e')" id="msd-disc-w">West</button>
+        </div>
+      </div>
 
     <!-- Outdoor unit space photos -->
     <div class="card">
@@ -2890,6 +2916,7 @@ function beginSurvey() {
     if (jobType === 'minisplit' && s === 3) { firstSec++; continue; }
     if (jobType === 'minisplit' && s === 5) { firstSec++; continue; }
     if (jobType === 'minisplit' && s === 6) { firstSec++; continue; }
+    if (jobType === 'minisplit' && s === 7) { firstSec++; continue; }
     if (jobType === 'minisplit' && s === 8) { firstSec++; continue; }
     break;
   }
@@ -2965,6 +2992,21 @@ function generateMSSummary() {
   let mountType = '—';
   for (const [id, label] of Object.entries(mountMap)) {
     if (document.getElementById(id)?.classList.contains('active')) { mountType = label; break; }
+  }
+  const sideMap = {'msd-side-n':'North','msd-side-s':'South','msd-side-e':'East','msd-side-w':'West'};
+  let sideOfHouse = '—';
+  for (const [id, label] of Object.entries(sideMap)) {
+    if (document.getElementById(id)?.classList.contains('active')) { sideOfHouse = label; break; }
+  }
+  const sunMap = {'msd-sun-full':'Full sun','msd-sun-partial':'Partial shade','msd-sun-shade':'Full shade'};
+  let sunExposure = '—';
+  for (const [id, label] of Object.entries(sunMap)) {
+    if (document.getElementById(id)?.classList.contains('active')) { sunExposure = label; break; }
+  }
+  const discMap = {'msd-disc-n':'North','msd-disc-s':'South','msd-disc-e':'East','msd-disc-w':'West'};
+  let dischargeDir = '—';
+  for (const [id, label] of Object.entries(discMap)) {
+    if (document.getElementById(id)?.classList.contains('active')) { dischargeDir = label; break; }
   }
 
   // Zone count + per-zone data
@@ -3097,6 +3139,9 @@ function generateMSSummary() {
 
     + '<div class="summary-section"><div class="summary-section-title">Outdoor Unit — Location &amp; Clearances</div>'
     + '<div class="summary-row"><span class="summary-label">Mount type</span><span class="summary-value">' + mountType + '</span></div>'
+    + '<div class="summary-row"><span class="summary-label">Side of house</span><span class="summary-value">' + sideOfHouse + '</span></div>'
+    + '<div class="summary-row"><span class="summary-label">Sun exposure</span><span class="summary-value">' + sunExposure + '</span></div>'
+    + '<div class="summary-row"><span class="summary-label">Discharge direction</span><span class="summary-value">' + dischargeDir + '</span></div>'
     + '<div class="summary-row"><span class="summary-label">Available space W×D</span><span class="summary-value">' + (outW||'—') + '″ × ' + (outD||'—') + '″</span></div>'
     + '<div class="summary-row"><span class="summary-label">Overhead clearance</span><span class="summary-value">' + (clrOH||'—') + '″</span></div>'
     + '<div class="summary-row"><span class="summary-label">Front (discharge) clearance</span><span class="summary-value">' + (clrFr||'—') + '″</span></div>'
@@ -3307,6 +3352,7 @@ function navigate(dir) {
     if (jobType === 'minisplit' && sec === 5) return true;
     if (jobType === 'minisplit' && sec === 6) return true;
     if (jobType !== 'minisplit' && jobType !== 'minisplit_replace' && sec === 8) return true;
+    if (jobType === 'minisplit' && sec === 7) return true;
     if (jobType === 'minisplit' && sec === 8) return true;
     if (jobType === 'minisplit' && sec === 3) return true;
     return false;
