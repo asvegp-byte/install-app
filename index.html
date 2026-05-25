@@ -589,6 +589,10 @@
 <!-- TAB 1: INSTALL SURVEY                                       -->
 <!-- ============================================================ -->
 <div id="content-install" class="tab-content active">
+  <!-- Back nav for minisplit flow -->
+  <div id="install-back-nav" style="display:none;padding:12px 16px 0;">
+    <button class="btn btn-sec" onclick="showTab('msdetails');window.scrollTo(0,0);">&larr; Back to MS Details</button>
+  </div>
 
 <!-- ============================================================ -->
 <!-- SECTION 2: EXISTING EQUIPMENT -->
@@ -2593,7 +2597,7 @@
 
     <div style="display:flex;justify-content:space-between;align-items:center;margin-top:28px;padding-top:16px;border-top:1px solid var(--gray-200);">
       <button class="btn btn-sec" onclick="showTab('electrical');window.scrollTo(0,0);">&larr; Back to Electrical Survey</button>
-      <button class="btn btn-pri" onclick="showTab('mj');window.scrollTo(0,0);">Continue to Load Calc &rarr;</button>
+      <button class="btn btn-pri" onclick="showTab('install');window.scrollTo(0,0);">Continue to Install Survey &rarr;</button>
     </div>
 
   </div>
@@ -2607,7 +2611,7 @@
 
   <!-- Back nav for minisplit flow -->
   <div id="mj-back-nav" style="display:none;padding:12px 16px 0;">
-    <button class="btn btn-sec" onclick="showTab('msdetails');window.scrollTo(0,0);">&larr; Back to MS Details</button>
+    <button class="btn btn-sec" onclick="returnToJobSetup();">&larr; Back to New Survey</button>
   </div>
 
   <!-- AZ Design Conditions bar -->
@@ -2796,6 +2800,13 @@
     <div id="mjFullResults"></div>
   </div><!-- end panelFull -->
 
+  <!-- Continue nav for minisplit flow -->
+  <div id="mj-continue-nav" style="display:none;padding:20px 16px 8px;border-top:1px solid var(--gray-200);margin-top:8px;">
+    <div style="display:flex;justify-content:flex-end;">
+      <button class="btn btn-pri" onclick="showTab('electrical');window.scrollTo(0,0);">Continue to Electrical Survey &rarr;</button>
+    </div>
+  </div>
+
 </div>
 
 </div><!-- end main-screen -->
@@ -2856,7 +2867,7 @@ function beginSurvey() {
   updateProgress();
   buildProgressSteps();
   if (jobType === 'minisplit') {
-    showTab('electrical');
+    showTab('mj');
   } else {
     showTab('install');
   }
@@ -2875,10 +2886,14 @@ function showTab(tab) {
   window.scrollTo(0,0);
   if (tab === 'mj') mjPrefillFromIntake();
   if (tab === 'msdetails') msdPrefillFromElectrical();
+  const isMiniSplit     = (jobType === 'minisplit');
+  const isMiniSplitAny  = (jobType === 'minisplit' || jobType === 'minisplit_replace');
   const mjBackNav = document.getElementById('mj-back-nav');
-  if (mjBackNav) mjBackNav.style.display =
-    (tab === 'mj' && (jobType === 'minisplit' || jobType === 'minisplit_replace'))
-    ? '' : 'none';
+  if (mjBackNav) mjBackNav.style.display = (tab === 'mj' && isMiniSplit) ? '' : 'none';
+  const mjContNav = document.getElementById('mj-continue-nav');
+  if (mjContNav) mjContNav.style.display = (tab === 'mj' && isMiniSplit) ? '' : 'none';
+  const instBackNav = document.getElementById('install-back-nav');
+  if (instBackNav) instBackNav.style.display = (tab === 'install' && isMiniSplitAny) ? '' : 'none';
 }
 
 // Activated once a job type is selected
@@ -3085,7 +3100,10 @@ function navigate(dir) {
   let dest = currentSection + dir;
   while (dest >= 1 && dest <= totalSections && shouldSkip(dest)) dest += dir;
 
-  if (dest < 2) { returnToJobSetup(); return; }
+  if (dest < 2) {
+    if (jobType === 'minisplit' || jobType === 'minisplit_replace') { showTab('msdetails'); return; }
+    returnToJobSetup(); return;
+  }
 
   document.getElementById('section-' + currentSection).classList.remove('active');
   currentSection = dest;
@@ -4047,7 +4065,7 @@ function today() {
 // ── NAVIGATION ────────────────────────────────────────────
 const LABS = ['','','Panel Info','Existing Loads','Equipment','Results'];
 function ms_go(n) {
-  if (n < 2) { returnToJobSetup(); return; }
+  if (n < 2) { if (jobType === 'minisplit') { showTab('mj'); return; } returnToJobSetup(); return; }
   if (n === 5) calc();
   for (let i = 1; i <= 5; i++) {
     const s = $('ms-s'+i); if (s) s.style.display = i===n ? 'block' : 'none';
@@ -4768,6 +4786,40 @@ window.addEventListener('DOMContentLoaded', function() {
 // ── MINI-SPLIT DETAILS TAB ───────────────────────────────────────────────────
 
 /**
+ * msdIndoorDimRange — returns a dimension range string for indoor wall-mount heads.
+ * Single-zone: filters by exact BTU match.
+ * Multi-zone:  shows full brand range since zone BTUs vary.
+ */
+function msdIndoorDimRange(brand, btu, zoneCapacity) {
+  var brData = MS_INDOOR[brand] || MS_INDOOR['Mitsubishi'];
+  var walls   = (brData && brData.wall) ? brData.wall : [];
+
+  // Filter to exact BTU for single-zone; use all for multi-zone
+  var pool = (zoneCapacity === 'single' && btu)
+    ? walls.filter(function(u) { return u.btu === btu && u.h && u.w && u.d; })
+    : walls.filter(function(u) { return u.h && u.w && u.d; });
+
+  if (!pool.length) return null;
+
+  var minH = Infinity, maxH = -Infinity;
+  var minW = Infinity, maxW = -Infinity;
+  var minD = Infinity, maxD = -Infinity;
+  pool.forEach(function(u) {
+    if (u.h < minH) minH = u.h; if (u.h > maxH) maxH = u.h;
+    if (u.w < minW) minW = u.w; if (u.w > maxW) maxW = u.w;
+    if (u.d < minD) minD = u.d; if (u.d > maxD) maxD = u.d;
+  });
+
+  function fmt(a, b) {
+    a = Math.floor(a * 4) / 4;   // round down to nearest 0.25
+    b = Math.ceil(b  * 4) / 4;   // round up   to nearest 0.25
+    return (a === b) ? a + '&Prime;' : a + '&ndash;' + b + '&Prime;';
+  }
+
+  return fmt(minH, maxH) + ' H &times; ' + fmt(minW, maxW) + ' W &times; ' + fmt(minD, maxD) + ' D';
+}
+
+/**
  * msdPrefillFromElectrical — called when the MS Details tab is opened.
  * Reads the selected outdoor unit from the Electrical Survey (msOModel select)
  * and populates the summary card. No re-selection required.
@@ -4841,9 +4893,22 @@ function msdPrefillFromElectrical() {
   if (mocp)    html += '<div><b>MOCP:</b> ' + mocp + 'A</div>';
   html += '</div>';
 
+  // ── Indoor head dimension range ──────────────────────────────────────────
+  var indoorRange = msdIndoorDimRange(brand, btu, zoneCapacity);
+  if (indoorRange) {
+    var scopeNote = zoneCapacity === 'multi'
+      ? 'All wall-mount head sizes for ' + brand + ' (zone BTUs vary)'
+      : (btu/1000).toFixed(0) + 'K wall-mount heads for ' + brand;
+    html += '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--gray-200);">';
+    html += '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted);margin-bottom:6px;">Indoor Head (wall-mount) — planning range</div>';
+    html += '<div style="font-size:13px;"><b>Dims:</b> ' + indoorRange + '</div>';
+    html += '<div style="font-size:11px;color:var(--text-muted);margin-top:3px;">' + scopeNote + ' &mdash; width varies most by BTU</div>';
+    html += '</div>';
+  }
+
   if (h && w && d) {
     html += '<div class="info-blue" style="font-size:12px;margin-top:10px;">';
-    html += '&#128207; Footprint: <b>' + w + '&Prime; W &times; ' + d + '&Prime; D &times; ' + h + '&Prime; H</b>';
+    html += '&#128207; Condenser footprint: <b>' + w + '&Prime; W &times; ' + d + '&Prime; D &times; ' + h + '&Prime; H</b>';
     html += ' &mdash; enter available space in clearance section below to check fit.';
     html += '</div>';
   }
