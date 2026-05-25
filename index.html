@@ -2788,14 +2788,18 @@ function navigate(dir) {
   const next = currentSection + dir;
   if (next < 2 || next > totalSections) return;
 
-  let skip = false;
-  if ((jobType === 'minisplit' || jobType === 'minisplit_replace') && next === 4) skip = true;
-  if (jobType === 'minisplit' && next === 5) skip = true;
-  if (jobType === 'minisplit' && next === 6) skip = true;
-  if (jobType !== 'minisplit' && next === 8) skip = true;
+  function shouldSkip(sec) {
+    if ((jobType === 'minisplit' || jobType === 'minisplit_replace') && sec === 4) return true;
+    if (jobType === 'minisplit' && sec === 5) return true;
+    if (jobType === 'minisplit' && sec === 6) return true;
+    if (jobType !== 'minisplit' && jobType !== 'minisplit_replace' && sec === 8) return true;
+    return false;
+  }
+  let dest = currentSection + dir;
+  while (dest >= 1 && dest <= totalSections && shouldSkip(dest)) dest += dir;
 
   document.getElementById('section-' + currentSection).classList.remove('active');
-  currentSection = skip ? next + dir : next;
+  currentSection = dest;
   if (currentSection < 1) currentSection = 1;
   if (currentSection > totalSections) {
     completeSurvey();
@@ -3274,21 +3278,27 @@ function generateSummary() {
 
   const flags = [];
   const warnings = [];
+  const isMSNew = jobType === 'minisplit';
+  const isMS    = isMSNew || jobType === 'minisplit_replace';
 
-  const discAmp = parseInt(document.getElementById('discAmp')?.value) || 0;
-  if (discAmp === 60) {
-    warnings.push('Existing disconnect is 60A — verify new equipment MOCP. Most residential units need 30-40A. May need replacement.');
-  }
-  if (discAmp === 0) {
-    warnings.push('Disconnect amperage not captured — confirm before ordering.');
+  if (!isMSNew) {
+    const discAmp = parseInt(document.getElementById('discAmp')?.value) || 0;
+    if (discAmp === 60) {
+      warnings.push('Existing disconnect is 60A — verify new equipment MOCP. Most residential units need 30-40A. May need replacement.');
+    }
+    if (discAmp === 0) {
+      warnings.push('Disconnect amperage not captured — confirm before ordering.');
+    }
   }
 
-  const wireGauge = document.getElementById('wireGaugeCond')?.value || '';
-  if (wireGauge === '#14 AWG') {
-    flags.push('⚠️ #14 AWG wire to condenser is only rated for 15A. Most condensers require #10 AWG minimum. Wire replacement likely needed.');
-  }
-  if (wireGauge === '#12 AWG') {
-    warnings.push('Existing #12 AWG wire to condenser rated for 20A. Verify new unit MCA does not exceed 20A.');
+  if (!isMSNew) {
+    const wireGauge = document.getElementById('wireGaugeCond')?.value || '';
+    if (wireGauge === '#14 AWG') {
+      flags.push('⚠️ #14 AWG wire to condenser is only rated for 15A. Most condensers require #10 AWG minimum. Wire replacement likely needed.');
+    }
+    if (wireGauge === '#12 AWG') {
+      warnings.push('Existing #12 AWG wire to condenser rated for 20A. Verify new unit MCA does not exceed 20A.');
+    }
   }
 
   const overhead = parseInt(document.getElementById('clearOverhead')?.value) || 999;
@@ -3307,9 +3317,11 @@ function generateSummary() {
     flags.push('🚨 One or more side clearances is less than 12 inches — below manufacturer minimums. Placement adjustment needed.');
   }
 
-  const drainPan = document.getElementById('drainPanCondition')?.value || '';
-  if (drainPan.includes('Cracked')) {
-    flags.push('🚨 Drain pan is cracked or leaking — must be replaced. Attic water damage risk.');
+  if (!isMS) {
+    const drainPan = document.getElementById('drainPanCondition')?.value || '';
+    if (drainPan.includes('Cracked')) {
+      flags.push('🚨 Drain pan is cracked or leaking — must be replaced. Attic water damage risk.');
+    }
   }
 
   const panelBrand = document.getElementById('panelBrand')?.value || '';
@@ -3326,18 +3338,22 @@ function generateSummary() {
     warnings.push('Job type not selected.');
   }
 
-  const lineSetCond = document.getElementById('lineSetCondition')?.value || '';
-  if (lineSetCond === 'Poor — replace') {
-    flags.push('🚨 Line set condition is poor — replacement needed. Add to job scope and pricing.');
+  if (!isMSNew) {
+    const lineSetCond = document.getElementById('lineSetCondition')?.value || '';
+    if (lineSetCond === 'Poor — replace') {
+      flags.push('🚨 Line set condition is poor — replacement needed. Add to job scope and pricing.');
+    }
   }
 
-  const refrig = document.getElementById('condRefrig')?.value || '';
-  if (refrig === 'R-22') {
-    warnings.push('Existing system uses R-22 (phased out). New system will use R-410A or R-454B. Line set flush or replacement may be required.');
+  if (!isMSNew) {
+    const refrig = document.getElementById('condRefrig')?.value || '';
+    if (refrig === 'R-22') {
+      warnings.push('Existing system uses R-22 (phased out). New system will use R-410A or R-454B. Line set flush or replacement may be required.');
+    }
   }
 
-  // Flag: furnace efficiency tier change warning
-  if (furnaceEfficiency === '80') {
+  // Flag: furnace efficiency tier change warning (split_ac only — only job type with a furnace)
+  if (jobType === 'split_ac' && furnaceEfficiency === '80') {
     warnings.push('Existing furnace is 80% AFUE. Confirm new equipment efficiency — upgrading to 90%+ requires new PVC venting, condensate drain, and combustion air intake. Significant additional scope.');
   }
 
