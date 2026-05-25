@@ -1924,38 +1924,7 @@
 <div class="section" id="section-9">
   <div class="section-header">
     <div class="section-title">Compliance & Notes</div>
-    <div class="section-desc">Permit requirements, HOA restrictions, rebate eligibility, and any job-specific notes.</div>
-  </div>
-
-  <div class="card" id="permitComplianceCard">
-    <div class="card-title">Permit &amp; Compliance</div>
-    <div class="field">
-      <label>Permit required for this job?</label>
-      <div class="toggle-group">
-        <button class="toggle-btn" onclick="toggle(this,'permitReqY','permitReqN permitReqUnk')">Yes</button>
-        <button class="toggle-btn" onclick="toggle(this,'permitReqN','permitReqY permitReqUnk')">No</button>
-        <button class="toggle-btn" onclick="toggle(this,'permitReqUnk','permitReqY permitReqN')">Confirm with office</button>
-      </div>
-    </div>
-    <div class="field" style="margin-top:10px;">
-      <label>Municipality / jurisdiction</label>
-      <select id="municipality">
-        <option value="">Select...</option>
-        <option>City of Glendale</option><option>City of Peoria</option>
-        <option>City of Phoenix</option><option>City of Surprise</option>
-        <option>City of Scottsdale</option><option>Unincorporated Maricopa County</option>
-        <option>Other</option>
-      </select>
-    </div>
-    <div class="field">
-      <label>HOA restrictions noted?</label>
-      <div class="toggle-group">
-        <button class="toggle-btn" onclick="toggle(this,'hoaRestrict','hoaNoRestrict hoaUnkRestrict')">Yes — note below</button>
-        <button class="toggle-btn" onclick="toggle(this,'hoaNoRestrict','hoaRestrict hoaUnkRestrict')">No restrictions</button>
-        <button class="toggle-btn" onclick="toggle(this,'hoaUnkRestrict','hoaRestrict hoaNoRestrict')">Unknown</button>
-      </div>
-    </div>
-    <div class="field" style="margin-top:10px;"><label>HOA notes <span class="label-hint">screening, color, placement restrictions</span></label><textarea id="hoaNotes" placeholder="Any HOA requirements for equipment placement, screening, color..."></textarea></div>
+    <div class="section-desc">Utility rebate eligibility and job-specific notes.</div>
   </div>
 
   <div class="card">
@@ -3097,9 +3066,7 @@ function applyJobTypeVisibility(type) {
     if (s3CondHField) s3CondHField.firstChild.textContent = 'Existing Unit Height ';
   }
 
-  // ── Section 9: hide Permit & Compliance card for mini-splits ────────────
-  const permitCard = document.getElementById('permitComplianceCard');
-  if (permitCard) permitCard.style.display = isMiniSplit ? 'none' : 'block';
+
 }
 
 // ============================================================
