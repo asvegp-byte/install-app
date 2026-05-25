@@ -2481,7 +2481,7 @@
     </div>
     <div class="ms-nav" style="margin-top:20px">
       <button class="btn btn-sec" onclick="ms_go(4)">&larr; Edit Equipment</button>
-      <button class="btn btn-pri" style="margin-left:auto;" onclick="showTab('install');window.scrollTo(0,0);">Continue Install Survey &rarr;</button>
+      <button class="btn btn-pri" style="margin-left:auto;" onclick="(jobType==='minisplit'||jobType==='minisplit_replace')?showTab('msdetails'):showTab('install');window.scrollTo(0,0);">Continue &rarr;</button>
     </div>
   </div>
 </div>
@@ -2591,6 +2591,11 @@
     <!-- Head units (populated by msdSetZones) -->
     <div id="msd-head-units"></div>
 
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:28px;padding-top:16px;border-top:1px solid var(--gray-200);">
+      <button class="btn btn-sec" onclick="showTab('electrical');window.scrollTo(0,0);">&larr; Back to Electrical Survey</button>
+      <button class="btn btn-pri" onclick="showTab('mj');window.scrollTo(0,0);">Continue to Load Calc &rarr;</button>
+    </div>
+
   </div>
 </div><!-- end content-msdetails -->
 
@@ -2599,6 +2604,11 @@
 <!-- TAB 3: MANUAL J LOAD CALCULATOR                             -->
 <!-- ============================================================ -->
 <div id="content-mj" class="tab-content">
+
+  <!-- Back nav for minisplit flow -->
+  <div id="mj-back-nav" style="display:none;padding:12px 16px 0;">
+    <button class="btn btn-sec" onclick="showTab('msdetails');window.scrollTo(0,0);">&larr; Back to MS Details</button>
+  </div>
 
   <!-- AZ Design Conditions bar -->
   <div class="mj-design-bar">
@@ -2865,6 +2875,10 @@ function showTab(tab) {
   window.scrollTo(0,0);
   if (tab === 'mj') mjPrefillFromIntake();
   if (tab === 'msdetails') msdPrefillFromElectrical();
+  const mjBackNav = document.getElementById('mj-back-nav');
+  if (mjBackNav) mjBackNav.style.display =
+    (tab === 'mj' && (jobType === 'minisplit' || jobType === 'minisplit_replace'))
+    ? '' : 'none';
 }
 
 // Activated once a job type is selected
