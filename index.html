@@ -77,7 +77,7 @@
   .job-type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
   .job-type-card { background: #fff; border: 2px solid var(--gray-200); border-radius: var(--radius); padding: 16px; cursor: pointer; transition: all 0.15s; text-align: center; }
   .job-type-card:hover { border-color: var(--blue); background: var(--blue-light); }
-  .job-type-card.selected { border-color: var(--blue); background: var(--blue-light); }
+  .job-type-card.selected { border-color: var(--blue); background: var(--blue-light); }\n  .job-type-card.solo { grid-column: 1 / -1; max-width: calc(50% - 6px); margin: 0 auto; }
   .job-type-icon { font-size: 32px; margin-bottom: 8px; }
   .job-type-name { font-size: 14px; font-weight: 600; color: var(--gray-900); margin-bottom: 4px; }
   .job-type-desc { font-size: 11px; color: var(--gray-400); line-height: 1.4; }
@@ -520,12 +520,12 @@
       <div class="card-title">Job Type <span style="color:var(--red)">*</span></div>
       <div class="job-type-grid" id="jobTypeGrid">
         <div class="job-type-card" onclick="selectJobType('split_hp', this)">
-          <div class="job-type-icon">&#x1F504;</div>
+          <div class="job-type-icon"><svg width="40" height="32" viewBox="0 0 40 32" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;display:inline-block;margin-bottom:4px"><rect x="0" y="0" width="17" height="32" rx="3" fill="#1e293b"/><rect x="23" y="0" width="17" height="32" rx="3" fill="#1e293b"/><polygon points="4,16 10,10 10,22" fill="white"/><rect x="9" y="13" width="6" height="6" fill="white"/><rect x="25" y="13" width="6" height="6" fill="white"/><polygon points="36,16 30,10 30,22" fill="white"/></svg></div>
           <div class="job-type-name">Split Heat Pump</div>
           <div class="job-type-desc">Outdoor condenser + indoor air handler, heating and cooling</div>
         </div>
         <div class="job-type-card" onclick="selectJobType('split_ac', this)">
-          <div class="job-type-icon">&#x2744;&#xFE0F;</div>
+          <div class="job-type-icon">&#x1F525;&#x2744;&#xFE0F;</div>
           <div class="job-type-name">Split AC + Furnace</div>
           <div class="job-type-desc">Outdoor AC condenser + indoor furnace with coil</div>
         </div>
@@ -534,15 +534,15 @@
           <div class="job-type-name">Packaged Unit</div>
           <div class="job-type-desc">Single cabinet &mdash; rooftop or ground mount</div>
         </div>
-        <div class="job-type-card" onclick="selectJobType('minisplit', this)">
-          <div class="job-type-icon">&#x1F4A8;</div>
-          <div class="job-type-name">Mini-Split &mdash; New Install</div>
-          <div class="job-type-desc">New ductless install, needs new circuit</div>
-        </div>
         <div class="job-type-card" onclick="selectJobType('minisplit_replace', this)">
           <div class="job-type-icon">&#x1F501;</div>
           <div class="job-type-name">Mini-Split &mdash; Replace</div>
           <div class="job-type-desc">Swap existing unit, same circuit</div>
+        </div>
+        <div class="job-type-card solo" onclick="selectJobType('minisplit', this)">
+          <div class="job-type-icon">&#x1F4A8;</div>
+          <div class="job-type-name">Mini-Split &mdash; New Install</div>
+          <div class="job-type-desc">New ductless install, needs new circuit</div>
         </div>
       </div>
       <div id="jobTypeSelected" style="display:none;">
