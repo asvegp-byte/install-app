@@ -2706,10 +2706,31 @@ function intakeToggle(btn) {
 }
 
 // ── INTAKE & TAB NAVIGATION ───────────────────────────────────
+function returnToJobSetup() {
+  document.getElementById('section-' + currentSection).classList.remove('active');
+  document.getElementById('main-screen').style.display = 'none';
+  document.getElementById('shared-intake').style.display = 'block';
+  currentSection = 2;
+  window.scrollTo(0, 0);
+}
+
 function beginSurvey() {
   if (!jobType) { alert('Please select a job type to continue.'); return; }
   document.getElementById('shared-intake').style.display = 'none';
   document.getElementById('main-screen').style.display = 'block';
+  // Find the first non-skipped section for this job type
+  let firstSec = 2;
+  while (firstSec <= totalSections) {
+    const s = firstSec;
+    if ((jobType === 'minisplit' || jobType === 'minisplit_replace') && s === 4) { firstSec++; continue; }
+    if (jobType === 'minisplit' && s === 2) { firstSec++; continue; }
+    if (jobType === 'minisplit' && s === 5) { firstSec++; continue; }
+    if (jobType === 'minisplit' && s === 6) { firstSec++; continue; }
+    break;
+  }
+  currentSection = firstSec;
+  const firstEl = document.getElementById('section-' + firstSec);
+  if (firstEl) firstEl.classList.add('active');
   updateProgress();
   buildProgressSteps();
   if (jobType === 'minisplit') {
@@ -2907,7 +2928,7 @@ function updateProgress() {
   document.getElementById('progressTotal').textContent = totalSections - 1;
   document.getElementById('progressName').textContent = SECTION_NAMES[currentSection] || '';
   buildProgressSteps();
-  document.getElementById('btnBack').style.display = currentSection > 2 ? 'block' : 'none';
+  document.getElementById('btnBack').style.display = 'block';
   const _nb = document.getElementById('btnNext');
   if (currentSection === totalSections) {
     _nb.textContent = '📥 Save Survey';
@@ -2923,17 +2944,20 @@ function updateProgress() {
 // ============================================================
 function navigate(dir) {
   const next = currentSection + dir;
-  if (next < 2 || next > totalSections) return;
+  if (next > totalSections) return;
 
   function shouldSkip(sec) {
     if ((jobType === 'minisplit' || jobType === 'minisplit_replace') && sec === 4) return true;
     if (jobType === 'minisplit' && sec === 5) return true;
     if (jobType === 'minisplit' && sec === 6) return true;
     if (jobType !== 'minisplit' && jobType !== 'minisplit_replace' && sec === 8) return true;
+    if (jobType === 'minisplit' && sec === 2) return true;
     return false;
   }
   let dest = currentSection + dir;
   while (dest >= 1 && dest <= totalSections && shouldSkip(dest)) dest += dir;
+
+  if (dest < 2) { returnToJobSetup(); return; }
 
   document.getElementById('section-' + currentSection).classList.remove('active');
   currentSection = dest;
