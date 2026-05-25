@@ -2887,6 +2887,7 @@ function beginSurvey() {
     const s = firstSec;
     if ((jobType === 'minisplit' || jobType === 'minisplit_replace') && s === 4) { firstSec++; continue; }
     if (jobType === 'minisplit' && s === 2) { firstSec++; continue; }
+    if (jobType === 'minisplit' && s === 3) { firstSec++; continue; }
     if (jobType === 'minisplit' && s === 5) { firstSec++; continue; }
     if (jobType === 'minisplit' && s === 6) { firstSec++; continue; }
     if (jobType === 'minisplit' && s === 8) { firstSec++; continue; }
@@ -3113,6 +3114,7 @@ function navigate(dir) {
     if (jobType === 'minisplit' && sec === 5) return true;
     if (jobType === 'minisplit' && sec === 6) return true;
     if (jobType !== 'minisplit' && jobType !== 'minisplit_replace' && sec === 8) return true;
+    if (jobType === 'minisplit' && sec === 8) return true;
     if (jobType === 'minisplit' && sec === 3) return true;
     return false;
   }
