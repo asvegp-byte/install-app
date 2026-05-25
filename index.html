@@ -2609,11 +2609,6 @@
 <!-- ============================================================ -->
 <div id="content-mj" class="tab-content">
 
-  <!-- Back nav for minisplit flow -->
-  <div id="mj-back-nav" style="display:none;padding:12px 16px 0;">
-    <button class="btn btn-sec" onclick="returnToJobSetup();">&larr; Back to New Survey</button>
-  </div>
-
   <!-- AZ Design Conditions bar -->
   <div class="mj-design-bar">
     <div class="mj-design-item">Cooling: <span>108&deg;F DB / 76&deg;F WB outdoor</span></div>
@@ -2695,13 +2690,14 @@
       <div class="mj-field">
         <label>Window exposure</label>
         <div class="toggle-group">
-          <button class="toggle-btn" onclick="mjSetToggle('mj_q_window_exposure','minimal',this)">Minimal<br><span style="font-size:10px;">~8% floor area</span></button>
-          <button class="toggle-btn active" onclick="mjSetToggle('mj_q_window_exposure','average',this)">Average<br><span style="font-size:10px;">~12% floor area</span></button>
-          <button class="toggle-btn" onclick="mjSetToggle('mj_q_window_exposure','heavy',this)">Heavy<br><span style="font-size:10px;">~18% floor area</span></button>
+          <button class="toggle-btn" onclick="mjSetToggle('mj_q_window_exposure','none',this);mjToggleGlassFields('none')">None<br><span style="font-size:10px;">No windows</span></button>
+          <button class="toggle-btn" onclick="mjSetToggle('mj_q_window_exposure','minimal',this);mjToggleGlassFields('minimal')">Minimal<br><span style="font-size:10px;">~8% floor area</span></button>
+          <button class="toggle-btn active" onclick="mjSetToggle('mj_q_window_exposure','average',this);mjToggleGlassFields('average')">Average<br><span style="font-size:10px;">~12% floor area</span></button>
+          <button class="toggle-btn" onclick="mjSetToggle('mj_q_window_exposure','heavy',this);mjToggleGlassFields('heavy')">Heavy<br><span style="font-size:10px;">~18% floor area</span></button>
         </div>
         <input type="hidden" id="mj_q_window_exposure" value="average">
       </div>
-      <div class="mj-field" style="margin-top:14px;">
+      <div class="mj-field" style="margin-top:14px;" id="mj_q_orientation_wrap">
         <label>Primary glass orientation <span class="mj-hint">where is most glass facing?</span></label>
         <div class="toggle-group">
           <button class="toggle-btn" onclick="mjSetToggle('mj_q_orientation','n_s',this)">North/South<br><span style="font-size:10px;">Better</span></button>
@@ -2802,7 +2798,8 @@
 
   <!-- Continue nav for minisplit flow -->
   <div id="mj-continue-nav" style="display:none;padding:20px 16px 8px;border-top:1px solid var(--gray-200);margin-top:8px;">
-    <div style="display:flex;justify-content:flex-end;">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <button class="btn btn-sec" onclick="returnToJobSetup();window.scrollTo(0,0);">&larr; Back to New Survey</button>
       <button class="btn btn-pri" onclick="showTab('electrical');window.scrollTo(0,0);">Continue to Electrical Survey &rarr;</button>
     </div>
   </div>
@@ -2888,8 +2885,6 @@ function showTab(tab) {
   if (tab === 'msdetails') msdPrefillFromElectrical();
   const isMiniSplit     = (jobType === 'minisplit');
   const isMiniSplitAny  = (jobType === 'minisplit' || jobType === 'minisplit_replace');
-  const mjBackNav = document.getElementById('mj-back-nav');
-  if (mjBackNav) mjBackNav.style.display = (tab === 'mj' && isMiniSplit) ? '' : 'none';
   const mjContNav = document.getElementById('mj-continue-nav');
   if (mjContNav) mjContNav.style.display = (tab === 'mj' && isMiniSplit) ? '' : 'none';
   const instBackNav = document.getElementById('install-back-nav');
@@ -4595,11 +4590,12 @@ function mjRunQuickEstimate(d){
   const insMap={poor:['block_r0','r19'],average:['2x4_r13','r30'],good:['2x6_r19','r38'],excellent:['2x6_r21','r49']};
   let[wall_type,ceiling_type]=insMap[d.insulation||'average']||insMap.average;
   if(year<1980&&construction==='average')construction='leaky';
-  const winPct={minimal:0.08,average:0.12,heavy:0.18};
-  const totalWin=sqft*(winPct[d.window_exposure||'average']||0.12);
+  const winPct={none:0,minimal:0.08,average:0.12,heavy:0.18};
+  const isNoGlass=(d.window_exposure==='none');
+  const totalWin=sqft*(winPct[d.window_exposure]!==undefined?winPct[d.window_exposure]:0.12);
   const orientDist={n_s:{N:0.25,S:0.35,E:0.20,W:0.20},e_w:{N:0.15,S:0.15,E:0.35,W:0.35},mixed:{N:0.20,S:0.25,E:0.25,W:0.30},worst:{N:0.10,S:0.20,E:0.20,W:0.50}};
   const dist=orientDist[d.orientation||'mixed']||orientDist.mixed;
-  const glass=year<1985?'single':(year<2000?'double':'double_lowe');
+  const glass=isNoGlass?'none':(year<1985?'single':(year<2000?'double':'double_lowe'));
   const stories=parseInt(d.stories)||1,ch=parseFloat(d.ceiling_height)||9.0,foundation=d.foundation||'slab';
   const house=new MJHouse(foundation,construction);
   if(foundation==='slab')house.slabPerimeter=Math.round(Math.sqrt(sqft/stories)*4);
@@ -4649,7 +4645,7 @@ function mjRunFullEstimate(d){
 
 // ── MANUAL J UI ───────────────────────────────────────────────
 const MJ_WALL_LABELS={'2x4_r13':'2x4 R-13','2x4_r15':'2x4 R-15','2x6_r19':'2x6 R-19','2x6_r21':'2x6 R-21','block_r0':'Block uninsulated','block_r4':'Block R-4','icf':'ICF'};
-const MJ_GLASS_LABELS={single:'Single pane',double:'Double pane',double_lowe:'Double low-e',triple_lowe:'Triple low-e'};
+const MJ_GLASS_LABELS={none:'No windows',single:'Single pane',double:'Double pane',double_lowe:'Double low-e',triple_lowe:'Triple low-e'};
 const MJ_CEIL_LABELS={r19:'R-19',r30:'R-30',r38:'R-38',r49:'R-49',r60:'R-60'};
 const MJ_ROOM_PRESETS=['Living Room','Kitchen','Master Bedroom','Bedroom 2','Bedroom 3','Bedroom 4','Master Bath','Hall Bath','Hallway / Entry','Dining Room','Laundry','Office','Family Room','Garage (conditioned)','Custom'];
 const MJ_DIRS=['N','S','E','W'];
@@ -4706,6 +4702,11 @@ function mjAddWindow(roomIdx,dir){
   div.innerHTML=`<div class="mj-field" style="margin:0;"><label style="font-size:11px;">Width (ft)</label><input type="number" id="mj_room_${roomIdx}_win_${dir}_${wIdx}_width" placeholder="e.g. 4" min="0.5" step="0.5"></div><div class="mj-field" style="margin:0;"><label style="font-size:11px;">Height (ft)</label><input type="number" id="mj_room_${roomIdx}_win_${dir}_${wIdx}_height" value="4" min="0.5" step="0.5"></div><div class="mj-field" style="margin:0;"><label style="font-size:11px;">Glass type</label><select id="mj_room_${roomIdx}_win_${dir}_${wIdx}_glass">${Object.entries(MJ_GLASS_LABELS).map(([v,l])=>`<option value="${v}"${v===dG?' selected':''}>${l}</option>`).join('')}</select></div><button onclick="this.closest('.mj-window-row').remove()" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:18px;padding:0 4px;align-self:flex-end;margin-bottom:2px;">&times;</button>`;
   container.appendChild(div);
 }
+function mjToggleGlassFields(val) {
+  const wrap = document.getElementById('mj_q_orientation_wrap');
+  if (wrap) wrap.style.display = (val === 'none') ? 'none' : '';
+}
+
 function mjRunQuickCalc(){
   const sqft=parseFloat(document.getElementById('mj_q_sqft')?.value)||0;
   if(!sqft||sqft<100){mjShowError('mjQuickError','Please enter a valid square footage.');return;}
