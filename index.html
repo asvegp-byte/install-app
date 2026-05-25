@@ -2762,6 +2762,7 @@ function activateBeginBtn() {
 let currentSection = 2;
 let totalSections = 11;
 let jobType = '';
+const SURVEY_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwcmRJ7wqvvN8uQFA6t7m30-f64A4YrPOvTdnV1MG4IBcTfpn24cNm3X7hRVkmXz6kk4g/exec'; // AireServ Install Surveys folder
 let furnaceEfficiency = '';
 let newFurnaceEfficiency = '';
 let activePhotoTarget = '';
@@ -2801,7 +2802,14 @@ function updateProgress() {
   document.getElementById('progressName').textContent = SECTION_NAMES[currentSection] || '';
   buildProgressSteps();
   document.getElementById('btnBack').style.display = currentSection > 2 ? 'block' : 'none';
-  document.getElementById('btnNext').textContent = currentSection === totalSections ? '✓ Complete Survey' : 'Continue →';
+  const _nb = document.getElementById('btnNext');
+  if (currentSection === totalSections) {
+    _nb.textContent = '📥 Save Survey';
+    _nb.onclick = downloadSurvey;
+  } else {
+    _nb.textContent = currentSection === totalSections - 1 ? '✓ View Summary' : 'Continue →';
+    _nb.onclick = function() { navigate(1); };
+  }
 }
 
 // ============================================================
@@ -2831,6 +2839,9 @@ function navigate(dir) {
 
   // Re-apply job type visibility every time we navigate
   if (jobType) applyJobTypeVisibility(jobType);
+
+  // Auto-generate summary when landing on the final section
+  if (currentSection === totalSections) generateSummary();
 
   updateProgress();
 }
@@ -3385,7 +3396,7 @@ function generateSummary() {
 
       <div class="summary-section">
         <div class="summary-section-title">Job Information</div>
-        <div class="summary-row"><span class="summary-label">Job type</span><span class="summary-value">${jobType ? {split_hp:'Split Heat Pump',split_ac:'Split AC + Furnace',packaged:'Packaged Unit',minisplit:'Mini-Split'}[jobType] : '—'}</span></div>
+        <div class="summary-row"><span class="summary-label">Job type</span><span class="summary-value">${jobType ? {split_hp:'Split Heat Pump',split_ac:'Split AC + Furnace',packaged:'Packaged Unit',minisplit:'Mini-Split — New Install',minisplit_replace:'Mini-Split — Replace'}[jobType] : '—'}</span></div>
         <div class="summary-row"><span class="summary-label">Year built</span><span class="summary-value">${v('yearBuilt')}</span></div>
         <div class="summary-row"><span class="summary-label">Home size</span><span class="summary-value">${v('homeSqft')} sq ft</span></div>
         <div class="summary-row"><span class="summary-label">Foundation</span><span class="summary-value">${v('homeFoundation')}</span></div>
@@ -3484,29 +3495,121 @@ function generateSummary() {
 // UTILITIES
 // ============================================================
 function copyToClipboard() {
-  const custName = document.getElementById('custName')?.value || 'Unknown';
-  const address = document.getElementById('custAddress')?.value || '';
-  const date = document.getElementById('surveyDate')?.value || '';
-  const hcd = document.getElementById('hcdName')?.value || '';
-  let text = `AIRE SERV INSTALL SURVEY\n`;
-  text += `Customer: ${custName}\nAddress: ${address}\nDate: ${date}\nHCD: ${hcd}\n\n`;
-  text += `Job Type: ${jobType || '—'}\n\n`;
-  text += `EXISTING EQUIPMENT\n`;
-  text += `Condenser: ${document.getElementById('condBrand')?.value||''} ${document.getElementById('condModel')?.value||''}\n`;
-  text += `Tonnage: ${document.getElementById('condTons')?.value||''}\n`;
-  text += `Refrigerant: ${document.getElementById('condRefrig')?.value||''}\n`;
-  text += `Air Handler: ${document.getElementById('ahBrand')?.value||''} ${document.getElementById('ahModel')?.value||''}\n\n`;
-  text += `ELECTRICAL\n`;
-  text += `Panel: ${document.getElementById('panelBrand')?.value||''} ${document.getElementById('mainBreaker')?.value||''}\n`;
-  text += `Disconnect: ${document.getElementById('discAmp')?.value||''} ${document.getElementById('discType')?.value||''}\n`;
-  text += `Wire to condenser: ${document.getElementById('wireGaugeCond')?.value||''}\n\n`;
-  text += `DUCT SYSTEM\n`;
-  text += `Supply plenum: ${document.getElementById('supW')?.value||''}W x ${document.getElementById('supH')?.value||''}H x ${document.getElementById('supD')?.value||''}D\n`;
-  text += `Return plenum: ${document.getElementById('retW')?.value||''}W x ${document.getElementById('retH')?.value||''}H x ${document.getElementById('retD')?.value||''}D\n\n`;
-  text += `Photos captured: ${Object.keys(photos).length}\n`;
-  navigator.clipboard.writeText(text).then(() => {
-    alert('Summary copied to clipboard — paste into email or ServiceTitan notes.');
+  const v = id => document.getElementById(id)?.value || '';
+  const isSplit = jobType === 'split_hp' || jobType === 'split_ac';
+  const isMS = jobType === 'minisplit' || jobType === 'minisplit_replace';
+  const isPkg = jobType === 'packaged';
+  const names = {split_hp:'Split Heat Pump',split_ac:'Split AC + Furnace',packaged:'Packaged Unit',minisplit:'Mini-Split — New Install',minisplit_replace:'Mini-Split — Replace'};
+  const div = '\n' + '-'.repeat(36) + '\n';
+  let t = 'AIRE SERV — INSTALL SURVEY\n' + '='.repeat(36) + '\n';
+  t += `Customer:    ${v('custName')}\n`;
+  t += `Phone:       ${v('custPhone')}  |  Email: ${v('custEmail')}\n`;
+  t += `Address:     ${v('custAddress')}\n`;
+  t += `Survey Date: ${v('surveyDate')}  |  HCD: ${v('hcdName')}\n`;
+  t += `Job Type:    ${names[jobType] || jobType || '—'}\n`;
+  t += `Home:        ${v('homeSqft')} sq ft  |  ${v('homeStories')} story  |  ${v('homeFoundation')}\n`;
+  t += `Year Built:  ${v('yearBuilt')}  |  Municipality: ${v('municipality')}\n`;
+  if (isMS) {
+    t += div + 'MINI-SPLIT OUTDOOR UNIT\n';
+    t += `Brand/Model: ${v('condBrand')} ${v('condModel')}  /  Serial: ${v('condSerial')}\n`;
+    t += `Tons: ${v('condTons')}  |  Refrigerant: ${v('condRefrig')}  |  Age: ${v('condAge')} yrs\n`;
+    t += `MCA: ${v('condMCA')}A  |  MOCP: ${v('condMOCP')}A\n`;
+    t += `Footprint: ${v('msOutdoorW')}" W x ${v('msOutdoorD')}" D\n`;
+    const zBtn = document.querySelector('#zoneCount .toggle-btn.active');
+    t += `Zones: ${zBtn ? zBtn.textContent : '—'}\n`;
+    t += div + 'LINE SET\n';
+    t += `Length: ${v('lineSetLength')} ft  |  Suction: ${v('suctionSize')}  |  Liquid: ${v('liquidSize')}\n`;
+    t += `Penetration: ${v('penetrationCondition')}  |  Condition: ${v('lineSetCondition')}\n`;
+  } else if (isPkg) {
+    t += div + 'PACKAGED UNIT\n';
+    t += `Brand/Model: ${v('pkgBrand')} ${v('pkgModel')}  /  Serial: ${v('pkgSerial')}\n`;
+    t += `Tons: ${v('pkgTons')}  |  Refrigerant: ${v('pkgRefrig')}  |  Age: ${v('pkgAge')} yrs\n`;
+    t += `Type: ${v('pkgType')}  |  Mount: ${v('pkgMount')}\n`;
+    t += `MCA: ${v('pkgMCA')}A  |  MOCP: ${v('pkgMOCP')}A\n`;
+    t += `Footprint: ${v('pkgW')}" W x ${v('pkgD')}" D x ${v('pkgH')}" H\n`;
+  } else {
+    t += div + 'EXISTING CONDENSER\n';
+    t += `Brand/Model: ${v('condBrand')} ${v('condModel')}  /  Serial: ${v('condSerial')}\n`;
+    t += `Tons: ${v('condTons')}  |  Refrigerant: ${v('condRefrig')}  |  Age: ${v('condAge')} yrs\n`;
+    t += `MCA: ${v('condMCA')}A  |  MOCP: ${v('condMOCP')}A\n`;
+    t += `Space: ${v('spaceCondenser')}  |  ${v('spaceW')}" W x ${v('spaceD')}" D x ${v('spaceH')}" H\n`;
+    t += div + 'AIR HANDLER / INDOOR UNIT\n';
+    t += `Brand/Model: ${v('ahBrand')} ${v('ahModel')}  /  Serial: ${v('ahSerial')}\n`;
+    t += `Type: ${v('ahType')}  |  BTU: ${v('ahBTU')}  |  CFM: ${v('ahCFM')}\n`;
+    t += `Footprint: ${v('ahW')}" W x ${v('ahD')}" D x ${v('ahH')}" H\n`;
+    t += div + 'LINE SET\n';
+    t += `Length: ${v('lineSetLength')} ft  |  Suction: ${v('suctionSize')}  |  Liquid: ${v('liquidSize')}\n`;
+    t += `Penetration: ${v('penetrationCondition')}  |  Condition: ${v('lineSetCondition')}\n`;
+  }
+  t += div + 'CONDENSER PLACEMENT\n';
+  t += `Clearances — N:${v('clearN')}"  S:${v('clearS')}"  E:${v('clearE')}"  W:${v('clearW')}"  Overhead:${v('clearOverhead')}"\n`;
+  t += `Pad: ${v('padW')}" W x ${v('padD')}" D\n`;
+  if (v('condenserSpaceNotes')) t += `Notes: ${v('condenserSpaceNotes')}\n`;
+  t += div + 'ELECTRICAL\n';
+  t += `Panel: ${v('panelBrand')}  |  Main: ${v('mainBreaker')}A  |  Open slots: ${v('blankSlots')}\n`;
+  t += `Panel location: ${v('panelLocation') || v('ms-panelLocation') || '—'}\n`;
+  t += `Disconnect: ${v('discAmp')}A ${v('discType')}\n`;
+  t += `Wire to condenser: ${v('wireGaugeCond')}  |  Wire to AH: ${v('wireGaugeAH')}\n`;
+  t += `Cond breaker: ${v('condBreaker') || '—'}  |  AH breaker: ${v('ahBreaker') || '—'}\n`;
+  t += `Panel → condenser: ${v('distPanelCond')}"  |  Panel → AH: ${v('distPanelAH')}"\n`;
+  if (isSplit) {
+    t += div + 'DUCT SYSTEM\n';
+    t += `Supply plenum: ${v('supW')}" W x ${v('supH')}" H x ${v('supD')}" D  |  Connections: ${v('supplyConnections')}\n`;
+    t += `Return plenum: ${v('retW')}" W x ${v('retH')}" H x ${v('retD')}" D\n`;
+    t += `Return drop: ${v('retDropW')}" W x ${v('retDropH')}" H\n`;
+    t += `Filter: ${v('filterLoc')}  |  Size: ${v('filterSize')}\n`;
+    t += `Drain pan: ${v('drainPanCondition')}  |  ${v('drainPanL')}" L x ${v('drainPanW')}" W\n`;
+    if (v('ductNotes')) t += `Notes: ${v('ductNotes')}\n`;
+  }
+  t += div + 'THERMOSTAT\n';
+  t += `Type: ${v('tstatType')}  |  Model: ${v('tstatModel')}  |  Wire gauge: ${v('tstatWireGauge')}\n`;
+  const photoCount = document.querySelectorAll('.photo-item.captured').length;
+  t += div + `PHOTOS: ${photoCount} marked as taken\n`;
+  const notePairs = [['Customer notes','customerNotes'],['Scope notes','scopeNotes'],['HOA notes','hoaNotes'],['Path notes','pathNotes'],['Complexity notes','complexityNotes']];
+  const noteLines = notePairs.filter(([,id]) => v(id)).map(([lbl,id]) => `${lbl}: ${v(id)}`).join('\n');
+  if (noteLines) { t += div + 'NOTES\n' + noteLines + '\n'; }
+  navigator.clipboard.writeText(t).then(() => {
+    alert('Full survey copied — paste into ServiceTitan notes or email.');
+  }).catch(() => {
+    const ta = document.createElement('textarea'); ta.value = t;
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+    alert('Full survey copied to clipboard.');
   });
+}
+
+function downloadSurvey() {
+  const v = id => document.getElementById(id)?.value || '';
+  const zBtn = document.querySelector('#zoneCount .toggle-btn.active');
+  const data = {
+    meta: { app: 'AireServ HCD Field Survey', version: '2.0', exported: new Date().toISOString() },
+    customer: { name: v('custName'), phone: v('custPhone'), email: v('custEmail'), address: v('custAddress') },
+    survey: { date: v('surveyDate'), hcd: v('hcdName'), jobType: jobType, yearBuilt: v('yearBuilt'), sqft: v('homeSqft'), stories: v('homeStories'), foundation: v('homeFoundation'), municipality: v('municipality') },
+    condenser: { brand: v('condBrand'), model: v('condModel'), serial: v('condSerial'), tons: v('condTons'), refrigerant: v('condRefrig'), age: v('condAge'), mca: v('condMCA'), mocp: v('condMOCP'), msW: v('msOutdoorW'), msD: v('msOutdoorD'), zones: zBtn ? zBtn.textContent : '' },
+    airHandler: { brand: v('ahBrand'), model: v('ahModel'), serial: v('ahSerial'), type: v('ahType'), btu: v('ahBTU'), cfm: v('ahCFM') },
+    electrical: { panelBrand: v('panelBrand'), mainBreaker: v('mainBreaker'), blankSlots: v('blankSlots'), panelLocation: v('panelLocation') || v('ms-panelLocation'), discAmp: v('discAmp'), discType: v('discType'), wireToCondenser: v('wireGaugeCond'), wireToAH: v('wireGaugeAH'), condBreaker: v('condBreaker'), ahBreaker: v('ahBreaker'), distToCondenser: v('distPanelCond'), distToAH: v('distPanelAH') },
+    clearances: { n: v('clearN'), s: v('clearS'), e: v('clearE'), w: v('clearW'), overhead: v('clearOverhead'), padW: v('padW'), padD: v('padD') },
+    duct: { supW: v('supW'), supH: v('supH'), supD: v('supD'), supConnections: v('supplyConnections'), retW: v('retW'), retH: v('retH'), retD: v('retD'), retDropW: v('retDropW'), retDropH: v('retDropH'), filterLoc: v('filterLoc'), filterSize: v('filterSize'), drainPan: v('drainPanCondition'), drainL: v('drainPanL'), drainW: v('drainPanW') },
+    lineSet: { length: v('lineSetLength'), suction: v('suctionSize'), liquid: v('liquidSize'), condition: v('lineSetCondition'), penetration: v('penetrationCondition') },
+    thermostat: { type: v('tstatType'), model: v('tstatModel'), wireGauge: v('tstatWireGauge') },
+    photos: { count: document.querySelectorAll('.photo-item.captured').length },
+    notes: { customer: v('customerNotes'), scope: v('scopeNotes'), hoa: v('hoaNotes'), path: v('pathNotes'), placement: v('condenserSpaceNotes'), complexity: v('complexityNotes') }
+  };
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const safeName = (v('custName') || 'Survey').replace(/[^a-z0-9]/gi, '_');
+  const safeDate = (v('surveyDate') || new Date().toISOString().slice(0,10)).replace(/[^0-9]/g, '-');
+  a.href = url; a.download = `AireServ_${safeName}_${safeDate}.json`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  if (typeof SURVEY_WEBHOOK_URL === 'string' && SURVEY_WEBHOOK_URL) {
+    fetch(SURVEY_WEBHOOK_URL, { method: 'POST', mode: 'no-cors', headers: {'Content-Type':'text/plain'}, body: json })
+      .then(() => alert('Survey saved locally and submitted to team repository.'))
+      .catch(() => alert('Survey downloaded. Could not reach team repository.'));
+  } else {
+    alert('Survey saved as JSON file.\nUpload to your Google Drive survey folder to archive.');
+  }
 }
 
 function startNew() {
