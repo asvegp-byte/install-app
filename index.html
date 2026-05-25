@@ -2572,6 +2572,40 @@
           <button class="toggle-btn" onclick="toggle(this,'msd-mount-roof','msd-mount-ground msd-mount-wall')" id="msd-mount-roof">Rooftop</button>
         </div>
       </div>
+
+    <!-- Outdoor unit space photos -->
+    <div class="card">
+      <div class="card-title">Required Photos — Outdoor Unit Space</div>
+      <p style="font-size:13px;color:var(--gray-600);margin-bottom:12px;">
+        📸 Photograph the proposed outdoor unit location before installation. These confirm clearances and mounting conditions in the job record.
+      </p>
+      <div class="photo-grid">
+        <div class="photo-item" id="msd-photo-outdoor-space" onclick="capturePhoto('msd-photo-outdoor-space','Outdoor Unit — Proposed Location (full view)')">
+          <img class="photo-preview" id="prev-msd-photo-outdoor-space">
+          <div class="photo-icon">📷</div>
+          <div class="photo-label">Proposed Location</div>
+          <div class="photo-status">Required</div>
+        </div>
+        <div class="photo-item" id="msd-photo-outdoor-overhead" onclick="capturePhoto('msd-photo-outdoor-overhead','Outdoor Unit — Overhead Clearance')">
+          <img class="photo-preview" id="prev-msd-photo-outdoor-overhead">
+          <div class="photo-icon">📷</div>
+          <div class="photo-label">Overhead Clearance</div>
+          <div class="photo-status">Required</div>
+        </div>
+        <div class="photo-item" id="msd-photo-outdoor-front" onclick="capturePhoto('msd-photo-outdoor-front','Outdoor Unit — Front / Discharge Side')">
+          <img class="photo-preview" id="prev-msd-photo-outdoor-front">
+          <div class="photo-icon">📷</div>
+          <div class="photo-label">Front (discharge side)</div>
+          <div class="photo-status">Required</div>
+        </div>
+        <div class="photo-item" id="msd-photo-outdoor-rear" onclick="capturePhoto('msd-photo-outdoor-rear','Outdoor Unit — Rear / Intake Side')">
+          <img class="photo-preview" id="prev-msd-photo-outdoor-rear">
+          <div class="photo-icon">📷</div>
+          <div class="photo-label">Rear (intake side)</div>
+          <div class="photo-status">Required</div>
+        </div>
+      </div>
+    </div>
     </div>
 
     <!-- Zone count (gated by condenser capacity) -->
@@ -3079,8 +3113,7 @@ function navigate(dir) {
     if (jobType === 'minisplit' && sec === 5) return true;
     if (jobType === 'minisplit' && sec === 6) return true;
     if (jobType !== 'minisplit' && jobType !== 'minisplit_replace' && sec === 8) return true;
-    if (jobType === 'minisplit' && sec === 2) return true;
-    if (jobType === 'minisplit' && sec === 8) return true;
+    if (jobType === 'minisplit' && sec === 3) return true;
     return false;
   }
   let dest = currentSection + dir;
@@ -4974,6 +5007,34 @@ function msdSetZones(n) {
         <div class="toggle-group">
           <button class="toggle-btn" onclick="toggle(this,'msd-wall-wood-${i}','msd-wall-metal-${i}')">Wood studs</button>
           <button class="toggle-btn" onclick="toggle(this,'msd-wall-metal-${i}','msd-wall-wood-${i}')">Metal studs</button>
+        </div>
+      </div>
+      <div class="card-title" style="margin-top:14px;">📸 Required Photos — Zone ${i} Indoor Space</div>
+      <p style="font-size:12px;color:var(--gray-600);margin-bottom:10px;">Photograph the proposed wall location. Confirm available width, height, and ceiling clearance.</p>
+      <div class="photo-grid">
+        <div class="photo-item" id="msd-photo-indoor-${i}-wall" onclick="capturePhoto('msd-photo-indoor-${i}-wall','Zone ${i} — Proposed Wall Location')">
+          <img class="photo-preview" id="prev-msd-photo-indoor-${i}-wall">
+          <div class="photo-icon">📷</div>
+          <div class="photo-label">Proposed wall location</div>
+          <div class="photo-status">Required</div>
+        </div>
+        <div class="photo-item" id="msd-photo-indoor-${i}-measure" onclick="capturePhoto('msd-photo-indoor-${i}-measure','Zone ${i} — Width &amp; Height Measurement')">
+          <img class="photo-preview" id="prev-msd-photo-indoor-${i}-measure">
+          <div class="photo-icon">📷</div>
+          <div class="photo-label">Width &amp; height measurement</div>
+          <div class="photo-status">Required</div>
+        </div>
+        <div class="photo-item" id="msd-photo-indoor-${i}-ceiling" onclick="capturePhoto('msd-photo-indoor-${i}-ceiling','Zone ${i} — Ceiling Clearance')">
+          <img class="photo-preview" id="prev-msd-photo-indoor-${i}-ceiling">
+          <div class="photo-icon">📷</div>
+          <div class="photo-label">Ceiling clearance</div>
+          <div class="photo-status">Required</div>
+        </div>
+        <div class="photo-item" id="msd-photo-indoor-${i}-lineset" onclick="capturePhoto('msd-photo-indoor-${i}-lineset','Zone ${i} — Line Set Path')">
+          <img class="photo-preview" id="prev-msd-photo-indoor-${i}-lineset">
+          <div class="photo-icon">📷</div>
+          <div class="photo-label">Line set path</div>
+          <div class="photo-status">Required</div>
         </div>
       </div>`;
     container.appendChild(card);
