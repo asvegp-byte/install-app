@@ -376,7 +376,7 @@
   /* Default install-survey print: only show the summary section */
   .header, .progress-bar, .nav-bar,
   .tab-bar, #shared-intake, #install-progress,
-  #content-electrical, #content-mj { display: none !important; }
+  #content-electrical, #content-msdetails, #content-mj { display: none !important; }
   #content-install .section { display: none !important; }
   #content-install #section-11 { display: block !important; padding: 12px; }
   #content-install .card { break-inside: avoid; }
@@ -384,6 +384,7 @@
   /* Mini-split permit doc print (body.pp class set by buildPDoc) */
   body.pp #content-install,
   body.pp #content-electrical,
+  body.pp #content-msdetails,
   body.pp #content-mj,
   body.pp #shared-intake,
   body.pp #main-screen,
@@ -393,6 +394,7 @@
   /* Mini-split customer doc print (body.pc class set by buildCDoc) */
   body.pc #content-install,
   body.pc #content-electrical,
+  body.pc #content-msdetails,
   body.pc #content-mj,
   body.pc #shared-intake,
   body.pc #main-screen,
@@ -574,6 +576,9 @@
   </button>
   <button class="tab tab-disabled" id="tab-electrical" onclick="showTab('electrical')" title="Select Mini-Split job type to enable">
     &#x26A1; Electrical Survey
+  </button>
+  <button class="tab tab-disabled" id="tab-msdetails" onclick="showTab('msdetails')" title="Select Mini-Split job type to enable">
+    &#x1F4CB; MS Details
   </button>
   <button class="tab" id="tab-mj" onclick="showTab('mj')">
     &#x1F4D0; Load Calc
@@ -2485,6 +2490,112 @@
 </div><!-- end content-electrical -->
 
 <!-- ============================================================ -->
+<!-- TAB: MINI-SPLIT DETAILS                                     -->
+<!-- ============================================================ -->
+<div id="content-msdetails" class="tab-content">
+  <div style="max-width:720px;margin:0 auto;padding:16px 12px 80px;">
+
+    <!-- Outdoor unit summary (sourced from Electrical Survey) -->
+    <div class="card" id="msd-equip-card">
+      <div class="card-title">Outdoor Unit — Proposed Equipment</div>
+      <div id="msd-equip-summary" style="font-size:13px;color:var(--text-muted);padding:8px 0;">
+        Complete the Electrical Survey first to auto-populate equipment here.
+      </div>
+    </div>
+
+    <!-- Outdoor clearance assessment -->
+    <div class="card">
+      <div class="card-title">Outdoor Unit — Clearance Assessment</div>
+      <div id="msd-outdoor-unit-ref" style="font-size:12px;color:var(--text-muted);margin-bottom:10px;"></div>
+      <div class="info-blue" style="font-size:12px;margin-bottom:14px;">
+        <b>Manufacturer minimums (Mitsubishi / Daikin / AC Pro — top-discharge residential):</b>
+        <table style="width:100%;margin-top:8px;border-collapse:collapse;font-size:12px;line-height:1.8;">
+          <tr><td style="padding:1px 10px 1px 0;white-space:nowrap;">&#x2B06; Overhead</td><td><b>12&Prime; min</b> &mdash; 36&Prime; recommended (top-discharge airflow)</td></tr>
+          <tr><td style="padding:1px 10px 1px 0;white-space:nowrap;">&#x27A1; Front (access)</td><td><b>24&Prime; min</b> &mdash; service and airflow clearance</td></tr>
+          <tr><td style="padding:1px 10px 1px 0;white-space:nowrap;">&#x2B05; Rear (intake)</td><td><b>6&Prime; min</b> &mdash; inlet air side</td></tr>
+          <tr><td style="padding:1px 10px 1px 0;white-space:nowrap;">&#x2194; Each side</td><td><b>12&Prime; min</b></td></tr>
+        </table>
+      </div>
+      <div class="card-title" style="font-size:13px;margin-bottom:8px;">Unit Footprint vs. Available Space</div>
+      <div class="field-row col2">
+        <div class="field">
+          <label>Available width <span class="label-hint">in</span></label>
+          <input type="number" id="msd-outdoor-w" placeholder="e.g. 48" oninput="msdOutdoorClearCheck()">
+        </div>
+        <div class="field">
+          <label>Available depth <span class="label-hint">in</span></label>
+          <input type="number" id="msd-outdoor-d" placeholder="e.g. 24" oninput="msdOutdoorClearCheck()">
+        </div>
+      </div>
+      <div class="card-title" style="font-size:13px;margin-top:14px;margin-bottom:8px;">Measured Clearances at Proposed Location</div>
+      <div class="field-row col2">
+        <div class="field">
+          <label>Overhead <span class="label-hint">in — to nearest obstruction above</span></label>
+          <input type="number" id="msd-clear-overhead" placeholder="min 12&Prime; / rec 36&Prime;" oninput="msdOutdoorClearCheck()">
+        </div>
+        <div class="field">
+          <label>Front <span class="label-hint">in — discharge / access side</span></label>
+          <input type="number" id="msd-clear-front" placeholder="min 24&Prime;" oninput="msdOutdoorClearCheck()">
+        </div>
+      </div>
+      <div class="field-row col2">
+        <div class="field">
+          <label>Rear <span class="label-hint">in — intake / wall side</span></label>
+          <input type="number" id="msd-clear-rear" placeholder="min 6&Prime;" oninput="msdOutdoorClearCheck()">
+        </div>
+        <div class="field">
+          <label>Left side <span class="label-hint">inches</span></label>
+          <input type="number" id="msd-clear-left" placeholder="min 12&Prime;" oninput="msdOutdoorClearCheck()">
+        </div>
+      </div>
+      <div class="field-row col2">
+        <div class="field">
+          <label>Right side <span class="label-hint">inches</span></label>
+          <input type="number" id="msd-clear-right" placeholder="min 12&Prime;" oninput="msdOutdoorClearCheck()">
+        </div>
+        <div class="field"></div>
+      </div>
+      <div id="msd-fit-panel" style="margin-top:8px;"></div>
+    </div>
+
+    <!-- Mount type -->
+    <div class="card">
+      <div class="card-title">Outdoor Mount Type</div>
+      <div class="field">
+        <div class="toggle-group">
+          <button class="toggle-btn" onclick="toggle(this,'msd-mount-ground','msd-mount-wall msd-mount-roof')" id="msd-mount-ground">Ground pad</button>
+          <button class="toggle-btn" onclick="toggle(this,'msd-mount-wall','msd-mount-ground msd-mount-roof')" id="msd-mount-wall">Wall bracket</button>
+          <button class="toggle-btn" onclick="toggle(this,'msd-mount-roof','msd-mount-ground msd-mount-wall')" id="msd-mount-roof">Rooftop</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Zone count (gated by condenser capacity) -->
+    <div class="card">
+      <div class="card-title">Indoor System Configuration</div>
+      <div class="field">
+        <label>Number of zones</label>
+        <div id="msd-zone-note" style="font-size:12px;color:#b45309;background:#fef3c7;border:1px solid #fcd34d;border-radius:5px;padding:6px 10px;margin-bottom:8px;display:none;">
+          ⚠️ Selected condenser is single-zone only — options 2–5 are disabled.
+        </div>
+        <div class="toggle-group" id="msd-zone-count">
+          <button class="toggle-btn" onclick="toggle(this,'msd-zc1','msd-zc2 msd-zc3 msd-zc4 msd-zc5');msdSetZones(1)" id="msd-zc1">1</button>
+          <button class="toggle-btn" onclick="toggle(this,'msd-zc2','msd-zc1 msd-zc3 msd-zc4 msd-zc5');msdSetZones(2)" id="msd-zc2">2</button>
+          <button class="toggle-btn" onclick="toggle(this,'msd-zc3','msd-zc1 msd-zc2 msd-zc4 msd-zc5');msdSetZones(3)" id="msd-zc3">3</button>
+          <button class="toggle-btn" onclick="toggle(this,'msd-zc4','msd-zc1 msd-zc2 msd-zc3 msd-zc5');msdSetZones(4)" id="msd-zc4">4</button>
+          <button class="toggle-btn" onclick="toggle(this,'msd-zc5','msd-zc1 msd-zc2 msd-zc3 msd-zc4');msdSetZones(5)" id="msd-zc5">5</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Head units (populated by msdSetZones) -->
+    <div id="msd-head-units"></div>
+
+  </div>
+</div><!-- end content-msdetails -->
+
+
+<!-- ============================================================ -->
 <!-- TAB 3: MANUAL J LOAD CALCULATOR                             -->
 <!-- ============================================================ -->
 <div id="content-mj" class="tab-content">
@@ -2726,6 +2837,7 @@ function beginSurvey() {
     if (jobType === 'minisplit' && s === 2) { firstSec++; continue; }
     if (jobType === 'minisplit' && s === 5) { firstSec++; continue; }
     if (jobType === 'minisplit' && s === 6) { firstSec++; continue; }
+    if (jobType === 'minisplit' && s === 8) { firstSec++; continue; }
     break;
   }
   currentSection = firstSec;
@@ -2742,7 +2854,7 @@ function beginSurvey() {
 }
 
 function showTab(tab) {
-  ['install','electrical','mj'].forEach(t => {
+  ['install','electrical','msdetails','mj'].forEach(t => {
     const btn     = document.getElementById('tab-'+t);
     const content = document.getElementById('content-'+t);
     if (btn)     btn.classList.toggle('active', t === tab);
@@ -2752,6 +2864,7 @@ function showTab(tab) {
   if (ipb) ipb.style.display = (tab === 'install') ? 'block' : 'none';
   window.scrollTo(0,0);
   if (tab === 'mj') mjPrefillFromIntake();
+  if (tab === 'msdetails') msdPrefillFromElectrical();
 }
 
 // Activated once a job type is selected
@@ -2952,6 +3065,7 @@ function navigate(dir) {
     if (jobType === 'minisplit' && sec === 6) return true;
     if (jobType !== 'minisplit' && jobType !== 'minisplit_replace' && sec === 8) return true;
     if (jobType === 'minisplit' && sec === 2) return true;
+    if (jobType === 'minisplit' && sec === 8) return true;
     return false;
   }
   let dest = currentSection + dir;
@@ -2994,6 +3108,17 @@ function selectJobType(type, el) {
     } else {
       elTab.classList.add('tab-disabled');
       elTab.title = 'Select Mini-Split job type to enable';
+    }
+  }
+  // Enable/disable Mini-Split Details tab for both minisplit types
+  const msdTab = document.getElementById('tab-msdetails');
+  if (msdTab) {
+    if (type === 'minisplit' || type === 'minisplit_replace') {
+      msdTab.classList.remove('tab-disabled');
+      msdTab.title = '';
+    } else {
+      msdTab.classList.add('tab-disabled');
+      msdTab.title = 'Select Mini-Split job type to enable';
     }
   }
   // Activate the Begin Survey button
@@ -4624,6 +4749,383 @@ window.addEventListener('DOMContentLoaded', function() {
   const sd = document.getElementById('surveyDate');
   if (sd) { const _d=new Date(); sd.value = _d.getFullYear()+'-'+String(_d.getMonth()+1).padStart(2,'0')+'-'+String(_d.getDate()).padStart(2,'0'); }
 });
+
+// ── MINI-SPLIT DETAILS TAB ───────────────────────────────────────────────────
+
+/**
+ * msdPrefillFromElectrical — called when the MS Details tab is opened.
+ * Reads the selected outdoor unit from the Electrical Survey (msOModel select)
+ * and populates the summary card. No re-selection required.
+ */
+function msdPrefillFromElectrical() {
+  const summaryEl = document.getElementById('msd-equip-summary');
+  if (!summaryEl) return;
+
+  const sel = document.getElementById('msOModel');
+  if (!sel || !sel.value) {
+    summaryEl.innerHTML = '<span style="color:var(--text-muted)">Complete the Electrical Survey and select a proposed outdoor unit to auto-populate here.</span>';
+    msdUpdateZoneOptions('unknown');
+    return;
+  }
+  const opt = sel.options[sel.selectedIndex];
+  if (!opt || !opt.value) {
+    summaryEl.innerHTML = '<span style="color:var(--text-muted)">No outdoor unit selected in Electrical Survey.</span>';
+    msdUpdateZoneOptions('unknown');
+    return;
+  }
+
+  const model    = opt.dataset.model || '';
+  const brandBtn = document.querySelector('#msOBrand .toggle-btn.active');
+  const brand    = brandBtn ? brandBtn.dataset.brand : '';
+  const btu      = opt.dataset.btu ? parseInt(opt.dataset.btu) : null;
+  const h = parseFloat(opt.dataset.h) || null;
+  const w = parseFloat(opt.dataset.w) || null;
+  const d = parseFloat(opt.dataset.d) || null;
+  const dimStr = (h && w && d) ? h + '" H × ' + w + '" W × ' + d + '" D' : 'Dims not on file';
+
+  const mca  = document.getElementById('ms-mca')  ? document.getElementById('ms-mca').value  : '';
+  const mocp = document.getElementById('ms-mocp') ? document.getElementById('ms-mocp').value : '';
+
+  // ── Determine zone capacity from MS_OUTDOOR pricebook ──────────────────
+  const selCode = opt.value;
+  let zoneCapacity = 'single';
+  var brKeys = Object.keys(MS_OUTDOOR);
+  for (var bi = 0; bi < brKeys.length; bi++) {
+    var brMulti = MS_OUTDOOR[brKeys[bi]].multi || [];
+    for (var mi = 0; mi < brMulti.length; mi++) {
+      if (brMulti[mi].code === selCode) { zoneCapacity = 'multi'; break; }
+    }
+    if (zoneCapacity === 'multi') break;
+  }
+
+  const card = document.getElementById('msd-equip-card');
+  if (card) {
+    card.dataset.uw = w || '';
+    card.dataset.ud = d || '';
+    card.dataset.uh = h || '';
+    card.dataset.zoneCapacity = zoneCapacity;
+  }
+
+  let html = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;font-size:13px;">';
+  html += '<div><b>Brand:</b> ' + (brand || '—') + '</div>';
+  html += '<div><b>Model:</b> ' + (model || '—') + '</div>';
+  if (btu) html += '<div><b>Capacity:</b> ' + (btu/1000).toFixed(0) + 'K BTU</div>';
+  html += '<div><b>Type:</b> ' + (zoneCapacity === 'multi' ? 'Multi-zone' : 'Single-zone') + '</div>';
+  html += '<div><b>Dims:</b> ' + dimStr + '</div>';
+  if (mca)  html += '<div><b>MCA:</b> ' + mca + 'A</div>';
+  if (mocp) html += '<div><b>MOCP:</b> ' + mocp + 'A</div>';
+  html += '</div>';
+
+  if (h && w && d) {
+    html += '<div class="info-blue" style="font-size:12px;margin-top:10px;">📏 Unit footprint: <b>' + w + '" W × ' + d + '" D × ' + h + '" H</b> — enter available space below to check fit.</div>';
+  }
+
+  summaryEl.innerHTML = html;
+  msdUpdateZoneOptions(zoneCapacity);
+  msdOutdoorClearCheck();
+}
+
+/**
+ * msdUpdateZoneOptions — enable or disable multi-zone buttons based on condenser type.
+ * Sources from MS_OUTDOOR: units in the .multi array can support multiple zones.
+ */
+function msdUpdateZoneOptions(zoneCapacity) {
+  const isSingle = (zoneCapacity !== 'multi');
+  const noteEl = document.getElementById('msd-zone-note');
+  if (noteEl) noteEl.style.display = isSingle && zoneCapacity !== 'unknown' ? '' : 'none';
+
+  for (var z = 2; z <= 5; z++) {
+    var btn = document.getElementById('msd-zc' + z);
+    if (!btn) continue;
+    btn.disabled = isSingle;
+    btn.style.opacity   = isSingle ? '0.35' : '';
+    btn.style.cursor    = isSingle ? 'not-allowed' : '';
+    btn.style.pointerEvents = isSingle ? 'none' : '';
+    btn.title = isSingle && zoneCapacity !== 'unknown'
+      ? 'Single-zone condenser — cannot support multiple heads'
+      : '';
+  }
+
+  // If > 1 zone is currently active but unit is single-zone, snap back to 1
+  if (isSingle) {
+    var active = document.querySelector('#msd-zone-count .toggle-btn.active');
+    if (active && active.id !== 'msd-zc1') {
+      if (active) active.classList.remove('active');
+      var btn1 = document.getElementById('msd-zc1');
+      if (btn1) { btn1.classList.add('active'); msdSetZones(1); }
+    }
+  }
+}
+
+/**
+ * msdSetZones — build zone cards for n indoor units
+ */
+function msdSetZones(n) {
+  const container = document.getElementById('msd-head-units');
+  if (!container) return;
+  container.innerHTML = '';
+  for (let i = 1; i <= n; i++) {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="card-title">Zone ${i} — Indoor Unit</div>
+      <div class="field">
+        <label>Room / area name</label>
+        <input type="text" id="msd-room-${i}" placeholder="e.g. Master Bedroom">
+      </div>
+      <div class="field">
+        <label>Indoor unit style</label>
+        <div class="toggle-group">
+          <button class="toggle-btn" onclick="toggle(this,'msd-style-${i}-wall','msd-style-${i}-cass msd-style-${i}-floor msd-style-${i}-duct');msdPopulateIndoor(${i},'wall')">Wall mount</button>
+          <button class="toggle-btn" onclick="toggle(this,'msd-style-${i}-cass','msd-style-${i}-wall msd-style-${i}-floor msd-style-${i}-duct');msdPopulateIndoor(${i},'cassette')">Cassette</button>
+          <button class="toggle-btn" onclick="toggle(this,'msd-style-${i}-floor','msd-style-${i}-wall msd-style-${i}-cass msd-style-${i}-duct');msdPopulateIndoor(${i},'floor')">Floor / console</button>
+          <button class="toggle-btn" onclick="toggle(this,'msd-style-${i}-duct','msd-style-${i}-wall msd-style-${i}-cass msd-style-${i}-floor');msdPopulateIndoor(${i},'ducted')">Concealed ducted</button>
+        </div>
+      </div>
+      <div class="field" id="msd-imodel-wrap-${i}" style="display:none">
+        <label>Proposed model <span class="label-hint">filtered by brand from Electrical Survey</span></label>
+        <select id="msd-imodel-${i}" onchange="msdIndoorSelect(${i})"><option value="">Select model…</option></select>
+      </div>
+      <div id="msd-idims-${i}" style="display:none"></div>
+      <div id="msd-indoor-clear-${i}"></div>
+      <div class="field">
+        <label>Location in home</label>
+        <input type="text" id="msd-loc-${i}" placeholder="e.g. north wall, 8ft ceiling">
+      </div>
+      <div class="field">
+        <label>Wall construction</label>
+        <div class="toggle-group">
+          <button class="toggle-btn" onclick="toggle(this,'msd-wall-wood-${i}','msd-wall-metal-${i}')">Wood studs</button>
+          <button class="toggle-btn" onclick="toggle(this,'msd-wall-metal-${i}','msd-wall-wood-${i}')">Metal studs</button>
+        </div>
+      </div>`;
+    container.appendChild(card);
+  }
+}
+
+/**
+ * msdPopulateIndoor — populate indoor model dropdown for zone i
+ * Sources brand from the Electrical Survey brand toggle (#msOBrand)
+ */
+function msdPopulateIndoor(zoneIdx, style) {
+  const brandBtn = document.querySelector('#msOBrand .toggle-btn.active');
+  const brand = brandBtn ? brandBtn.dataset.brand : '';
+  const units = ((MS_INDOOR[brand] || {})[style] || []);
+
+  const sel  = document.getElementById('msd-imodel-' + zoneIdx);
+  const wrap = document.getElementById('msd-imodel-wrap-' + zoneIdx);
+  if (!sel) return;
+
+  sel.innerHTML = '<option value="">Select model…</option>';
+
+  const sources = units.length
+    ? [{ label: brand, list: units }]
+    : ['Mitsubishi', 'Daikin', 'AC Pro']
+        .map(function(br) { return { label: br, list: ((MS_INDOOR[br] || {})[style] || []) }; })
+        .filter(function(x) { return x.list.length; });
+
+  sources.forEach(function(src) {
+    const grp = document.createElement('optgroup');
+    grp.label = src.label;
+    src.list.forEach(function(u) {
+      const dimStr = u.h ? u.h + '"H×' + u.w + '"W×' + u.d + '"D' : 'dims TBD';
+      const opt = document.createElement('option');
+      opt.value = u.code;
+      opt.dataset.h = u.h != null ? u.h : '';
+      opt.dataset.w = u.w != null ? u.w : '';
+      opt.dataset.d = u.d != null ? u.d : '';
+      opt.dataset.model = u.model;
+      opt.textContent = (u.btu/1000) + 'K — ' + u.model + ' (' + dimStr + ')';
+      grp.appendChild(opt);
+    });
+    sel.appendChild(grp);
+  });
+
+  if (wrap) wrap.style.display = '';
+  msdRenderIndoorClearance(zoneIdx, style);
+}
+
+/**
+ * msdIndoorSelect — show dimensions for selected indoor unit
+ */
+function msdIndoorSelect(zoneIdx) {
+  const sel   = document.getElementById('msd-imodel-' + zoneIdx);
+  const panel = document.getElementById('msd-idims-' + zoneIdx);
+  if (!sel || !panel) return;
+  const opt = sel.options[sel.selectedIndex];
+  if (!opt || !opt.value) { panel.style.display = 'none'; return; }
+  const h = parseFloat(opt.dataset.h), w = parseFloat(opt.dataset.w), d = parseFloat(opt.dataset.d);
+  panel.innerHTML = (h && w && d)
+    ? '<div class="info-blue" style="font-size:12px;padding:8px 12px;border-radius:6px;margin-top:4px;">Ὅ0 <b>' + opt.dataset.model + '</b>: ' + h + '" H × ' + w + '" W × ' + d + '" D projection from wall</div>'
+    : '<div class="info-blue" style="font-size:12px;padding:8px 12px;border-radius:6px;margin-top:4px;">Ὅ0 <b>' + opt.dataset.model + '</b>: Dims not on file — verify spec sheet</div>';
+  panel.style.display = '';
+}
+
+/**
+ * MSD_CLEARANCES — manufacturer minimums for Mitsubishi / Daikin / AC Pro.
+ * Sources: Mitsubishi MUZ/MXZ installation manuals; Daikin RX/MX series;
+ * AC Pro MHPC series installation guide. All are top-discharge residential units.
+ */
+const MSD_CLEARANCES = {
+  outdoor: {
+    overhead: { min: 12, rec: 36, label: 'Overhead' },
+    front:    { min: 24, rec: 24, label: 'Front (access / discharge face)' },
+    rear:     { min: 6,  rec: 12, label: 'Rear (intake)' },
+    sides:    { min: 12, rec: 12, label: 'Each side' }
+  },
+  indoor: {
+    wall: {
+      ceiling:   { min: 6,  label: 'Ceiling to top of unit' },
+      sides:     { min: 6,  label: 'Side clearance — each side' },
+      front:     { min: 24, label: 'Open space in front of unit' },
+      minHeight: { min: 84, label: 'Mounting height — bottom of unit from floor' }
+    },
+    cassette: {
+      sides: { min: 12, label: 'Panel edge to nearest wall / obstacle (each side)' },
+      below: { min: 36, label: 'Open space below cassette panel' }
+    },
+    floor: {
+      sides: { min: 6,  label: 'Side clearance — each side' },
+      front: { min: 24, label: 'Open space in front of unit' }
+    },
+    ducted: null
+  }
+};
+
+/**
+ * msdOutdoorClearCheck — check unit footprint fit and all directional clearances.
+ */
+function msdOutdoorClearCheck() {
+  const fitPanel = document.getElementById('msd-fit-panel');
+  const refEl    = document.getElementById('msd-outdoor-unit-ref');
+  const card     = document.getElementById('msd-equip-card');
+  if (!fitPanel) return;
+
+  const uw = parseFloat(card ? card.dataset.uw : 0) || 0;
+  const ud = parseFloat(card ? card.dataset.ud : 0) || 0;
+  const uh = parseFloat(card ? card.dataset.uh : 0) || 0;
+
+  if (refEl) {
+    refEl.textContent = (uw && ud && uh)
+      ? 'Unit: ' + uw + '" W × ' + ud + '" D × ' + uh + '" H'
+      : 'Select a unit in the Electrical Survey to see dimensions here.';
+  }
+
+  var g = function(id){ var el=document.getElementById(id); return el ? parseFloat(el.value)||0 : 0; };
+  var spaceW=g('msd-outdoor-w'), spaceD=g('msd-outdoor-d');
+  var cOH=g('msd-clear-overhead'), cFr=g('msd-clear-front');
+  var cRe=g('msd-clear-rear'), cL=g('msd-clear-left'), cR=g('msd-clear-right');
+
+  if (!spaceW && !spaceD && !cOH && !cFr && !cRe && !cL && !cR) {
+    fitPanel.style.display = 'none'; return;
+  }
+
+  var rows = [];
+  function chk(val, min, rec, label) {
+    if (!val) return;
+    var ok = val >= min, warn = ok && rec && val < rec;
+    rows.push({ label:label, val:val, min:min, rec:rec, ok:ok, warn:warn });
+  }
+  if (uw && spaceW) rows.push({ label:'Unit width '+uw+'" vs. '+spaceW+'" space', val:spaceW, min:uw, rec:0, ok:spaceW>=uw, warn:false });
+  if (ud && spaceD) rows.push({ label:'Unit depth '+ud+'" vs. '+spaceD+'" space', val:spaceD, min:ud, rec:0, ok:spaceD>=ud, warn:false });
+  var C = MSD_CLEARANCES.outdoor;
+  chk(cOH, C.overhead.min, C.overhead.rec, 'Overhead');
+  chk(cFr, C.front.min,    C.front.rec,    'Front');
+  chk(cRe, C.rear.min,     C.rear.rec,     'Rear');
+  chk(cL,  C.sides.min,    C.sides.rec,    'Left side');
+  chk(cR,  C.sides.min,    C.sides.rec,    'Right side');
+
+  if (!rows.length) { fitPanel.style.display = 'none'; return; }
+
+  var fails  = rows.filter(function(r){ return !r.ok; });
+  var warns  = rows.filter(function(r){ return r.ok && r.warn; });
+  var passes = rows.filter(function(r){ return r.ok && !r.warn; });
+  var bg  = fails.length ? '#fef2f2' : warns.length ? '#fffbeb' : 'var(--green-light)';
+  var bdr = fails.length ? '#fca5a5' : warns.length ? '#fcd34d' : 'var(--green-border)';
+  var ttl = fails.length ? '⚠️ Clearance issues found' : warns.length ? '⚠️ Passes minimums — see recommendations' : '✅ All clearances OK';
+
+  var html = '<div style="border-radius:6px;overflow:hidden;border:1px solid '+bdr+';">';
+  html += '<div style="padding:8px 12px;font-size:12px;font-weight:700;background:'+bg+';border-bottom:1px solid '+bdr+';">'+ttl+'</div>';
+  html += '<div style="padding:8px 12px;font-size:12px;">';
+  fails.forEach(function(r) { html+='<div style="color:var(--red);margin:2px 0;">❌ '+r.label+' — min '+r.min+'" required</div>'; });
+  warns.forEach(function(r) { html+='<div style="color:#92400e;margin:2px 0;">⚠️ '+r.label+': '+r.val+'" — meets min '+r.min+'" but rec '+r.rec+'"</div>'; });
+  passes.forEach(function(r){ html+='<div style="color:var(--green);margin:2px 0;">✅ '+r.label+(r.min?' — meets '+r.min+'" min':'')+'</div>'; });
+  html += '</div></div>';
+  fitPanel.innerHTML = html; fitPanel.style.display = '';
+}
+
+/**
+ * msdRenderIndoorClearance — inject style-specific measurement fields into
+ * msd-indoor-clear-{i} for zone i. Called by msdPopulateIndoor.
+ */
+function msdRenderIndoorClearance(zoneIdx, style) {
+  var el = document.getElementById('msd-indoor-clear-' + zoneIdx);
+  if (!el) return;
+
+  if (style === 'ducted') {
+    el.innerHTML = '<div class="info-blue" style="font-size:12px;margin:12px 0 4px;padding:8px 12px;border-radius:6px;">'
+      + '📋 Concealed ducted: clearances vary by model. Review spec sheet for service access, '
+      + 'duct inlet/outlet sizes, and static pressure before finalising placement.</div>';
+    return;
+  }
+
+  var spec = MSD_CLEARANCES.indoor[style];
+  if (!spec) { el.innerHTML = ''; return; }
+
+  var styleName = { wall:'Wall Mount', cassette:'Ceiling Cassette', floor:'Floor / Console' }[style] || style;
+
+  var refTable = '<table style="margin-top:6px;border-collapse:collapse;font-size:12px;line-height:1.8;">';
+  Object.keys(spec).forEach(function(k) {
+    refTable += '<tr><td style="padding:1px 10px 1px 0;">' + spec[k].label + '</td><td><b>' + spec[k].min + '&Prime; min</b></td></tr>';
+  });
+  refTable += '</table>';
+
+  var inputs = '';
+  Object.keys(spec).forEach(function(k) {
+    inputs += '<div class="field"><label>' + spec[k].label + ' <span class="label-hint">inches</span></label>'
+           + '<input type="number" id="msd-ic-'+zoneIdx+'-'+k+'" placeholder="min '+spec[k].min+'&Prime;" oninput="msdIndoorClearCheck('+zoneIdx+',\''+style+'\')"></div>';
+  });
+
+  el.innerHTML = '<div style="border-top:1px solid var(--border);margin-top:14px;padding-top:12px;">'
+    + '<div class="card-title" style="font-size:13px;margin-bottom:6px;">Clearance Measurements — ' + styleName + '</div>'
+    + '<div class="info-blue" style="font-size:12px;margin-bottom:10px;"><b>Manufacturer minimums:</b>' + refTable + '</div>'
+    + inputs
+    + '<div id="msd-ic-panel-' + zoneIdx + '" style="margin-top:6px;"></div>'
+    + '</div>';
+}
+
+/**
+ * msdIndoorClearCheck — compare measurements against minimums for zone i.
+ */
+function msdIndoorClearCheck(zoneIdx, style) {
+  var panelEl = document.getElementById('msd-ic-panel-' + zoneIdx);
+  if (!panelEl) return;
+  var spec = MSD_CLEARANCES.indoor[style];
+  if (!spec) return;
+
+  var rows = [];
+  Object.keys(spec).forEach(function(k) {
+    var inp = document.getElementById('msd-ic-' + zoneIdx + '-' + k);
+    if (!inp || !inp.value) return;
+    var val = parseFloat(inp.value) || 0;
+    rows.push({ label: spec[k].label, val: val, min: spec[k].min, ok: val >= spec[k].min });
+  });
+
+  if (!rows.length) { panelEl.style.display = 'none'; return; }
+
+  var fails = rows.filter(function(r){ return !r.ok; });
+  var bg  = fails.length ? '#fef2f2' : 'var(--green-light)';
+  var bdr = fails.length ? '#fca5a5' : 'var(--green-border)';
+  var ttl = fails.length ? '⚠️ Clearance issue' : '✅ Clearances OK';
+  var html = '<div style="border-radius:6px;overflow:hidden;border:1px solid '+bdr+';margin-top:4px;">'
+    + '<div style="padding:6px 12px;font-size:12px;font-weight:700;background:'+bg+';border-bottom:1px solid '+bdr+';">'+ttl+'</div>'
+    + '<div style="padding:6px 12px;font-size:12px;">';
+  fails.forEach(function(r)  { html+='<div style="color:var(--red);margin:2px 0;">❌ '+r.label+': '+r.val+'" — min '+r.min+'" required</div>'; });
+  rows.filter(function(r){ return r.ok; }).forEach(function(r) { html+='<div style="color:var(--green);margin:2px 0;">✅ '+r.label+': '+r.val+'&Prime; — OK</div>'; });
+  html += '</div></div>';
+  panelEl.innerHTML = html; panelEl.style.display = '';
+}
+}
 
 </script>
 </body>
