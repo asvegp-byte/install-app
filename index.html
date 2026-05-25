@@ -2508,9 +2508,9 @@
       <div class="card-title">Outdoor Unit — Clearance Assessment</div>
       <div id="msd-outdoor-unit-ref" style="font-size:12px;color:var(--text-muted);margin-bottom:10px;"></div>
       <div class="info-blue" style="font-size:12px;margin-bottom:14px;">
-        <b>Manufacturer minimums (Mitsubishi / Daikin / AC Pro — top-discharge residential):</b>
+        <b>Manufacturer minimums (Mitsubishi / Daikin / AC Pro — side-discharge residential):</b>
         <table style="width:100%;margin-top:8px;border-collapse:collapse;font-size:12px;line-height:1.8;">
-          <tr><td style="padding:1px 10px 1px 0;white-space:nowrap;">&#x2B06; Overhead</td><td><b>12&Prime; min</b> &mdash; 36&Prime; recommended (top-discharge airflow)</td></tr>
+          <tr><td style="padding:1px 10px 1px 0;white-space:nowrap;">&#x2B06; Overhead</td><td><b>12&Prime; min</b> &mdash; service &amp; airflow clearance above unit</td></tr>
           <tr><td style="padding:1px 10px 1px 0;white-space:nowrap;">&#x27A1; Front (access)</td><td><b>24&Prime; min</b> &mdash; service and airflow clearance</td></tr>
           <tr><td style="padding:1px 10px 1px 0;white-space:nowrap;">&#x2B05; Rear (intake)</td><td><b>6&Prime; min</b> &mdash; inlet air side</td></tr>
           <tr><td style="padding:1px 10px 1px 0;white-space:nowrap;">&#x2194; Each side</td><td><b>12&Prime; min</b></td></tr>
@@ -4776,42 +4776,49 @@ function msdPrefillFromElectrical() {
   const summaryEl = document.getElementById('msd-equip-summary');
   if (!summaryEl) return;
 
-  const sel = document.getElementById('msOModel');
-  if (!sel || !sel.value) {
+  // ── Read brand from Electrical Survey radio buttons ─────────────────────
+  const brandRadio = document.querySelector('input[name="brand"]:checked');
+  const brand = brandRadio ? brandRadio.value : '';
+
+  // ── Read model from Electrical Survey modelSel dropdown ─────────────────
+  const modelSel = document.getElementById('modelSel');
+  const selIdx   = modelSel ? parseInt(modelSel.value) : NaN;
+  const mdl      = (!isNaN(selIdx) && selIdx >= 0 && selIdx < MODELS.length) ? MODELS[selIdx] : null;
+
+  if (!mdl || !brand || brand === 'Other') {
     summaryEl.innerHTML = '<span style="color:var(--text-muted)">Complete the Electrical Survey and select a proposed outdoor unit to auto-populate here.</span>';
     msdUpdateZoneOptions('unknown');
     return;
   }
-  const opt = sel.options[sel.selectedIndex];
-  if (!opt || !opt.value) {
-    summaryEl.innerHTML = '<span style="color:var(--text-muted)">No outdoor unit selected in Electrical Survey.</span>';
-    msdUpdateZoneOptions('unknown');
-    return;
-  }
 
-  const model    = opt.dataset.model || '';
-  const brandBtn = document.querySelector('#msOBrand .toggle-btn.active');
-  const brand    = brandBtn ? brandBtn.dataset.brand : '';
-  const btu      = opt.dataset.btu ? parseInt(opt.dataset.btu) : null;
-  const h = parseFloat(opt.dataset.h) || null;
-  const w = parseFloat(opt.dataset.w) || null;
-  const d = parseFloat(opt.dataset.d) || null;
-  const dimStr = (h && w && d) ? h + '" H × ' + w + '" W × ' + d + '" D' : 'Dims not on file';
+  const modelNum = mdl.m || '';
+  const btu      = mdl.btu || null;
+  const voltage  = mdl.v  || null;
+  const mca      = document.getElementById('mca')  ? document.getElementById('mca').value  : (mdl.mca  || '');
+  const mocp     = document.getElementById('mocp') ? document.getElementById('mocp').value : (mdl.mocp || '');
 
-  const mca  = document.getElementById('ms-mca')  ? document.getElementById('ms-mca').value  : '';
-  const mocp = document.getElementById('ms-mocp') ? document.getElementById('ms-mocp').value : '';
-
-  // ── Determine zone capacity from MS_OUTDOOR pricebook ──────────────────
-  const selCode = opt.value;
-  let zoneCapacity = 'single';
+  // ── Cross-reference MS_OUTDOOR for dimensions and zone capacity ──────────
+  let h = null, w = null, d = null, zoneCapacity = 'single';
   var brKeys = Object.keys(MS_OUTDOOR);
-  for (var bi = 0; bi < brKeys.length; bi++) {
-    var brMulti = MS_OUTDOOR[brKeys[bi]].multi || [];
-    for (var mi = 0; mi < brMulti.length; mi++) {
-      if (brMulti[mi].code === selCode) { zoneCapacity = 'multi'; break; }
+  outer: for (var bi = 0; bi < brKeys.length; bi++) {
+    var brData = MS_OUTDOOR[brKeys[bi]];
+    var singleArr = brData.single || [];
+    for (var si = 0; si < singleArr.length; si++) {
+      if (singleArr[si].model === modelNum) {
+        h = singleArr[si].h; w = singleArr[si].w; d = singleArr[si].d;
+        zoneCapacity = 'single'; break outer;
+      }
     }
-    if (zoneCapacity === 'multi') break;
+    var multiArr = brData.multi || [];
+    for (var mi = 0; mi < multiArr.length; mi++) {
+      if (multiArr[mi].model === modelNum) {
+        h = multiArr[mi].h; w = multiArr[mi].w; d = multiArr[mi].d;
+        zoneCapacity = 'multi'; break outer;
+      }
+    }
   }
+
+  const dimStr = (h && w && d) ? h + '" H &times; ' + w + '" W &times; ' + d + '" D' : 'Dims not on file — verify spec sheet';
 
   const card = document.getElementById('msd-equip-card');
   if (card) {
@@ -4821,25 +4828,30 @@ function msdPrefillFromElectrical() {
     card.dataset.zoneCapacity = zoneCapacity;
   }
 
-  let html = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;font-size:13px;">';
-  html += '<div><b>Brand:</b> ' + (brand || '—') + '</div>';
-  html += '<div><b>Model:</b> ' + (model || '—') + '</div>';
-  if (btu) html += '<div><b>Capacity:</b> ' + (btu/1000).toFixed(0) + 'K BTU</div>';
-  html += '<div><b>Type:</b> ' + (zoneCapacity === 'multi' ? 'Multi-zone' : 'Single-zone') + '</div>';
+  // ── Build summary grid ───────────────────────────────────────────────────
+  let html = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 20px;font-size:13px;">';
+  html += '<div><b>Brand:</b> ' + brand + '</div>';
+  html += '<div><b>Model:</b> ' + modelNum + '</div>';
+  if (btu)     html += '<div><b>Capacity:</b> ' + (btu/1000).toFixed(0) + 'K BTU</div>';
+  html += '<div><b>Type:</b> ' + (zoneCapacity === 'multi' ? '&#9989; Multi-zone capable' : 'Single-zone') + '</div>';
+  if (voltage) html += '<div><b>Voltage:</b> ' + voltage + 'V</div>';
+  html += '<div><b>Discharge:</b> Side (front face)</div>';
   html += '<div><b>Dims:</b> ' + dimStr + '</div>';
-  if (mca)  html += '<div><b>MCA:</b> ' + mca + 'A</div>';
-  if (mocp) html += '<div><b>MOCP:</b> ' + mocp + 'A</div>';
+  if (mca)     html += '<div><b>MCA:</b> ' + mca + 'A</div>';
+  if (mocp)    html += '<div><b>MOCP:</b> ' + mocp + 'A</div>';
   html += '</div>';
 
   if (h && w && d) {
-    html += '<div class="info-blue" style="font-size:12px;margin-top:10px;">📏 Unit footprint: <b>' + w + '" W × ' + d + '" D × ' + h + '" H</b> — enter available space below to check fit.</div>';
+    html += '<div class="info-blue" style="font-size:12px;margin-top:10px;">';
+    html += '&#128207; Footprint: <b>' + w + '&Prime; W &times; ' + d + '&Prime; D &times; ' + h + '&Prime; H</b>';
+    html += ' &mdash; enter available space in clearance section below to check fit.';
+    html += '</div>';
   }
 
   summaryEl.innerHTML = html;
   msdUpdateZoneOptions(zoneCapacity);
   msdOutdoorClearCheck();
 }
-
 /**
  * msdUpdateZoneOptions — enable or disable multi-zone buttons based on condenser type.
  * Sources from MS_OUTDOOR: units in the .multi array can support multiple zones.
@@ -4979,7 +4991,7 @@ function msdIndoorSelect(zoneIdx) {
 /**
  * MSD_CLEARANCES — manufacturer minimums for Mitsubishi / Daikin / AC Pro.
  * Sources: Mitsubishi MUZ/MXZ installation manuals; Daikin RX/MX series;
- * AC Pro MHPC series installation guide. All are top-discharge residential units.
+ * AC Pro MHPC series installation guide. These are side-discharge residential units (air exits the front face).
  */
 const MSD_CLEARANCES = {
   outdoor: {
