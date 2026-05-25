@@ -536,8 +536,13 @@
         </div>
         <div class="job-type-card" onclick="selectJobType('minisplit', this)">
           <div class="job-type-icon">&#x1F4A8;</div>
-          <div class="job-type-name">Mini-Split</div>
-          <div class="job-type-desc">Ductless &mdash; single or multi-zone</div>
+          <div class="job-type-name">Mini-Split &mdash; New Install</div>
+          <div class="job-type-desc">New ductless install, needs new circuit</div>
+        </div>
+        <div class="job-type-card" onclick="selectJobType('minisplit_replace', this)">
+          <div class="job-type-icon">&#x1F501;</div>
+          <div class="job-type-name">Mini-Split &mdash; Replace</div>
+          <div class="job-type-desc">Swap existing unit, same circuit</div>
         </div>
       </div>
       <div id="jobTypeSelected" style="display:none;">
@@ -1363,21 +1368,21 @@
 
   <div class="diagram-card">
     <div class="diagram-title">🔧 Line set identification</div>
-    <svg class="diagram-svg" width="320" height="120" viewBox="0 0 320 120">
-      <circle cx="60" cy="40" r="18" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/>
-      <text x="60" y="44" text-anchor="middle" font-size="10" fill="#1e40af" font-weight="600">SUCTION</text>
-      <text x="60" y="70" text-anchor="middle" font-size="10" fill="#374151">Larger pipe</text>
-      <text x="60" y="83" text-anchor="middle" font-size="10" fill="#374151">Usually 3/4" or 7/8"</text>
-      <text x="60" y="96" text-anchor="middle" font-size="10" fill="#374151">Insulated (cold)</text>
-      <circle cx="60" cy="40" r="10" fill="#93c5fd" stroke="#3b82f6" stroke-width="1"/>
-      <circle cx="220" cy="40" r="12" fill="#fee2e2" stroke="#dc2626" stroke-width="2"/>
-      <text x="220" y="44" text-anchor="middle" font-size="10" fill="#991b1b" font-weight="600">LIQUID</text>
-      <text x="220" y="70" text-anchor="middle" font-size="10" fill="#374151">Smaller pipe</text>
-      <text x="220" y="83" text-anchor="middle" font-size="10" fill="#374151">Usually 3/8" or 1/4"</text>
-      <text x="220" y="96" text-anchor="middle" font-size="10" fill="#374151">Not insulated</text>
-      <circle cx="220" cy="40" r="6" fill="#fca5a5" stroke="#dc2626" stroke-width="1"/>
-      <line x1="95" y1="40" x2="195" y2="40" stroke="#374151" stroke-width="1" stroke-dasharray="4,3"/>
-      <text x="145" y="35" text-anchor="middle" font-size="10" fill="#6b7280">LINE SET</text>
+    <svg class="diagram-svg" width="320" height="130" viewBox="0 0 320 130">
+      <circle cx="60" cy="33" r="22" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/>
+      <circle cx="60" cy="33" r="12" fill="#93c5fd" stroke="#3b82f6" stroke-width="1.5"/>
+      <circle cx="240" cy="33" r="15" fill="#fee2e2" stroke="#dc2626" stroke-width="2"/>
+      <circle cx="240" cy="33" r="7" fill="#fca5a5" stroke="#dc2626" stroke-width="1.5"/>
+      <line x1="84" y1="33" x2="213" y2="33" stroke="#374151" stroke-width="1.5" stroke-dasharray="5,3"/>
+      <text x="150" y="27" text-anchor="middle" font-size="10" fill="#6b7280" font-weight="600">LINE SET</text>
+      <text x="60" y="67" text-anchor="middle" font-size="10" fill="#1e40af" font-weight="700">SUCTION</text>
+      <text x="60" y="80" text-anchor="middle" font-size="9" fill="#374151">Larger pipe</text>
+      <text x="60" y="92" text-anchor="middle" font-size="9" fill="#374151">Usually 3/4" or 7/8"</text>
+      <text x="60" y="104" text-anchor="middle" font-size="9" fill="#374151">Insulated (cold)</text>
+      <text x="240" y="67" text-anchor="middle" font-size="10" fill="#991b1b" font-weight="700">LIQUID</text>
+      <text x="240" y="80" text-anchor="middle" font-size="9" fill="#374151">Smaller pipe</text>
+      <text x="240" y="92" text-anchor="middle" font-size="9" fill="#374151">Usually 3/8" or 1/4"</text>
+      <text x="240" y="104" text-anchor="middle" font-size="9" fill="#374151">Not insulated</text>
     </svg>
     <div class="diagram-note">💡 The suction line is the large insulated copper pipe. The liquid line is the small uninsulated copper pipe. Both run between the condenser and air handler. Measure both diameters and total length.</div>
   </div>
@@ -1686,7 +1691,7 @@
         <option>Unknown</option>
       </select>
     </div>
-    <div class="info-blue" style="font-size:12px;">Wire gauge capacity: #14=15A, #12=20A, #10=30A, #8=40A, #6=55A, #4=70A. Wire must handle the new unit's MCA.</div>
+    <div class="info-blue" style="font-size:12px;line-height:1.7;"><b>Capacity:</b> #14=15A &middot; #12=20A &middot; #10=30A &middot; #8=40A &middot; #6=55A &middot; #4=70A. Wire must handle the new unit's MCA.<br><b>How to identify it:</b> Open the outdoor disconnect box (small weatherproof box on the wall near the condenser) &#8212; the gauge is printed on the cable jacket, e.g. <em>10 AWG</em> or <em>10/2 WITH GROUND</em>. If inaccessible, use breaker size as a guide: 30A breaker &rarr; likely #10 &nbsp;&middot;&nbsp; 20A &rarr; likely #12 &nbsp;&middot;&nbsp; 40A &rarr; likely #8. When in doubt, select “Unknown.”</div>
   </div>
 
   <div class="card" id="ahElecCard">
@@ -2179,6 +2184,27 @@
       <label>Solar Backfeed Breaker (amps)</label>
       <input type="number" id="solAmps" placeholder="e.g. 32" min="1" max="200">
       <div class="ms-hint">Labeled on the solar backfeed breaker in the panel</div>
+    </div>
+    <div class="ms-field">
+      <label>Panel location</label>
+      <select id="ms-panelLocation">
+        <option value="">Select...</option>
+        <option>Garage</option>
+        <option>Utility room</option>
+        <option>Hallway</option>
+        <option>Exterior</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div class="ms-field">
+      <label>Panel Interior Photo <span style="font-weight:400;color:#aaa">(mark as taken, upload to ServiceTitan)</span></label>
+      <div class="photo-grid" style="grid-template-columns:repeat(auto-fill,minmax(110px,1fr));">
+        <div class="photo-item" id="ms-photo-panel" onclick="capturePhoto('ms-photo-panel','Panel Interior')">
+          <div class="photo-icon">&#128247;</div>
+          <div class="photo-label">Panel Interior</div>
+          <div class="photo-status">Tap to mark as taken</div>
+        </div>
+      </div>
     </div>
     <div class="ms-nav">
       <button class="btn btn-sec" onclick="ms_go(1)">&larr; Back</button>
@@ -2786,7 +2812,8 @@ function navigate(dir) {
   if (next < 2 || next > totalSections) return;
 
   let skip = false;
-  if (jobType === 'minisplit' && next === 4) skip = true;
+  if ((jobType === 'minisplit' || jobType === 'minisplit_replace') && next === 4) skip = true;
+  if (jobType === 'minisplit' && next === 6) skip = true;
   if (jobType !== 'minisplit' && next === 8) skip = true;
 
   document.getElementById('section-' + currentSection).classList.remove('active');
@@ -2833,7 +2860,8 @@ function selectJobType(type, el) {
     split_hp: 'Split Heat Pump System',
     split_ac: 'Split AC + Gas Furnace',
     packaged: 'Packaged Unit',
-    minisplit: 'Mini-Split System'
+    minisplit: 'Mini-Split — New Install',
+    minisplit_replace: 'Mini-Split — Replacement'
   };
 
   document.getElementById('jobTypeSelected').style.display = 'block';
@@ -2902,7 +2930,7 @@ function applyJobTypeVisibility(type) {
 
   const isSplit = type === 'split_hp' || type === 'split_ac';
   const isPackaged = type === 'packaged';
-  const isMiniSplit = type === 'minisplit';
+  const isMiniSplit = type === 'minisplit' || type === 'minisplit_replace';
   const hasDucts = isSplit || isPackaged;
   const hasIndoorUnit = isSplit;
   const hasLineset = isSplit || isMiniSplit;
