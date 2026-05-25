@@ -4582,7 +4582,7 @@ class MJHouse{
   slabHeating(){return(this.foundation==='slab'&&this.slabPerimeter>0)?MJ_SLAB_F*this.slabPerimeter*MJ_WINTER_DT:0;}
   totalCooling(){const rs=this.rooms.reduce((s,r)=>s+r.coolingLoad(),0);const[is,il]=this.infiltrationCooling();return[rs+is,il*1.10];}
   totalHeating(){return this.rooms.reduce((s,r)=>s+r.heatingLoad(),0)+this.infiltrationHeating()+this.slabHeating();}
-  recommendedTonnage(){const[s,l]=this.totalCooling(),total=s+l,raw=total/12000;for(const sz of[1.5,2,2.5,3,3.5,4,4.5,5,6,7.5,10])if(raw<=sz*1.15)return[sz,raw];return[Math.round(raw*2)/2,raw];}
+  recommendedTonnage(){const[s,l]=this.totalCooling(),total=s+l,raw=total/12000;for(const sz of[0.75,1,1.5,2,2.5,3,3.5,4,4.5,5,6,7.5,10])if(raw<=sz*1.15)return[sz,raw];return[Math.round(raw*4)/4,raw];}
 }
 
 function mjRunQuickEstimate(d){
@@ -4609,7 +4609,7 @@ function mjRunQuickEstimate(d){
   const[recT,rawT]=house.recommendedTonnage(),shr=totC>0?totS/totC:0;
   let confidence='Medium',confidence_note='Suitable for budgeting and initial conversations. Full room-by-room calculation recommended before ordering equipment.';
   if(d.window_exposure==='heavy'||d.orientation==='worst'){confidence='Lower — complex exposure';confidence_note='High solar exposure increases uncertainty. Full Manual J strongly recommended before specifying equipment.';}
-  return{mode:'quick',sqft,year_built:year,wall_type,ceiling_type,glass_type:glass,construction,foundation,total_cooling:Math.round(totC),total_heating:Math.round(totH),total_sensible:Math.round(totS),total_latent:Math.round(totL),shr:Math.round(shr*1000)/1000,raw_tons:Math.round(rawT*100)/100,rec_tons:recT,range_low:Math.max(1.5,Math.round(rawT*0.85*2)/2),range_high:Math.round(rawT*1.15*2)/2,btusqft:Math.round(totC/sqft*10)/10,confidence,confidence_note,assumed_wall:wall_type,assumed_ceiling:ceiling_type,assumed_glass:glass,window_sqft:Math.round(totalWin)};
+  return{mode:'quick',sqft,year_built:year,wall_type,ceiling_type,glass_type:glass,construction,foundation,total_cooling:Math.round(totC),total_heating:Math.round(totH),total_sensible:Math.round(totS),total_latent:Math.round(totL),shr:Math.round(shr*1000)/1000,raw_tons:Math.round(rawT*100)/100,rec_tons:recT,range_low:Math.max(0.75,Math.round(rawT*0.85*4)/4),range_high:Math.round(rawT*1.15*4)/4,btusqft:Math.round(totC/sqft*10)/10,confidence,confidence_note,assumed_wall:wall_type,assumed_ceiling:ceiling_type,assumed_glass:glass,window_sqft:Math.round(totalWin)};
 }
 
 function mjRunFullEstimate(d){
@@ -4879,6 +4879,8 @@ function msdPrefillFromElectrical() {
     card.dataset.ud = d || '';
     card.dataset.uh = h || '';
     card.dataset.zoneCapacity = zoneCapacity;
+    card.dataset.brand = brand;
+    card.dataset.btu   = btu || '';
   }
 
   // ── Build summary grid ───────────────────────────────────────────────────
@@ -5001,9 +5003,16 @@ function msdSetZones(n) {
  * Sources brand from the Electrical Survey brand toggle (#msOBrand)
  */
 function msdPopulateIndoor(zoneIdx, style) {
-  const brandBtn = document.querySelector('#msOBrand .toggle-btn.active');
-  const brand = brandBtn ? brandBtn.dataset.brand : '';
-  const units = ((MS_INDOOR[brand] || {})[style] || []);
+  const card = document.getElementById('msd-equip-card');
+  const brand = card ? (card.dataset.brand || '') : '';
+  const outerBtu = card ? parseInt(card.dataset.btu || '0') : 0;
+  const zoneCapacity = card ? (card.dataset.zoneCapacity || 'single') : 'single';
+  const isSingle = (zoneCapacity === 'single');
+  const allUnits = ((MS_INDOOR[brand] || {})[style] || []);
+  // For single-zone filter to matching BTU; multi shows all (each zone picks its BTU)
+  const units = (isSingle && outerBtu)
+    ? allUnits.filter(function(u) { return u.btu === outerBtu; })
+    : allUnits;
 
   const sel  = document.getElementById('msd-imodel-' + zoneIdx);
   const wrap = document.getElementById('msd-imodel-wrap-' + zoneIdx);
@@ -5013,9 +5022,11 @@ function msdPopulateIndoor(zoneIdx, style) {
 
   const sources = units.length
     ? [{ label: brand, list: units }]
-    : ['Mitsubishi', 'Daikin', 'AC Pro']
-        .map(function(br) { return { label: br, list: ((MS_INDOOR[br] || {})[style] || []) }; })
-        .filter(function(x) { return x.list.length; });
+    : (allUnits.length && isSingle)
+      ? [{ label: brand + ' (all BTUs)', list: allUnits }]
+      : ['Mitsubishi', 'Daikin', 'AC Pro']
+          .map(function(br) { return { label: br, list: ((MS_INDOOR[br] || {})[style] || []) }; })
+          .filter(function(x) { return x.list.length; });
 
   sources.forEach(function(src) {
     const grp = document.createElement('optgroup');
