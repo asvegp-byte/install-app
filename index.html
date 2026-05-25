@@ -1927,8 +1927,8 @@
     <div class="section-desc">Permit requirements, HOA restrictions, rebate eligibility, and any job-specific notes.</div>
   </div>
 
-  <div class="card">
-    <div class="card-title">Permit & Compliance</div>
+  <div class="card" id="permitComplianceCard">
+    <div class="card-title">Permit &amp; Compliance</div>
     <div class="field">
       <label>Permit required for this job?</label>
       <div class="toggle-group">
@@ -2821,6 +2821,7 @@ function navigate(dir) {
 
   let skip = false;
   if ((jobType === 'minisplit' || jobType === 'minisplit_replace') && next === 4) skip = true;
+  if (jobType === 'minisplit' && next === 5) skip = true;
   if (jobType === 'minisplit' && next === 6) skip = true;
   if (jobType !== 'minisplit' && next === 8) skip = true;
 
@@ -3079,6 +3080,26 @@ function applyJobTypeVisibility(type) {
     if (photoDrainpan) photoDrainpan.style.display = 'none';
     if (photoDrainline) photoDrainline.style.display = 'none';
   }
+
+
+  // ── Section 3: language swap for mini-split new install ────────────────
+  const s3InfoBlue = document.querySelector('#spaceCondenser .info-blue');
+  const s3CardTitle = document.querySelector('#spaceCondenser .card-title');
+  const s3CondHField = Array.from(document.querySelectorAll('#section-3 label'))
+    .find(l => l.textContent.includes('Existing Unit Height'));
+  if (type === 'minisplit') {
+    if (s3InfoBlue) s3InfoBlue.textContent = 'Measure and photograph the proposed outdoor unit location. Verify all clearances before committing to placement — manufacturer minimums are typically 12\u201d on sides, 18\u201324\u201d on service side, and unrestricted overhead for vertical discharge.';
+    if (s3CardTitle) s3CardTitle.textContent = 'Proposed Outdoor Unit Location';
+    if (s3CondHField) s3CondHField.firstChild.textContent = 'Available Height ';
+  } else {
+    if (s3InfoBlue) s3InfoBlue.textContent = 'Measure the existing pad or space AND all clearances. Manufacturer minimum clearances are typically 12\u201d on sides, 18\u201324\u201d on service side, and unrestricted overhead for vertical discharge units.';
+    if (s3CardTitle) s3CardTitle.textContent = 'Condenser / Outdoor Unit Space';
+    if (s3CondHField) s3CondHField.firstChild.textContent = 'Existing Unit Height ';
+  }
+
+  // ── Section 9: hide Permit & Compliance card for mini-splits ────────────
+  const permitCard = document.getElementById('permitComplianceCard');
+  if (permitCard) permitCard.style.display = isMiniSplit ? 'none' : 'block';
 }
 
 // ============================================================
