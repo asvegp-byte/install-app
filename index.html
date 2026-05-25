@@ -4033,6 +4033,7 @@ function today() {
 // ── NAVIGATION ────────────────────────────────────────────
 const LABS = ['','','Panel Info','Existing Loads','Equipment','Results'];
 function ms_go(n) {
+  if (n < 2) { returnToJobSetup(); return; }
   if (n === 5) calc();
   for (let i = 1; i <= 5; i++) {
     const s = $('ms-s'+i); if (s) s.style.display = i===n ? 'block' : 'none';
