@@ -2935,6 +2935,198 @@ function activateBeginBtn() {
     btn.style.color = 'white';
   }
 }
+
+// ============================================================
+// MINI-SPLIT NEW INSTALL — SURVEY SUMMARY
+// ============================================================
+function generateMSSummary() {
+  const v = id => document.getElementById(id)?.value || '—';
+  const flags = [];
+  const warnings = [];
+
+  // Electrical Survey data
+  const msBrand = document.querySelector('input[name="brand"]:checked')?.value || '—';
+  const msModel = document.getElementById('modelSel')?.value || '—';
+  const msMCA   = document.getElementById('mca')?.value   || '—';
+  const msMOCP  = document.getElementById('mocp')?.value  || '—';
+
+  // Outdoor clearances (MS Details tab)
+  const outW  = document.getElementById('msd-outdoor-w')?.value  || '';
+  const outD  = document.getElementById('msd-outdoor-d')?.value  || '';
+  const clrOH = document.getElementById('msd-clear-overhead')?.value || '';
+  const clrFr = document.getElementById('msd-clear-front')?.value  || '';
+  const clrRe = document.getElementById('msd-clear-rear')?.value   || '';
+  const clrLt = document.getElementById('msd-clear-left')?.value   || '';
+  const clrRt = document.getElementById('msd-clear-right')?.value  || '';
+  const fitEl = document.getElementById('msd-fit-panel');
+
+  // Mount type
+  const mountMap = {'msd-mount-ground':'Ground pad','msd-mount-wall':'Wall bracket','msd-mount-roof':'Rooftop'};
+  let mountType = '—';
+  for (const [id, label] of Object.entries(mountMap)) {
+    if (document.getElementById(id)?.classList.contains('active')) { mountType = label; break; }
+  }
+
+  // Zone count + per-zone data
+  let zoneCount = 1;
+  const zcActive = document.querySelector('#msd-zone-count .toggle-btn.active');
+  if (zcActive) zoneCount = parseInt(zcActive.textContent) || 1;
+
+  const zoneData = [];
+  for (let i = 1; i <= zoneCount; i++) {
+    const room  = document.getElementById('msd-room-' + i)?.value  || '—';
+    const loc   = document.getElementById('msd-loc-' + i)?.value   || '—';
+    const model = document.getElementById('msd-imodel-' + i)?.value || '—';
+    const wallEl = document.querySelector('#msd-head-units .card:nth-child(' + i + ') .toggle-btn.active');
+    const wall  = wallEl ? wallEl.textContent.trim() : '—';
+    const dimsEl = document.getElementById('msd-idims-' + i);
+    const dims  = dimsEl ? dimsEl.textContent.trim() : '';
+    zoneData.push({ i, room, loc, model, wall, dims });
+  }
+
+  // MJ result (stored globally when calc runs)
+  const mj = mjLastResult;
+
+  // Panel flags
+  const panelBrand = v('panelBrand');
+  if (panelBrand === 'Federal Pacific' || panelBrand === 'Zinsco') {
+    flags.push('🚨 ' + panelBrand + ' panel — known safety concern. Flag for install manager.');
+  }
+  if ((parseInt(v('blankSlots')) || 99) < 2) {
+    warnings.push('Panel has fewer than 2 open slots — verify breaker availability.');
+  }
+
+  // Clearance flags
+  const oh = parseInt(clrOH) || 0;
+  if (oh > 0 && oh < 12) flags.push('🚨 Overhead clearance ' + oh + '″ is below 12″ minimum.');
+  const fr = parseInt(clrFr) || 0;
+  if (fr > 0 && fr < 24) flags.push('⚠️ Front clearance ' + fr + '″ is below 24″ minimum.');
+  const re = parseInt(clrRe) || 0;
+  if (re > 0 && re < 6) flags.push('⚠️ Rear clearance ' + re + '″ is below 6″ minimum.');
+
+  if (!v('custName') || v('custName') === '—') warnings.push('Customer name not entered.');
+  if (!mj) warnings.push('Manual J not run — load sizing not confirmed.');
+  if (!msModel || msModel === '—') warnings.push('Outdoor unit model not selected in Electrical Survey.');
+
+  // Complexity badge
+  const fc = flags.length, wc = warnings.length;
+  let complexity = 'Straightforward', cc = 'complexity-simple';
+  if (fc >= 2 || (fc >= 1 && wc >= 2)) { complexity = 'Complex — review before ordering'; cc = 'complexity-complex'; }
+  else if (fc >= 1 || wc >= 2) { complexity = 'Moderate — review flags'; cc = 'complexity-moderate'; }
+
+  // Flags container
+  const fc_el = document.getElementById('flagsContainer');
+  let fHTML = '';
+  if (flags.length || warnings.length) {
+    fHTML = '<div class="card"><div class="card-title">⚑ Flags — Review Before Ordering</div>';
+    flags.forEach(f => { fHTML += '<div class="flag-item flag-red"><span class="flag-icon">🚨</span><span>' + f + '</span></div>'; });
+    warnings.forEach(w => { fHTML += '<div class="flag-item flag-yellow"><span class="flag-icon">⚠️</span><span>' + w + '</span></div>'; });
+    fHTML += '</div>';
+  } else {
+    fHTML = '<div class="card"><div class="info-green">✅ No flags. Review data below and confirm before ordering.</div></div>';
+  }
+  if (fc_el) fc_el.innerHTML = fHTML;
+
+  // Zone cards HTML
+  let zoneRows = '';
+  zoneData.forEach(function(z) {
+    zoneRows += '<div class="summary-section">'
+      + '<div class="summary-section-title">Zone ' + z.i + (z.room !== '—' ? ' — ' + z.room : '') + '</div>'
+      + '<div class="summary-row"><span class="summary-label">Room / area</span><span class="summary-value">' + z.room + '</span></div>'
+      + '<div class="summary-row"><span class="summary-label">Wall location</span><span class="summary-value">' + z.loc + '</span></div>'
+      + '<div class="summary-row"><span class="summary-label">Wall construction</span><span class="summary-value">' + z.wall + '</span></div>'
+      + '<div class="summary-row"><span class="summary-label">Proposed indoor model</span><span class="summary-value">' + z.model + '</span></div>'
+      + (z.dims ? '<div class="summary-row"><span class="summary-label">Indoor unit dims</span><span class="summary-value">' + z.dims + '</span></div>' : '')
+      + '</div>';
+  });
+
+  // MJ section HTML
+  let mjSection = '';
+  if (mj) {
+    const shrOk = mj.shr >= 0.7;
+    mjSection = '<div class="summary-section">'
+      + '<div class="summary-section-title">Manual J Load Calculation</div>'
+      + '<div class="summary-row"><span class="summary-label">Recommended size</span>'
+      + '<span class="summary-value" style="font-size:18px;font-weight:800;color:var(--blue);">' + mj.rec_tons + ' tons</span></div>'
+      + '<div class="summary-row"><span class="summary-label">Acceptable range</span><span class="summary-value">' + mj.range_low + ' – ' + mj.range_high + ' tons</span></div>'
+      + '<div class="summary-row"><span class="summary-label">Raw calculated</span><span class="summary-value">' + mj.raw_tons + ' tons</span></div>'
+      + '<div class="summary-row"><span class="summary-label">Total cooling load</span><span class="summary-value">' + mj.total_cooling.toLocaleString() + ' BTU/hr</span></div>'
+      + '<div class="summary-row"><span class="summary-label">Total heating load</span><span class="summary-value">' + mj.total_heating.toLocaleString() + ' BTU/hr</span></div>'
+      + '<div class="summary-row"><span class="summary-label">BTU / sq ft</span><span class="summary-value">' + mj.btusqft + '</span></div>'
+      + '<div class="summary-row"><span class="summary-label">Sensible heat ratio</span><span class="summary-value">' + mj.shr + (shrOk ? ' ✓' : ' ⚠') + '</span></div>'
+      + (mj.confidence ? '<div class="summary-row"><span class="summary-label">Confidence</span><span class="summary-value">' + mj.confidence + '</span></div>' : '')
+      + '</div>';
+  } else {
+    mjSection = '<div class="summary-section"><div class="summary-section-title">Manual J Load Calculation</div>'
+      + '<div class="summary-row"><span class="summary-label">Status</span>'
+      + '<span class="summary-value missing">Not calculated — run Manual J tab first</span></div></div>';
+  }
+
+  // Build final summary HTML
+  const sc = document.getElementById('summaryContainer');
+  sc.innerHTML = '<div class="card">'
+
+    + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">'
+    + '<div><div style="font-size:18px;font-weight:700;">' + (v('custName') || 'Customer Name') + '</div>'
+    + '<div style="font-size:13px;color:var(--gray-600);">' + v('custAddress') + '</div>'
+    + '<div style="font-size:12px;color:var(--gray-400);margin-top:2px;">Survey: ' + v('surveyDate') + ' · HCD: ' + v('hcdName') + '</div>'
+    + '</div><span class="complexity-badge ' + cc + '">' + complexity + '</span></div>'
+
+    + '<div class="summary-section"><div class="summary-section-title">Job Information</div>'
+    + '<div class="summary-row"><span class="summary-label">Job type</span><span class="summary-value">Mini-Split — New Install</span></div>'
+    + '<div class="summary-row"><span class="summary-label">Year built</span><span class="summary-value">' + v('yearBuilt') + '</span></div>'
+    + '<div class="summary-row"><span class="summary-label">Home size</span><span class="summary-value">' + v('homeSqft') + ' sq ft</span></div>'
+    + '<div class="summary-row"><span class="summary-label">Foundation</span><span class="summary-value">' + v('homeFoundation') + '</span></div>'
+    + '<div class="summary-row"><span class="summary-label">Municipality / AHJ</span><span class="summary-value">'
+    + (v('municipality') !== '—' ? v('municipality') : (document.getElementById('ahj')?.value || '—')) + '</span></div>'
+    + '<div class="summary-row"><span class="summary-label">HOA</span><span class="summary-value">'
+    + (document.querySelector('input[name="hoa"]:checked')?.value || '—') + '</span></div>'
+    + '<div class="summary-row"><span class="summary-label">Permit required</span><span class="summary-value">'
+    + (document.querySelector('input[name="permit"]:checked')?.value || '—') + '</span></div>'
+    + '</div>'
+
+    + mjSection
+
+    + '<div class="summary-section"><div class="summary-section-title">Proposed Equipment — Outdoor Unit</div>'
+    + '<div class="summary-row"><span class="summary-label">Brand</span><span class="summary-value">' + msBrand + '</span></div>'
+    + '<div class="summary-row"><span class="summary-label">Model</span><span class="summary-value">' + msModel + '</span></div>'
+    + '<div class="summary-row"><span class="summary-label">MCA</span><span class="summary-value">' + msMCA + ' A</span></div>'
+    + '<div class="summary-row"><span class="summary-label">MOCP</span><span class="summary-value">' + msMOCP + ' A</span></div>'
+    + '<div class="summary-row"><span class="summary-label">Number of zones</span><span class="summary-value">' + zoneCount + '</span></div>'
+    + '</div>'
+
+    + '<div class="summary-section"><div class="summary-section-title">Outdoor Unit — Location &amp; Clearances</div>'
+    + '<div class="summary-row"><span class="summary-label">Mount type</span><span class="summary-value">' + mountType + '</span></div>'
+    + '<div class="summary-row"><span class="summary-label">Available space W×D</span><span class="summary-value">' + (outW||'—') + '″ × ' + (outD||'—') + '″</span></div>'
+    + '<div class="summary-row"><span class="summary-label">Overhead clearance</span><span class="summary-value">' + (clrOH||'—') + '″</span></div>'
+    + '<div class="summary-row"><span class="summary-label">Front (discharge) clearance</span><span class="summary-value">' + (clrFr||'—') + '″</span></div>'
+    + '<div class="summary-row"><span class="summary-label">Rear (intake) clearance</span><span class="summary-value">' + (clrRe||'—') + '″</span></div>'
+    + '<div class="summary-row"><span class="summary-label">Left / right clearance</span><span class="summary-value">' + (clrLt||'—') + '″ / ' + (clrRt||'—') + '″</span></div>'
+    + (fitEl && fitEl.textContent.trim() ? '<div class="summary-row"><span class="summary-label">Fit check result</span><span class="summary-value">' + fitEl.textContent.trim() + '</span></div>' : '')
+    + '</div>'
+
+    + zoneRows
+
+    + '<div class="summary-section"><div class="summary-section-title">Electrical Panel</div>'
+    + '<div class="summary-row"><span class="summary-label">Panel brand</span><span class="summary-value">' + v('panelBrand') + '</span></div>'
+    + '<div class="summary-row"><span class="summary-label">Main breaker</span><span class="summary-value">' + v('mainBreaker') + '</span></div>'
+    + '<div class="summary-row"><span class="summary-label">Available slots</span><span class="summary-value">' + v('blankSlots') + '</span></div>'
+    + '</div>'
+
+    + '<div class="summary-section"><div class="summary-section-title">Notes &amp; Scope</div>'
+    + '<div class="summary-row"><span class="summary-label">Placement notes</span><span class="summary-value" style="text-align:left;">' + v('placementNotes') + '</span></div>'
+    + '<div class="summary-row"><span class="summary-label">Scope of work</span><span class="summary-value" style="text-align:left;">' + v('scopeNotes') + '</span></div>'
+    + '<div class="summary-row"><span class="summary-label">Customer notes</span><span class="summary-value" style="text-align:left;">' + v('customerNotes') + '</span></div>'
+    + '<div class="summary-row"><span class="summary-label">Items to confirm</span><span class="summary-value" style="text-align:left;">' + v('confirmNotes') + '</span></div>'
+    + '</div>'
+
+    + '<div class="summary-section"><div class="summary-section-title">Photos</div>'
+    + '<div class="summary-row"><span class="summary-label">Photos captured</span><span class="summary-value">' + Object.keys(photos).length + ' photos</span></div>'
+    + '</div>'
+
+    + '</div>';
+}
+
 const MS_OUTDOOR={
 "Mitsubishi":{single:[{code:"ASV-MO-100",brand:"Mitsubishi",model:"MUZ-WX09NL",name:"9,000 BTU Single Zone Mini Split Heat Pump Condenser Up",btu:9000,h:22.0,w:31.0,d:11.0},{code:"ASV-MO-110",brand:"Mitsubishi",model:"MUZ-WX12NL",name:"12,000 BTU Single Zone Mini Split Heat Pump Condenser U",btu:12000,h:22.0,w:31.0,d:11.0},{code:"ASV-MO-120",brand:"Mitsubishi",model:"MUZ-WX18NL",name:"18,000 BTU Single Zone Mini Split Heat Pump Condenser U",btu:18000,h:22.0,w:31.0,d:11.0},{code:"ASV-MO-130",brand:"Mitsubishi",model:"MUZ-WX24NL",name:"24,000 BTU Single Zone Mini Split Heat Pump Condenser U",btu:24000,h:28.0,w:31.0,d:11.0},{code:"ASV-MO-200",brand:"Mitsubishi",model:"MUZ-GX09NL",name:"9,000 BTU Single Zone Mini Split Heat Pump Condenser Up",btu:9000,h:22.0,w:31.0,d:11.0},{code:"ASV-MO-210",brand:"Mitsubishi",model:"MUZ-GX12NL",name:"12,000 BTU Single Zone Mini Split Heat Pump Condenser U",btu:12000,h:22.0,w:31.0,d:11.0},{code:"ASV-MO-220",brand:"Mitsubishi",model:"MUZ-GX15NL",name:"15,000 BTU Single Zone Mini Split Heat Pump Condenser U",btu:15000,h:22.0,w:31.0,d:11.0},{code:"ASV-MO-230",brand:"Mitsubishi",model:"MUZ-GX18NL",name:"18,000 BTU Single Zone Mini Split Heat Pump Condenser U",btu:18000,h:35.0,w:33.0,d:13.0},{code:"ASV-MO-240",brand:"Mitsubishi",model:"MUZ-GX24NL",name:"24,000 BTU Single Zone Mini Split Heat Pump Condenser U",btu:24000,h:35.0,w:33.0,d:13.0},{code:"ASV-MO-250",brand:"Mitsubishi",model:"MUZ-GX30NL",name:"30,000 BTU Single Zone Mini Split Heat Pump Condenser U",btu:30000,h:35.0,w:33.0,d:13.0},{code:"ASV-MO-260",brand:"Mitsubishi",model:"MUZ-GX36NL",name:"36,000 BTU Single Zone Mini Split Heat Pump Condenser U",btu:36000,h:35.0,w:33.0,d:13.0},{code:"ASV-MO-300",brand:"Mitsubishi",model:"MUZ-FX06NLHZ",name:"6,000 BTU Single Zone Mini Split Heat Pump Condenser Up",btu:6000,h:28.0,w:31.0,d:11.0},{code:"ASV-MO-310",brand:"Mitsubishi",model:"MUZ-FX09NLHZ",name:"9,000 BTU Single Zone Mini Split Heat Pump Condenser Up",btu:9000,h:28.0,w:31.0,d:11.0},{code:"ASV-MO-320",brand:"Mitsubishi",model:"MUZ-FX12NLHZ",name:"12,000 BTU Single Zone Mini Split Heat Pump Condenser U",btu:12000,h:28.0,w:31.0,d:11.0},{code:"ASV-MO-330",brand:"Mitsubishi",model:"MUZ-FX15NLHZ",name:"15,000 BTU Single Zone Mini Split Heat Pump Condenser U",btu:15000,h:null,w:null,d:null},{code:"ASV-MO-340",brand:"Mitsubishi",model:"MUZ-FX18NLHZ",name:"18,000 BTU Single Zone Mini Split Heat Pump Condenser U",btu:18000,h:35.0,w:33.0,d:13.0},{code:"ASV-MO-400",brand:"Mitsubishi",model:"SUZ-AA09NL",name:"9,000 BTU Single Zone Mini Split Heat Pump Condenser Up",btu:9000,h:22.0,w:31.0,d:11.0},{code:"ASV-MO-410",brand:"Mitsubishi",model:"SUZ-AA12NL",name:"12,000 BTU Single Zone Mini Split Heat Pump Condenser U",btu:12000,h:22.0,w:31.0,d:11.0},{code:"ASV-MO-420",brand:"Mitsubishi",model:"SUZ-AA15NL",name:"15,000 BTU Single Zone Mini Split Heat Pump Condenser U",btu:15000,h:22.0,w:31.0,d:11.0},{code:"ASV-MO-430",brand:"Mitsubishi",model:"SUZ-AA18NL",name:"18,000 BTU Single Zone Mini Split Heat Pump Condenser U",btu:18000,h:35.0,w:33.0,d:13.0}],multi:[{code:"ASV-MO-500",brand:"Mitsubishi",model:"MXZ-2D20NL",name:"20,000 BTU Multi Zone Heat Pump Condenser Mini Split Up",btu:20000,h:null,w:null,d:null},{code:"ASV-MO-510",brand:"Mitsubishi",model:"MXZ-3D24NL",name:"24,000 BTU Multi Zone Heat Pump Condenser Mini Split Up",btu:24000,h:null,w:null,d:null},{code:"ASV-MO-520",brand:"Mitsubishi",model:"MXZ-4D30NL",name:"30,000 BTU Multi Zone Heat Pump Condenser Mini Split Up",btu:30000,h:null,w:null,d:null},{code:"ASV-MO-530",brand:"Mitsubishi",model:"MXZ-5D36NL",name:"36,000 BTU Multi Zone Heat Pump Condenser Mini Split Up",btu:36000,h:null,w:null,d:null},{code:"ASV-MO-540",brand:"Mitsubishi",model:"MXZ-5D42NL",name:"42,000 BTU Multi Zone Heat Pump Condenser Mini Split Up",btu:42000,h:null,w:null,d:null}]},
 "Daikin":{single:[{code:"DAI-MO-100",brand:"Daikin",model:"RXL12WMVJU",name:"12,000 BTU Single Zone Mini Split Heat Pump Condenser A",btu:12000,h:21.62,w:26.56,d:11.19},{code:"DAI-MO-110",brand:"Daikin",model:"RXL15WMVJU",name:"15,000 BTU Single Zone Mini Split Heat Pump Condenser A",btu:15000,h:28.94,w:34.25,d:12.62},{code:"DAI-MO-120",brand:"Daikin",model:"RXL18WMVJU",name:"18,000 BTU Single Zone Mini Split Heat Pump Condenser A",btu:18000,h:28.94,w:34.25,d:12.62},{code:"DAI-MO-200",brand:"Daikin",model:"RX12WMVJU",name:"12,000 BTU Single Zone Mini Split Heat Pump Condenser V",btu:12000,h:21.62,w:26.56,d:11.19},{code:"DAI-MO-210",brand:"Daikin",model:"RX15WMVJU",name:"15,000 BTU Single Zone Mini Split Heat Pump Condenser V",btu:15000,h:28.94,w:34.25,d:12.62},{code:"DAI-MO-220",brand:"Daikin",model:"RX18WMVJU",name:"18,000 BTU Single Zone Mini Split Heat Pump Condenser V",btu:18000,h:28.94,w:34.25,d:12.62},{code:"DAI-MO-600",brand:"Daikin",model:"RXB12BXVJU",name:"12,000 BTU Single Zone Mini Split Heat Pump Condenser E",btu:12000,h:21.69,w:26.5,d:11.19},{code:"DAI-MO-610",brand:"Daikin",model:"RXB18BXVJU",name:"18,000 BTU Single Zone Mini Split Heat Pump Condenser E",btu:18000,h:27.41,w:36.62,d:13.81},{code:"DAI-MO-620",brand:"Daikin",model:"RXF12AXVJU",name:"12,000 BTU Single Zone Mini Split Heat Pump Condenser O",btu:12000,h:21.69,w:26.5,d:11.19},{code:"DAI-MO-630",brand:"Daikin",model:"RXF18AXVJU",name:"18,000 BTU Single Zone Mini Split Heat Pump Condenser O",btu:18000,h:27.41,w:36.62,d:13.81},{code:"DAI-MO-640",brand:"Daikin",model:"RKF12AXVJU",name:"12,000 BTU Single Zone Mini Split Cooling Only Condense",btu:12000,h:21.69,w:26.5,d:11.19},{code:"DAI-MO-650",brand:"Daikin",model:"RKF18AXVJU",name:"18,000 BTU Single Zone Mini Split Cooling Only Condense",btu:18000,h:27.41,w:36.62,d:13.81},{code:"DAI-MO-660",brand:"Daikin",model:"RZQ18TBVJUA",name:"18,000 BTU SkyAir Single Zone Heat Pump Outdoor Unit",btu:18000,h:39.0,w:37.0,d:12.62},{code:"DAI-MO-670",brand:"Daikin",model:"RZR18TBVJUA",name:"18,000 BTU SkyAir Single Zone Cooling Only Outdoor Unit",btu:18000,h:39.0,w:37.0,d:12.62}],multi:[{code:"DAI-MO-500",brand:"Daikin",model:"2MXS18WMVJU9",name:"18,000 BTU Multi Zone Heat Pump Condenser Mini Split Up",btu:18000,h:null,w:null,d:null},{code:"DAI-MO-510",brand:"Daikin",model:"2MXL18WMVJU9",name:"18,000 BTU Multi Zone Heat Pump Condenser Mini Split AU",btu:18000,h:null,w:null,d:null},{code:"DAI-MO-520",brand:"Daikin",model:"DE36D3D-175R-530",name:"36,000 BTU Multi-Zone Mini-Split Outdoor Condenser",btu:36000,h:null,w:null,d:null},{code:"DAI-MO-530",brand:"Daikin",model:"DE48D4D-210R-530",name:"48,000 BTU Multi-Zone Mini-Split Outdoor Condenser",btu:48000,h:null,w:null,d:null},{code:"DAI-MO-540",brand:"Daikin",model:"DE60D3D-210R-530",name:"60,000 BTU Multi-Zone Mini-Split Outdoor Condenser",btu:60000,h:null,w:null,d:null}]},
@@ -3050,6 +3242,7 @@ function msIndoorSelect(zoneIdx){
 // STATE
 // ============================================================
 let currentSection = 2;
+let mjLastResult = null;
 let totalSections = 11;
 let jobType = '';
 const SURVEY_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwcmRJ7wqvvN8uQFA6t7m30-f64A4YrPOvTdnV1MG4IBcTfpn24cNm3X7hRVkmXz6kk4g/exec'; // AireServ Install Surveys folder
@@ -3624,6 +3817,7 @@ function buildPhotoChecklist() {
 // ============================================================
 function generateSummary() {
   buildPhotoChecklist();
+  if (jobType === 'minisplit') { generateMSSummary(); return; }
 
   const flags = [];
   const warnings = [];
@@ -4736,7 +4930,7 @@ function mjRunQuickCalc(){
   document.getElementById('mjQuickLoading').classList.add('active');
   document.getElementById('mjQuickError').style.display='none';
   document.getElementById('mjQuickResults').innerHTML='';
-  try{const data=mjRunQuickEstimate(payload);if(data.error)mjShowError('mjQuickError',data.error);else{document.getElementById('mjQuickResults').innerHTML=mjRenderQuickResults(data);document.getElementById('mjQuickResults').scrollIntoView({behavior:'smooth',block:'start'});}}
+  try{const data=mjRunQuickEstimate(payload);if(data.error)mjShowError('mjQuickError',data.error);else{mjLastResult=data;document.getElementById('mjQuickResults').innerHTML=mjRenderQuickResults(data);document.getElementById('mjQuickResults').scrollIntoView({behavior:'smooth',block:'start'});}}
   catch(e){mjShowError('mjQuickError','Calculation error: '+e.message);}
   finally{document.getElementById('mjQuickLoading').classList.remove('active');}
 }
