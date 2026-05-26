@@ -2112,8 +2112,23 @@
       <input type="number" id="custAmps" placeholder="Enter amps" min="60" max="600">
     </div>
     <div class="ms-field">
-      <label>Panel Brand / Model <span style="font-weight:400;color:#aaa">(optional)</span></label>
-      <input type="text" id="panelModel" placeholder="e.g. Square D SC40M200S">
+      <label>Panel Brand <span style="color:#c62828;font-size:11px;font-weight:600;">required</span></label>
+      <select id="msPanelBrand" onchange="var w=document.getElementById('msPanelBrandWarn');if(w)w.style.display=(this.value==='Federal Pacific (Stab-Lok)'||this.value==='Zinsco')?'block':'none';">
+        <option value="">Select brand...</option>
+        <option>Square D</option>
+        <option>Eaton / Cutler-Hammer</option>
+        <option>Siemens</option>
+        <option>Leviton</option>
+        <option>Federal Pacific (Stab-Lok)</option>
+        <option>Zinsco</option>
+        <option>GE</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div class="info-yellow" id="msPanelBrandWarn" style="font-size:12px;margin-top:-6px;margin-bottom:4px;display:none;">⚠️ Federal Pacific and Zinsco panels are known safety concerns — flag for install manager immediately.</div>
+    <div class="ms-field">
+      <label>Panel Model <span style="font-weight:400;color:#aaa">(optional)</span></label>
+      <input type="text" id="panelModel" placeholder="e.g. SC40M200S">
     </div>
     <div class="ms-field">
       <label>How Many Open Breaker Slots?</label>
@@ -3607,12 +3622,13 @@ function navigate(dir) {
 
   function shouldSkip(sec) {
     if ((jobType === 'minisplit' || jobType === 'minisplit_replace') && sec === 4) return true;
+    if (jobType === 'minisplit' && sec === 2) return true;
+    if (jobType === 'minisplit' && sec === 3) return true;
     if (jobType === 'minisplit' && sec === 5) return true;
     if (jobType === 'minisplit' && sec === 6) return true;
-    if (jobType !== 'minisplit' && jobType !== 'minisplit_replace' && sec === 8) return true;
     if (jobType === 'minisplit' && sec === 7) return true;
     if (jobType === 'minisplit' && sec === 8) return true;
-    if (jobType === 'minisplit' && sec === 3) return true;
+    if (jobType !== 'minisplit' && jobType !== 'minisplit_replace' && sec === 8) return true;
     return false;
   }
   let dest = currentSection + dir;
