@@ -495,8 +495,25 @@
             <option>Slab</option><option>Raised / Crawl space</option><option>Basement</option>
           </select>
         </div>
-        <div class="field"><label>AHJ / Permit Jurisdiction</label>
-          <input type="text" id="ahj" placeholder="e.g. City of Surprise, Maricopa County"></div>
+        <div class="field"><label>Municipality / AHJ</label>
+          <select id="municipality" onchange="updatePermitInfo()">
+            <option value="">Select municipality...</option>
+            <option>City of Avondale</option>
+            <option>City of El Mirage</option>
+            <option>City of Glendale</option>
+            <option>City of Goodyear</option>
+            <option>City of Litchfield Park</option>
+            <option>City of Peoria</option>
+            <option>City of Phoenix</option>
+            <option>City of Scottsdale</option>
+            <option>City of Surprise</option>
+            <option>Sun City (Maricopa County)</option>
+            <option>Sun City West (Maricopa County)</option>
+            <option>Unincorporated Maricopa County</option>
+            <option>Other</option>
+          </select>
+          <div id="permitInfoCard"></div>
+        </div>
       </div>
       <div class="field"><label>Zone / Space Being Conditioned <span class="label-hint">mini-split jobs</span></label>
         <input type="text" id="ms_zone" placeholder="e.g. Attached garage, master bedroom addition"></div>
@@ -2964,6 +2981,222 @@ function activateBeginBtn() {
 }
 
 // ============================================================
+// PERMIT DATABASE + HELPERS
+// ============================================================
+const PERMIT_DB = {
+  'glendale': {
+    ahj: 'City of Glendale', phone: '623-930-2800', portal: 'glendaleaz.gov',
+    replacement: { required: false, note: 'No permit required for replacement by licensed contractor (residential). No same-for-same restriction.' },
+    newInstall:  { required: false, note: 'No permit required if installed by a licensed contractor (residential). Broader than same-for-same — applies to new installs too.' },
+    source: 'glendaleaz.gov/Work/Building-Safety-Codes-Services/Building-Permits/Q-A'
+  },
+  'goodyear': {
+    ahj: 'City of Goodyear', phone: '623-932-3004', portal: 'goodyearaz.gov',
+    replacement: { required: false, note: 'No permit required for like-for-like replacement by licensed contractor (residential).' },
+    newInstall:  { required: null,  note: 'New install requirement unconfirmed — call to verify.' },
+    source: 'goodyearaz.gov Homeowner Permit FAQ'
+  },
+  'phoenix': {
+    ahj: 'City of Phoenix', phone: '602-262-7811', portal: 'phoenix.gov/pdd',
+    replacement: { required: 'conditional', note: 'Outdoor unit ≤5 tons, same weight, same location: no mechanical permit required. Indoor air handler or new wiring always requires permit.' },
+    newInstall:  { required: true, note: 'Permit required for new installation.' },
+    source: 'phoenix.gov Work Exempt from Permit (PBCC §105.2.3)'
+  },
+  'avondale': {
+    ahj: 'City of Avondale', phone: '623-333-4000', portal: 'avondaleaz.gov',
+    replacement: { required: null, note: 'Requirement unconfirmed — call to verify.' },
+    newInstall:  { required: null, note: 'Requirement unconfirmed — call to verify.' },
+    unverified: true
+  },
+  'el mirage': {
+    ahj: 'City of El Mirage', phone: '623-933-8318', portal: 'elmirage.org',
+    replacement: { required: null, note: 'Requirement unconfirmed — call to verify.' },
+    newInstall:  { required: null, note: 'Requirement unconfirmed — call to verify.' },
+    unverified: true
+  },
+  'litchfield park': {
+    ahj: 'City of Litchfield Park', phone: '623-935-5033', portal: 'litchfieldpark.gov',
+    replacement: { required: true, note: 'Permit required — any replacement of a mechanical system requires a building permit.' },
+    newInstall:  { required: true, note: 'Permit required.' },
+    source: 'litchfieldpark.gov Building Permit Q&A'
+  },
+  'peoria': {
+    ahj: 'City of Peoria', phone: '623-773-7225', portal: 'peoriaaz.gov',
+    replacement: { required: null, note: 'Requirement unconfirmed — call to verify.' },
+    newInstall:  { required: null, note: 'Requirement unconfirmed — call to verify.' },
+    unverified: true
+  },
+  'sun city': {
+    ahj: 'Maricopa County', phone: '602-506-3301', portal: 'maricopa.gov/permitcenter',
+    ahjNote: 'Unincorporated Maricopa County — permits through county, not a city.',
+    replacement: { required: true, note: 'Permit required but web-issued (auto-approved online). Ground-mount: 1–2 day review. Roof-mount: full technical review + site plan.' },
+    newInstall:  { required: true, note: 'Non-technical permit — 1–2 business day review online.' },
+    source: 'maricopa.gov Construction Permit Information'
+  },
+  'sun city west': {
+    ahj: 'Maricopa County', phone: '602-506-3301', portal: 'maricopa.gov/permitcenter',
+    ahjNote: 'Unincorporated Maricopa County — permits through county, not a city.',
+    replacement: { required: true, note: 'Permit required but web-issued (auto-approved online). Ground-mount: 1–2 day review. Roof-mount: full technical review + site plan.' },
+    newInstall:  { required: true, note: 'Non-technical permit — 1–2 business day review online.' },
+    source: 'maricopa.gov Construction Permit Information'
+  },
+  'unincorporated maricopa county': {
+    ahj: 'Maricopa County', phone: '602-506-3301', portal: 'maricopa.gov/permitcenter',
+    replacement: { required: true, note: 'Permit required but web-issued (auto-approved online). Ground-mount: 1–2 day review. Roof-mount: full technical review + site plan.' },
+    newInstall:  { required: true, note: 'Non-technical permit — 1–2 business day review online.' },
+    source: 'maricopa.gov Construction Permit Information'
+  },
+  'surprise': {
+    ahj: 'City of Surprise', phone: '623-222-3000', portal: 'surpriseaz.gov',
+    replacement: { required: null, note: 'Requirement unconfirmed — call to verify.' },
+    newInstall:  { required: null, note: 'Requirement unconfirmed — call to verify.' },
+    unverified: true
+  }
+};
+
+function _muniKey(str) {
+  return (str || '').trim().toLowerCase()
+    .replace(/^city of\s+/, '')
+    .replace(/\(.*?\)/g, '')
+    .replace(/,?\s*(az|arizona)\b.*/i, '')
+    .trim();
+}
+
+function updatePermitInfo() {
+  const card = document.getElementById('permitInfoCard');
+  if (!card) return;
+  const muniEl = document.getElementById('municipality');
+  const ahjEl  = document.getElementById('ahj');
+  const raw = (muniEl && muniEl.value) ? muniEl.value
+            : (ahjEl  && ahjEl.value)  ? ahjEl.value : '';
+  if (!raw.trim()) { card.innerHTML = ''; return; }
+  const key = _muniKey(raw);
+  const e = PERMIT_DB[key];
+  if (!e) { card.innerHTML = '<div style="margin-top:8px;padding:10px 12px;border-radius:8px;background:var(--card-bg,#f9f9f9);border:1px solid var(--border,#ddd);font-size:13px;color:var(--muted,#888);">📞 <strong>' + raw + '</strong> not in permit database — verify with local AHJ before starting.</div>'; return; }
+  const isNew = (typeof jobType !== 'undefined' && jobType === 'minisplit');
+  const rule  = isNew ? e.newInstall : e.replacement;
+  let color = '#2e7d32', bg = '#e8f5e9', icon = '✅';
+  if (rule.required === true)            { color = '#c62828'; bg = '#ffebee'; icon = '📋'; }
+  else if (rule.required === 'conditional') { color = '#e65100'; bg = '#fff3e0'; icon = '⚠️'; }
+  else if (rule.required === null)       { color = '#f57f17'; bg = '#fffde7'; icon = '📞'; }
+  let html = '<div style="margin-top:8px;padding:10px 14px;border-radius:8px;background:' + bg + ';border:1px solid ' + color + '20;font-size:13px;">';
+  html += '<div style="font-weight:700;color:' + color + ';margin-bottom:4px;">' + icon + ' ' + e.ahj + (e.ahjNote ? ' <span style=\"font-weight:400;color:#666;font-size:12px;\">(' + e.ahjNote + ')</span>' : '') + '</div>';
+  if (rule.required === true)       html += '<div style="color:' + color + ';">Permit <strong>required</strong></div>';
+  else if (rule.required === false)  html += '<div style="color:' + color + ';">No permit required</div>';
+  else if (rule.required === 'conditional') html += '<div style="color:' + color + ';">Permit <strong>conditional</strong></div>';
+  else html += '<div style="color:' + color + ';">Permit requirement <strong>unconfirmed</strong></div>';
+  html += '<div style="margin-top:4px;color:#444;">' + rule.note + '</div>';
+  if (e.phone) html += '<div style="margin-top:6px;color:#555;font-size:12px;">📞 ' + e.phone + (e.portal ? ' &nbsp;|&nbsp; 🌐 ' + e.portal : '') + '</div>';
+  if (e.unverified) html += '<div style="margin-top:4px;color:#795548;font-size:12px;">⚠️ Data not yet verified from primary source — call to confirm.</div>';
+  if (e.source) html += '<div style="margin-top:2px;color:#999;font-size:11px;">Source: ' + e.source + '</div>';
+  html += '</div>';
+  card.innerHTML = html;
+}
+
+// ============================================================
+// MINI-SPLIT NEW INSTALL — COPY TO CLIPBOARD
+// ============================================================
+function copyMSNewInstall() {
+  const _v  = id => (document.getElementById(id)?.value || '').trim() || '—';
+  const _rb = name => document.querySelector('input[name="' + name + '"]:checked')?.value || '—';
+  const _tog = sel => { const el = document.querySelector(sel + '.active'); return el ? el.textContent.trim() : '—'; };
+  const div = '\n' + '-'.repeat(36) + '\n';
+  let t = 'AIRE SERV — MINI-SPLIT NEW INSTALL SURVEY\n' + '='.repeat(42) + '\n';
+  t += 'Customer:    ' + _v('custName') + '\n';
+  t += 'Phone:       ' + _v('custPhone') + '  |  Email: ' + _v('custEmail') + '\n';
+  t += 'Address:     ' + _v('custAddress') + '\n';
+  t += 'Survey Date: ' + _v('surveyDate') + '  |  HCD: ' + _v('hcdName') + '\n';
+  t += 'Year Built:  ' + _v('yearBuilt') + '  |  Sq Ft: ' + _v('homeSqft') + '  |  Foundation: ' + _v('homeFoundation') + '\n';
+  const _muni = _v('municipality') !== '—' ? _v('municipality') : _v('ahj');
+  t += 'Municipality: ' + _muni + '\n';
+
+  // Manual J
+  const _mj = mjLastResult;
+  t += div + 'MANUAL J LOAD\n';
+  if (_mj) {
+    t += 'Heating: ' + (_mj.heatingBTU ? Math.round(_mj.heatingBTU).toLocaleString() + ' BTU/h' : '—') + '\n';
+    t += 'Cooling: ' + (_mj.coolingBTU ? Math.round(_mj.coolingBTU).toLocaleString() + ' BTU/h' : '—') + '\n';
+    t += 'Recommended: ' + (_mj.recommendedTons ? _mj.recommendedTons + ' tons' : '—') + '\n';
+  } else { t += 'Not run\n'; }
+
+  // Equipment
+  t += div + 'EQUIPMENT SELECTED\n';
+  const _brand = _rb('brand');
+  const _modelSel = document.getElementById('modelSel');
+  const _msModel = _modelSel ? (_modelSel.options[_modelSel.selectedIndex]?.text || '—') : '—';
+  const _mca = _v('mca'); const _mocp = _v('mocp');
+  t += 'Brand: ' + _brand + '\n';
+  t += 'Outdoor Model: ' + _msModel + '\n';
+  t += 'MCA: ' + _mca + 'A  |  MOCP: ' + _mocp + 'A\n';
+
+  // Zones
+  const _zoneCountEl = document.querySelector('#msd-zone-count .toggle-btn.active');
+  const _zoneCount = _zoneCountEl ? parseInt(_zoneCountEl.textContent) || 1 : 1;
+  t += div + 'ZONES (' + _zoneCount + ')\n';
+  for (let _zi = 1; _zi <= _zoneCount; _zi++) {
+    const _zRoom  = _v('msd-room-' + _zi);
+    const _zLoc   = _v('msd-loc-' + _zi);
+    const _zModel = _v('msd-imodel-' + _zi);
+    t += 'Zone ' + _zi + ': ' + _zRoom + ' — ' + _zLoc + '\n';
+    if (_zModel && _zModel !== '—') t += '  Indoor model: ' + _zModel + '\n';
+  }
+
+  // Outdoor unit placement
+  t += div + 'OUTDOOR UNIT PLACEMENT\n';
+  t += 'Mount:     ' + _tog('#msd-mount .toggle-btn') + '\n';
+  t += 'Side:      ' + _tog('#msd-side .toggle-btn') + '\n';
+  t += 'Sun:       ' + _tog('#msd-sun .toggle-btn') + '\n';
+  t += 'Discharge: ' + _tog('#msd-discharge .toggle-btn') + '\n';
+  const _outW = _v('msd-outdoor-w'); const _outD = _v('msd-outdoor-d');
+  t += 'Space:     ' + _outW + '″ W × ' + _outD + '″ D\n';
+  t += 'Overhead clearance: ' + _v('msd-clr-oh') + '″\n';
+  t += 'Front clearance:    ' + _v('msd-clr-fr') + '″\n';
+  t += 'Rear clearance:     ' + _v('msd-clr-re') + '″\n';
+  t += 'Left clearance:     ' + _v('msd-clr-lt') + '″\n';
+  t += 'Right clearance:    ' + _v('msd-clr-rt') + '″\n';
+
+  // Electrical
+  t += div + 'ELECTRICAL PANEL\n';
+  t += 'Service size:  ' + _rb('svc') + 'A\n';
+  t += 'Panel brand:   ' + _v('msPanelBrand') + '\n';
+  t += 'Panel model:   ' + _v('panelModel') + '\n';
+  t += 'Open slots:    ' + _rb('slots') + '\n';
+
+  // Permit
+  const _pMuni = _muniKey(_muni !== '—' ? _muni : '');
+  const _pEntry = PERMIT_DB[_pMuni];
+  t += div + 'PERMIT\n';
+  if (_pEntry) {
+    const _pRule = _pEntry.newInstall;
+    t += 'AHJ: ' + _pEntry.ahj + '\n';
+    t += 'Required: ' + (_pRule.required === true ? 'YES' : _pRule.required === false ? 'NO' : _pRule.required === 'conditional' ? 'CONDITIONAL' : 'UNCONFIRMED') + '\n';
+    t += 'Note: ' + _pRule.note + '\n';
+    if (_pEntry.phone) t += 'Phone: ' + _pEntry.phone + '\n';
+    if (_pEntry.unverified) t += '⚠️ Data unverified — call to confirm.\n';
+  } else if (_muni !== '—') {
+    t += 'Municipality not in permit database — verify with local AHJ.\n';
+  } else { t += 'Municipality not selected.\n'; }
+
+  // Notes
+  t += div + 'NOTES\n';
+  t += 'Placement notes:  ' + _v('placementNotes') + '\n';
+  t += 'Scope of work:    ' + _v('scopeNotes') + '\n';
+  t += 'Customer notes:   ' + _v('customerNotes') + '\n';
+  t += 'Items to confirm: ' + _v('confirmNotes') + '\n';
+
+  // Photos
+  const _photoCount = document.querySelectorAll('.photo-item.captured').length;
+  t += div + 'PHOTOS: ' + _photoCount + ' captured\n';
+
+  navigator.clipboard.writeText(t).then(function() {
+    const btn = document.querySelector('[onclick="copyToClipboard()"]');
+    if (btn) { const orig = btn.textContent; btn.textContent = '✓ Copied!'; setTimeout(function(){ btn.textContent = orig; }, 1800); }
+  }).catch(function(err) {
+    alert('Copy failed: ' + err);
+  });
+}
+
+// ============================================================
 // MINI-SPLIT NEW INSTALL — SURVEY SUMMARY
 // ============================================================
 function generateMSSummary() {
@@ -3029,13 +3262,37 @@ function generateMSSummary() {
   // MJ result (stored globally when calc runs)
   const mj = mjLastResult;
 
-  // Panel flags
-  const panelBrand = v('panelBrand');
-  if (panelBrand === 'Federal Pacific' || panelBrand === 'Zinsco') {
-    flags.push('🚨 ' + panelBrand + ' panel — known safety concern. Flag for install manager.');
+  // Panel flags — read from Electrical Survey tab
+  const msPanelBrand = document.getElementById('msPanelBrand')?.value || '—';
+  const msSvcSize    = document.querySelector('input[name="svc"]:checked')?.value || '—';
+  const msSlotsEl    = document.querySelector('input[name="slots"]:checked');
+  const msSlots      = msSlotsEl ? msSlotsEl.value : '—';
+  if (msPanelBrand === 'Federal Pacific (Stab-Lok)' || msPanelBrand === 'Zinsco') {
+    flags.push('🚨 ' + msPanelBrand + ' panel — known safety concern. Flag for install manager.');
   }
-  if ((parseInt(v('blankSlots')) || 99) < 2) {
+  if (!msPanelBrand || msPanelBrand === '—') {
+    warnings.push('Panel brand not selected in Electrical Survey.');
+  }
+  const slotsNum = parseInt(msSlots) || 99;
+  if (slotsNum < 2 && msSlots !== '5+') {
     warnings.push('Panel has fewer than 2 open slots — verify breaker availability.');
+  }
+  // Permit flag
+  const _pMuni = (document.getElementById('municipality')?.value || document.getElementById('ahj')?.value || '').trim();
+  const _pKey  = _muniKey(_pMuni);
+  const _pEntry = typeof PERMIT_DB !== 'undefined' ? PERMIT_DB[_pKey] : null;
+  if (_pMuni && _pEntry) {
+    const _pRule = _pEntry.newInstall;
+    if (_pRule.required === true)
+      flags.push('📋 ' + _pEntry.ahj + ': Permit required — ' + _pRule.note);
+    else if (_pRule.required === 'conditional')
+      warnings.push('📋 ' + _pEntry.ahj + ' permit: Conditional — ' + _pRule.note);
+    else if (_pRule.required === null)
+      warnings.push('📞 ' + _pEntry.ahj + ': Permit requirement unconfirmed — call ' + _pEntry.phone + ' before starting.');
+    if (_pEntry.unverified)
+      warnings.push('⚠️ ' + _pEntry.ahj + ' permit data not yet verified from primary source.');
+  } else if (_pMuni && !_pEntry) {
+    warnings.push('📞 Permit requirement for "' + _pMuni + '" not in database — verify with local AHJ before starting.');
   }
 
   // Clearance flags
@@ -3153,9 +3410,10 @@ function generateMSSummary() {
     + zoneRows
 
     + '<div class="summary-section"><div class="summary-section-title">Electrical Panel</div>'
-    + '<div class="summary-row"><span class="summary-label">Panel brand</span><span class="summary-value">' + v('panelBrand') + '</span></div>'
-    + '<div class="summary-row"><span class="summary-label">Main breaker</span><span class="summary-value">' + v('mainBreaker') + '</span></div>'
-    + '<div class="summary-row"><span class="summary-label">Available slots</span><span class="summary-value">' + v('blankSlots') + '</span></div>'
+    + '<div class="summary-row"><span class="summary-label">Service size</span><span class="summary-value">' + (msSvcSize !== '—' ? msSvcSize + 'A' : '—') + '</span></div>'
+    + '<div class="summary-row"><span class="summary-label">Panel brand</span><span class="summary-value">' + msPanelBrand + '</span></div>'
+    + '<div class="summary-row"><span class="summary-label">Panel model</span><span class="summary-value">' + v('panelModel') + '</span></div>'
+    + '<div class="summary-row"><span class="summary-label">Open slots</span><span class="summary-value">' + msSlots + '</span></div>'
     + '</div>'
 
     + '<div class="summary-section"><div class="summary-section-title">Notes &amp; Scope</div>'
@@ -4091,6 +4349,7 @@ function copyToClipboard() {
   const v = id => document.getElementById(id)?.value || '';
   const isSplit = jobType === 'split_hp' || jobType === 'split_ac';
   const isMS = jobType === 'minisplit' || jobType === 'minisplit_replace';
+  if (jobType === 'minisplit') { copyMSNewInstall(); return; }
   const isPkg = jobType === 'packaged';
   const names = {split_hp:'Split Heat Pump',split_ac:'Split AC + Furnace',packaged:'Packaged Unit',minisplit:'Mini-Split — New Install',minisplit_replace:'Mini-Split — Replace'};
   const div = '\n' + '-'.repeat(36) + '\n';
