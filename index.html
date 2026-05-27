@@ -269,6 +269,8 @@
 .pbtn-cust:hover   { background: #3d4f5c; }
 .pbtn-new    { background: #1A6B1A; color: white; }
 .pbtn-new:hover    { background: #145214; }
+.pbtn-drive  { background: #1565C0; color: white; }
+.pbtn-drive:hover  { background: #0d47a1; }
 .psection { display: none; }
 
 /* ── TAB SYSTEM ── */
@@ -2513,6 +2515,7 @@
     <div class="pbtns">
       <button class="pbtn pbtn-permit" onclick="pv('p')">&#128196; Print Permit Load Calc</button>
       <button class="pbtn pbtn-cust"   onclick="pv('c')">&#128203; Print Customer Summary</button>
+      <button class="pbtn pbtn-drive"  onclick="downloadElecSurvey()">&#9729; Save Electrical Report to Drive</button>
       <button class="pbtn pbtn-new"    onclick="ms_nr()">&#43; New Survey</button>
     </div>
     <div class="ms-nav" style="margin-top:20px">
@@ -3443,6 +3446,9 @@ function generateMSSummary() {
     + '</div>'
 
     + '</div>';
+
+  // Auto-save to Drive whenever summary is generated (captures all tab data at render time)
+  setTimeout(function() { downloadSurvey(true); }, 300);
 }
 
 const MS_OUTDOOR={
@@ -4445,38 +4451,184 @@ function copyToClipboard() {
   });
 }
 
-function downloadSurvey() {
+function downloadSurvey(silent) {
   const v = id => document.getElementById(id)?.value || '';
-  const zBtn = document.querySelector('#zoneCount .toggle-btn.active');
-  const data = {
-    meta: { app: 'AireServ HCD Field Survey', version: '2.0', exported: new Date().toISOString() },
-    customer: { name: v('custName'), phone: v('custPhone'), email: v('custEmail'), address: v('custAddress') },
-    survey: { date: v('surveyDate'), hcd: v('hcdName'), jobType: jobType, yearBuilt: v('yearBuilt'), sqft: v('homeSqft'), stories: v('homeStories'), foundation: v('homeFoundation'), municipality: v('municipality') },
-    condenser: { brand: v('condBrand'), model: v('condModel'), serial: v('condSerial'), tons: v('condTons'), refrigerant: v('condRefrig'), age: v('condAge'), mca: v('condMCA'), mocp: v('condMOCP'), msW: v('msOutdoorW'), msD: v('msOutdoorD'), zones: zBtn ? zBtn.textContent : '' },
-    airHandler: { brand: v('ahBrand'), model: v('ahModel'), serial: v('ahSerial'), type: v('ahType'), btu: v('ahBTU'), cfm: v('ahCFM') },
-    electrical: { panelBrand: v('panelBrand'), mainBreaker: v('mainBreaker'), blankSlots: v('blankSlots'), panelLocation: v('panelLocation') || v('ms-panelLocation'), discAmp: v('discAmp'), discType: v('discType'), wireToCondenser: v('wireGaugeCond'), wireToAH: v('wireGaugeAH'), condBreaker: v('condBreaker'), ahBreaker: v('ahBreaker'), distToCondenser: v('distPanelCond'), distToAH: v('distPanelAH') },
-    clearances: { n: v('clearN'), s: v('clearS'), e: v('clearE'), w: v('clearW'), overhead: v('clearOverhead'), padW: v('padW'), padD: v('padD') },
-    duct: { supW: v('supW'), supH: v('supH'), supD: v('supD'), supConnections: v('supplyConnections'), retW: v('retW'), retH: v('retH'), retD: v('retD'), retDropW: v('retDropW'), retDropH: v('retDropH'), filterLoc: v('filterLoc'), filterSize: v('filterSize'), drainPan: v('drainPanCondition'), drainL: v('drainPanL'), drainW: v('drainPanW') },
-    lineSet: { length: v('lineSetLength'), suction: v('suctionSize'), liquid: v('liquidSize'), condition: v('lineSetCondition'), penetration: v('penetrationCondition') },
-    thermostat: { type: v('tstatType'), model: v('tstatModel'), wireGauge: v('tstatWireGauge') },
-    photos: { count: document.querySelectorAll('.photo-item.captured').length },
-    notes: { customer: v('customerNotes'), scope: v('scopeNotes'), hoa: v('hoaNotes'), path: v('pathNotes'), placement: v('condenserSpaceNotes'), complexity: v('complexityNotes') }
-  };
+  const activeToggle = groupId => document.querySelector('#' + groupId + ' .toggle-btn.active')?.textContent?.trim() || '';
+
+  const meta     = { app: 'AireServ HCD Field Survey', version: '2.0', exported: new Date().toISOString() };
+  const customer = { name: v('custName'), phone: v('custPhone'), email: v('custEmail'), address: v('custAddress') };
+  const survey   = { date: v('surveyDate'), hcd: v('hcdName'), jobType: jobType, yearBuilt: v('yearBuilt'), sqft: v('homeSqft'), stories: v('homeStories'), foundation: v('homeFoundation'), municipality: v('municipality') };
+
+  let data;
+
+  if (jobType === 'minisplit') {
+    // ── Mini-Split New Install payload ─────────────────────────────
+    const svcChecked   = document.querySelector('input[name="svc"]:checked');
+    const slotsChecked = document.querySelector('input[name="slots"]:checked');
+    const zcActive     = document.querySelector('#msd-zone-count .toggle-btn.active');
+    const zoneCount    = zcActive ? parseInt(zcActive.textContent) : 1;
+
+    const zones = [];
+    for (let i = 1; i <= zoneCount; i++) {
+      zones.push({
+        zone: i,
+        room:    v('msd-room-' + i),
+        model:   v('msd-imodel-' + i),
+        location: v('msd-loc-' + i)
+      });
+    }
+
+    const outdoorBrandEl = document.querySelector('#msOBrand .toggle-btn.active');
+
+    data = {
+      meta, customer, survey,
+      zoneServed: v('ms_zone'),
+      electrical: {
+        serviceSize:   svcChecked ? svcChecked.value : '',
+        panelBrand:    v('msPanelBrand'),
+        panelModel:    v('panelModel'),
+        openSlots:     slotsChecked ? slotsChecked.value : '',
+        panelLocation: v('ms-panelLocation'),
+        circuitAmps:   v('msA')
+      },
+      outdoorUnit: {
+        brand: outdoorBrandEl ? outdoorBrandEl.dataset.brand || outdoorBrandEl.textContent.trim() : '',
+        model: v('msOModel'),
+        widthIn: v('msOutdoorW'),
+        depthIn: v('msOutdoorD')
+      },
+      placement: {
+        mountType:    activeToggle('msd-mount-ground').length ? 'Ground pad' : activeToggle('msd-mount-wall').length ? 'Wall bracket' : activeToggle('msd-mount-roof').length ? 'Rooftop' : '',
+        side:         ['n','s','e','w'].map(d => document.getElementById('msd-side-'+d)?.classList.contains('active') ? d.toUpperCase() : '').filter(Boolean).join('') || '',
+        sunExposure:  document.getElementById('msd-sun-full')?.classList.contains('active') ? 'Full sun' : document.getElementById('msd-sun-partial')?.classList.contains('active') ? 'Partial shade' : document.getElementById('msd-sun-shade')?.classList.contains('active') ? 'Full shade' : '',
+        clearOverhead: v('msd-clear-overhead'),
+        clearFront:   v('msd-clear-front'),
+        clearRear:    v('msd-clear-rear'),
+        clearLeft:    v('msd-clear-left'),
+        clearRight:   v('msd-clear-right')
+      },
+      zones,
+      photos: { count: document.querySelectorAll('.photo-item.captured').length },
+      notes:  { scope: v('scopeNotes'), customer: v('customerNotes') }
+    };
+
+  } else {
+    // ── Full system (replacement / packaged / heatpump) payload ────
+    const zBtn = document.querySelector('#zoneCount .toggle-btn.active');
+    data = {
+      meta, customer, survey,
+      condenser:  { brand: v('condBrand'), model: v('condModel'), serial: v('condSerial'), tons: v('condTons'), refrigerant: v('condRefrig'), age: v('condAge'), mca: v('condMCA'), mocp: v('condMOCP'), outdoorW: v('msOutdoorW'), outdoorD: v('msOutdoorD'), zones: zBtn ? zBtn.textContent : '' },
+      airHandler: { brand: v('ahBrand'), model: v('ahModel'), serial: v('ahSerial'), type: v('ahType'), btu: v('ahBTU'), cfm: v('ahCFM') },
+      electrical: { panelBrand: v('panelBrand'), mainBreaker: v('mainBreaker'), blankSlots: v('blankSlots'), panelLocation: v('panelLocation'), discAmp: v('discAmp'), discType: v('discType'), wireToCondenser: v('wireGaugeCond'), wireToAH: v('wireGaugeAH'), condBreaker: v('condBreaker'), ahBreaker: v('ahBreaker'), distToCondenser: v('distPanelCond'), distToAH: v('distPanelAH') },
+      clearances: { n: v('clearN'), s: v('clearS'), e: v('clearE'), w: v('clearW'), overhead: v('clearOverhead'), padW: v('padW'), padD: v('padD') },
+      duct:       { supW: v('supW'), supH: v('supH'), supD: v('supD'), supConnections: v('supplyConnections'), retW: v('retW'), retH: v('retH'), retD: v('retD'), retDropW: v('retDropW'), retDropH: v('retDropH'), filterLoc: v('filterLoc'), filterSize: v('filterSize'), drainPan: v('drainPanCondition'), drainL: v('drainPanL'), drainW: v('drainPanW') },
+      lineSet:    { length: v('lineSetLength'), suction: v('suctionSize'), liquid: v('liquidSize'), condition: v('lineSetCondition'), penetration: v('penetrationCondition') },
+      thermostat: { type: v('tstatType'), model: v('tstatModel'), wireGauge: v('tstatWireGauge') },
+      photos:     { count: document.querySelectorAll('.photo-item.captured').length },
+      notes:      { customer: v('customerNotes'), scope: v('scopeNotes'), hoa: v('hoaNotes'), path: v('pathNotes'), placement: v('condenserSpaceNotes'), complexity: v('complexityNotes') }
+    };
+  }
+
   const json = JSON.stringify(data, null, 2);
-  const blob = new Blob([json], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  const safeName = (v('custName') || 'Survey').replace(/[^a-z0-9]/gi, '_');
-  const safeDate = (v('surveyDate') || new Date().toISOString().slice(0,10)).replace(/[^0-9]/g, '-');
-  a.href = url; a.download = `AireServ_${safeName}_${safeDate}.json`;
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  if (!silent) {
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const safeName = (v('custName') || 'Survey').replace(/[^a-z0-9]/gi, '_');
+    const safeDate = (v('surveyDate') || new Date().toISOString().slice(0,10)).replace(/[^0-9]/g, '-');
+    a.href = url; a.download = `AireServ_${safeName}_${safeDate}.json`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
   if (typeof SURVEY_WEBHOOK_URL === 'string' && SURVEY_WEBHOOK_URL) {
     fetch(SURVEY_WEBHOOK_URL, { method: 'POST', mode: 'no-cors', headers: {'Content-Type':'text/plain'}, body: json })
-      .then(() => alert('Survey saved locally and submitted to team repository.'))
-      .catch(() => alert('Survey downloaded. Could not reach team repository.'));
+      .then(() => { if (!silent) alert('Survey saved locally and submitted to team repository.'); })
+      .catch(() => { if (!silent) alert('Survey downloaded. Could not reach team repository.'); });
   } else {
-    alert('Survey saved as JSON file.\nUpload to your Google Drive survey folder to archive.');
+    if (!silent) alert('Survey saved as JSON file.\nUpload to your Google Drive survey folder to archive.');
+  }
+}
+
+function downloadElecSurvey(silent) {
+  if (!RES) { if (!silent) alert('Run the calculation first before saving.'); return; }
+  const r = RES;
+  const v = id => document.getElementById(id)?.value || '';
+  const rc = (name, def) => document.querySelector('input[name="' + name + '"]:checked')?.value || def || '';
+
+  const data = {
+    reportType: 'electrical',
+    meta:     { app: 'AireServ HCD Field Survey', version: '2.0', exported: new Date().toISOString() },
+    customer: { name: v('custName'), phone: v('custPhone'), email: v('custEmail'), address: v('custAddress') },
+    survey:   { date: v('surveyDate'), hcd: v('hcdName'), jobType: jobType, municipality: v('municipality'), ahj: v('ahj') },
+    panel: {
+      serviceSize:   r.svc,
+      panelBrand:    v('msPanelBrand'),
+      panelModel:    v('panelModel'),
+      openSlots:     r.slotsN,
+      adjacentSlots: r.adjOK,
+      subpanel:      r.hasSub,
+      subNotes:      v('subNotes'),
+      solar:         r.hasSol,
+      solarAmps:     r.hasSol ? r.solA : 0,
+      panelLocation: v('ms-panelLocation')
+    },
+    equipment: {
+      brand:   r.mdlBrand,
+      model:   r.mdlNum,
+      btu:     r.btu,
+      voltage: r.mdlV,
+      mca:     r.mca,
+      mocp:    r.mocp
+    },
+    circuit: {
+      breakerAmps:  r.mocp,
+      breakerPoles: r.mdlV === 115 ? 1 : 2,
+      wireSize:     r.ws,
+      conduit:      '3/4-in. EMT',
+      runFt:        parseFloat(v('runFt')) || 30,
+      whipFt:       parseFloat(v('whipFt')) || 6,
+      disconnect:   discLabel(v('disc') || rc('disc', '30f')),
+      routing:      v('routing')
+    },
+    loads: {
+      generalItems:   r.gen,
+      generalSubtotal: r.subGen,
+      generalDemand:  Math.round(r.demGen),
+      hvacItems:      r.hvac,
+      hvacSubtotal:   r.subHVAC,
+      grandTotal:     Math.round(r.grand),
+      grandTotalAmps: parseFloat(r.grandA.toFixed(1)),
+      serviceCapacityAmps: r.svc,
+      availableAmps:  parseFloat(r.availA.toFixed(1))
+    },
+    verdict: {
+      label:         r.vlbl.replace(/<[^>]+>/g, ''),
+      reason:        r.vreason,
+      capacityOK:    r.availA >= r.mca,
+      slotsOK:       r.slotOK,
+      solarOK:       r.solOK
+    },
+    issues: r.issues,
+    notes: v('notes')
+  };
+
+  const json = JSON.stringify(data, null, 2);
+  if (!silent) {
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const safeName = (v('custName') || 'Survey').replace(/[^a-z0-9]/gi, '_');
+    const safeDate = (v('surveyDate') || new Date().toISOString().slice(0,10)).replace(/[^0-9]/g, '-');
+    a.href = url; a.download = 'AireServ_Elec_' + safeName + '_' + safeDate + '.json';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+  if (typeof SURVEY_WEBHOOK_URL === 'string' && SURVEY_WEBHOOK_URL) {
+    fetch(SURVEY_WEBHOOK_URL, { method: 'POST', mode: 'no-cors', headers: {'Content-Type':'text/plain'}, body: json })
+      .then(() => { if (!silent) alert('Electrical Survey report saved to team Drive folder.'); })
+      .catch(() => { if (!silent) alert('Could not reach team repository. Check connection.'); });
+  } else {
+    if (!silent) alert('Electrical Survey downloaded as JSON.');
   }
 }
 
@@ -5738,60 +5890,4 @@ function msdRenderIndoorClearance(zoneIdx, style) {
   var spec = MSD_CLEARANCES.indoor[style];
   if (!spec) { el.innerHTML = ''; return; }
 
-  var styleName = { wall:'Wall Mount', cassette:'Ceiling Cassette', floor:'Floor / Console' }[style] || style;
-
-  var refTable = '<table style="margin-top:6px;border-collapse:collapse;font-size:12px;line-height:1.8;">';
-  Object.keys(spec).forEach(function(k) {
-    refTable += '<tr><td style="padding:1px 10px 1px 0;">' + spec[k].label + '</td><td><b>' + spec[k].min + '&Prime; min</b></td></tr>';
-  });
-  refTable += '</table>';
-
-  var inputs = '';
-  Object.keys(spec).forEach(function(k) {
-    inputs += '<div class="field"><label>' + spec[k].label + ' <span class="label-hint">inches</span></label>'
-           + '<input type="number" id="msd-ic-'+zoneIdx+'-'+k+'" placeholder="min '+spec[k].min+'&Prime;" oninput="msdIndoorClearCheck('+zoneIdx+',\''+style+'\')"></div>';
-  });
-
-  el.innerHTML = '<div style="border-top:1px solid var(--border);margin-top:14px;padding-top:12px;">'
-    + '<div class="card-title" style="font-size:13px;margin-bottom:6px;">Clearance Measurements — ' + styleName + '</div>'
-    + '<div class="info-blue" style="font-size:12px;margin-bottom:10px;"><b>Manufacturer minimums:</b>' + refTable + '</div>'
-    + inputs
-    + '<div id="msd-ic-panel-' + zoneIdx + '" style="margin-top:6px;"></div>'
-    + '</div>';
-}
-
-/**
- * msdIndoorClearCheck — compare measurements against minimums for zone i.
- */
-function msdIndoorClearCheck(zoneIdx, style) {
-  var panelEl = document.getElementById('msd-ic-panel-' + zoneIdx);
-  if (!panelEl) return;
-  var spec = MSD_CLEARANCES.indoor[style];
-  if (!spec) return;
-
-  var rows = [];
-  Object.keys(spec).forEach(function(k) {
-    var inp = document.getElementById('msd-ic-' + zoneIdx + '-' + k);
-    if (!inp || !inp.value) return;
-    var val = parseFloat(inp.value) || 0;
-    rows.push({ label: spec[k].label, val: val, min: spec[k].min, ok: val >= spec[k].min });
-  });
-
-  if (!rows.length) { panelEl.style.display = 'none'; return; }
-
-  var fails = rows.filter(function(r){ return !r.ok; });
-  var bg  = fails.length ? '#fef2f2' : 'var(--green-light)';
-  var bdr = fails.length ? '#fca5a5' : 'var(--green-border)';
-  var ttl = fails.length ? '⚠️ Clearance issue' : '✅ Clearances OK';
-  var html = '<div style="border-radius:6px;overflow:hidden;border:1px solid '+bdr+';margin-top:4px;">'
-    + '<div style="padding:6px 12px;font-size:12px;font-weight:700;background:'+bg+';border-bottom:1px solid '+bdr+';">'+ttl+'</div>'
-    + '<div style="padding:6px 12px;font-size:12px;">';
-  fails.forEach(function(r)  { html+='<div style="color:var(--red);margin:2px 0;">❌ '+r.label+': '+r.val+'" — min '+r.min+'" required</div>'; });
-  rows.filter(function(r){ return r.ok; }).forEach(function(r) { html+='<div style="color:var(--green);margin:2px 0;">✅ '+r.label+': '+r.val+'&Prime; — OK</div>'; });
-  html += '</div></div>';
-  panelEl.innerHTML = html; panelEl.style.display = '';
-}
-
-</script>
-</body>
-</html>
+  var styleName = { wall:'Wall Mount', cassette:'Ceiling Cassette', floor:'Floor
