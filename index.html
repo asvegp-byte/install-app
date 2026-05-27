@@ -3612,7 +3612,7 @@ function updateProgress() {
   const _nb = document.getElementById('btnNext');
   if (currentSection === totalSections) {
     _nb.textContent = '📥 Save Survey';
-    _nb.onclick = downloadSurvey;
+    _nb.onclick = function(){ downloadSurvey(); };
   } else {
     _nb.textContent = currentSection === totalSections - 1 ? '✓ View Summary' : 'Continue →';
     _nb.onclick = function() { navigate(1); };
