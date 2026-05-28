@@ -480,9 +480,9 @@
       <div class="card-title">Property</div>
       <div class="field-row col3">
         <div class="field"><label>Year Built</label>
-          <input type="number" id="yearBuilt" placeholder="e.g. 1998" min="1940" max="2026"></div>
+          <input type="number" id="yearBuilt" placeholder="e.g. 1998" min="1940" max="2026" oninput="mjSyncIntake()"></div>
         <div class="field"><label>Home Size <span class="label-hint">sq ft</span></label>
-          <input type="number" id="homeSqft" placeholder="e.g. 1800"></div>
+          <input type="number" id="homeSqft" placeholder="e.g. 1800" oninput="mjSyncIntake()"></div>
         <div class="field"><label>Stories</label>
           <select id="homeStories">
             <option value="">Select...</option>
@@ -2737,11 +2737,11 @@
       <div class="field-row col2">
         <div class="mj-field">
           <label>Total conditioned area <span class="mj-hint">sq ft &mdash; auto-filled from intake</span></label>
-          <input type="number" id="mj_q_sqft" placeholder="e.g. 1800" min="200" max="10000">
+          <input type="number" id="mj_q_sqft" placeholder="e.g. 1800" min="200" max="10000" oninput="this.dataset.userEdited='1'">
         </div>
         <div class="mj-field">
           <label>Year built <span class="mj-hint">auto-filled from intake</span></label>
-          <input type="number" id="mj_q_year" placeholder="e.g. 2005" min="1940" max="2026">
+          <input type="number" id="mj_q_year" placeholder="e.g. 2005" min="1940" max="2026" oninput="this.dataset.userEdited='1'">
         </div>
       </div>
       <div class="field-row col2">
@@ -5456,9 +5456,18 @@ function mjPrefillFromIntake(){
   const sqftEl=document.getElementById('mj_q_sqft'),yearEl=document.getElementById('mj_q_year'),nameEl=document.getElementById('mj_f_job_name');
   const sharedSqft=document.getElementById('homeSqft')?.value||'',sharedYear=document.getElementById('yearBuilt')?.value||'';
   const sharedName=document.getElementById('custName')?.value||'',sharedAddr=document.getElementById('custAddress')?.value||'';
-  if(sqftEl&&sharedSqft&&!sqftEl.value)sqftEl.value=sharedSqft;
-  if(yearEl&&sharedYear&&!yearEl.value)yearEl.value=sharedYear;
+  // Copy whenever source has a value and destination hasn't been user-edited
+  if(sqftEl&&sharedSqft&&!sqftEl.dataset.userEdited)sqftEl.value=sharedSqft;
+  if(yearEl&&sharedYear&&!yearEl.dataset.userEdited)yearEl.value=sharedYear;
   if(nameEl&&!nameEl.value){const parts=[sharedName,sharedAddr].filter(Boolean);if(parts.length)nameEl.value=parts.join(' — ');}
+}
+
+// Live sync: called oninput on the intake sqft/year fields
+function mjSyncIntake(){
+  const sqftEl=document.getElementById('mj_q_sqft'),yearEl=document.getElementById('mj_q_year');
+  const sharedSqft=document.getElementById('homeSqft')?.value||'',sharedYear=document.getElementById('yearBuilt')?.value||'';
+  if(sqftEl&&!sqftEl.dataset.userEdited)sqftEl.value=sharedSqft;
+  if(yearEl&&!yearEl.dataset.userEdited)yearEl.value=sharedYear;
 }
 
 
@@ -5937,6 +5946,18 @@ function msdIndoorClearCheck(zoneIdx, style) {
   var bdr = fails.length ? '#fca5a5' : 'var(--green-border)';
   var ttl = fails.length ? '⚠️ Clearance issue' : '✅ Clearances OK';
   var html = '<div style="border-radius:6px;overflow:hidden;border:1px solid '+bdr+';margin-top:4px;">'
+    + '<div style="padding:6px 12px;font-size:12px;font-weight:700;background:'+bg+';border-bottom:1px solid '+bdr+';">'+ttl+'</div>'
+    + '<div style="padding:6px 12px;font-size:12px;">';
+  fails.forEach(function(r)  { html+='<div style="color:var(--red);margin:2px 0;">❌ '+r.label+': '+r.val+'" — min '+r.min+'" required</div>'; });
+  rows.filter(function(r){ return r.ok; }).forEach(function(r) { html+='<div style="color:var(--green);margin:2px 0;">✅ '+r.label+': '+r.val+'&Prime; — OK</div>'; });
+  html += '</div></div>';
+  panelEl.innerHTML = html; panelEl.style.display = '';
+}
+
+</script>
+</body>
+</html>
+dden;border:1px solid '+bdr+';margin-top:4px;">'
     + '<div style="padding:6px 12px;font-size:12px;font-weight:700;background:'+bg+';border-bottom:1px solid '+bdr+';">'+ttl+'</div>'
     + '<div style="padding:6px 12px;font-size:12px;">';
   fails.forEach(function(r)  { html+='<div style="color:var(--red);margin:2px 0;">❌ '+r.label+': '+r.val+'" — min '+r.min+'" required</div>'; });
