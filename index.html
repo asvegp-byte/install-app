@@ -5890,4 +5890,60 @@ function msdRenderIndoorClearance(zoneIdx, style) {
   var spec = MSD_CLEARANCES.indoor[style];
   if (!spec) { el.innerHTML = ''; return; }
 
-  var styleName = { wall:'Wall Mount', cassette:'Ceiling Cassette', floor:'Floor
+  var styleName = { wall:'Wall Mount', cassette:'Ceiling Cassette', floor:'Floor / Console' }[style] || style;
+
+  var refTable = '<table style="margin-top:6px;border-collapse:collapse;font-size:12px;line-height:1.8;">';
+  Object.keys(spec).forEach(function(k) {
+    refTable += '<tr><td style="padding:1px 10px 1px 0;">' + spec[k].label + '</td><td><b>' + spec[k].min + '&Prime; min</b></td></tr>';
+  });
+  refTable += '</table>';
+
+  var inputs = '';
+  Object.keys(spec).forEach(function(k) {
+    inputs += '<div class="field"><label>' + spec[k].label + ' <span class="label-hint">inches</span></label>'
+           + '<input type="number" id="msd-ic-'+zoneIdx+'-'+k+'" placeholder="min '+spec[k].min+'&Prime;" oninput="msdIndoorClearCheck('+zoneIdx+',\''+style+'\')"></div>';
+  });
+
+  el.innerHTML = '<div style="border-top:1px solid var(--border);margin-top:14px;padding-top:12px;">'
+    + '<div class="card-title" style="font-size:13px;margin-bottom:6px;">Clearance Measurements — ' + styleName + '</div>'
+    + '<div class="info-blue" style="font-size:12px;margin-bottom:10px;"><b>Manufacturer minimums:</b>' + refTable + '</div>'
+    + inputs
+    + '<div id="msd-ic-panel-' + zoneIdx + '" style="margin-top:6px;"></div>'
+    + '</div>';
+}
+
+/**
+ * msdIndoorClearCheck — compare measurements against minimums for zone i.
+ */
+function msdIndoorClearCheck(zoneIdx, style) {
+  var panelEl = document.getElementById('msd-ic-panel-' + zoneIdx);
+  if (!panelEl) return;
+  var spec = MSD_CLEARANCES.indoor[style];
+  if (!spec) return;
+
+  var rows = [];
+  Object.keys(spec).forEach(function(k) {
+    var inp = document.getElementById('msd-ic-' + zoneIdx + '-' + k);
+    if (!inp || !inp.value) return;
+    var val = parseFloat(inp.value) || 0;
+    rows.push({ label: spec[k].label, val: val, min: spec[k].min, ok: val >= spec[k].min });
+  });
+
+  if (!rows.length) { panelEl.style.display = 'none'; return; }
+
+  var fails = rows.filter(function(r){ return !r.ok; });
+  var bg  = fails.length ? '#fef2f2' : 'var(--green-light)';
+  var bdr = fails.length ? '#fca5a5' : 'var(--green-border)';
+  var ttl = fails.length ? '⚠️ Clearance issue' : '✅ Clearances OK';
+  var html = '<div style="border-radius:6px;overflow:hidden;border:1px solid '+bdr+';margin-top:4px;">'
+    + '<div style="padding:6px 12px;font-size:12px;font-weight:700;background:'+bg+';border-bottom:1px solid '+bdr+';">'+ttl+'</div>'
+    + '<div style="padding:6px 12px;font-size:12px;">';
+  fails.forEach(function(r)  { html+='<div style="color:var(--red);margin:2px 0;">❌ '+r.label+': '+r.val+'" — min '+r.min+'" required</div>'; });
+  rows.filter(function(r){ return r.ok; }).forEach(function(r) { html+='<div style="color:var(--green);margin:2px 0;">✅ '+r.label+': '+r.val+'&Prime; — OK</div>'; });
+  html += '</div></div>';
+  panelEl.innerHTML = html; panelEl.style.display = '';
+}
+
+</script>
+</body>
+</html>
