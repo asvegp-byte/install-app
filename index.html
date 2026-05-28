@@ -4599,7 +4599,8 @@ function downloadElecSurvey(silent) {
       grandTotal:     Math.round(r.grand),
       grandTotalAmps: parseFloat(r.grandA.toFixed(1)),
       serviceCapacityAmps: r.svc,
-      availableAmps:  parseFloat(r.availA.toFixed(1))
+      availableAmps:  parseFloat(r.availA.toFixed(1)),
+      sqft:           r.sqft || 0
     },
     verdict: {
       label:         r.vlbl.replace(/<[^>]+>/g, ''),
