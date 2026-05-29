@@ -5957,15 +5957,3 @@ function msdIndoorClearCheck(zoneIdx, style) {
 </script>
 </body>
 </html>
-dden;border:1px solid '+bdr+';margin-top:4px;">'
-    + '<div style="padding:6px 12px;font-size:12px;font-weight:700;background:'+bg+';border-bottom:1px solid '+bdr+';">'+ttl+'</div>'
-    + '<div style="padding:6px 12px;font-size:12px;">';
-  fails.forEach(function(r)  { html+='<div style="color:var(--red);margin:2px 0;">❌ '+r.label+': '+r.val+'" — min '+r.min+'" required</div>'; });
-  rows.filter(function(r){ return r.ok; }).forEach(function(r) { html+='<div style="color:var(--green);margin:2px 0;">✅ '+r.label+': '+r.val+'&Prime; — OK</div>'; });
-  html += '</div></div>';
-  panelEl.innerHTML = html; panelEl.style.display = '';
-}
-
-</script>
-</body>
-</html>
