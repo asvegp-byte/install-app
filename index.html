@@ -5142,8 +5142,13 @@ function buildPDoc() {
   const r   = RES;
   const nm  = document.getElementById('custName')?.value||'--';
   const adr = document.getElementById('custAddress')?.value||'--';
-  const ahj = document.getElementById('ahj')?.value||'--';
-  const pm  = fv('panelModel')||'--';
+  // AHJ: read dedicated field if present, fall back to municipality dropdown
+  const ahj = document.getElementById('ahj')?.value ||
+              document.getElementById('municipality')?.value || '--';
+  // Panel: combine brand + model for the permit doc
+  const _pb = document.getElementById('msPanelBrand')?.value || '';
+  const _pm = fv('panelModel') || '';
+  const pm  = [_pb, _pm].filter(Boolean).join(' ') || '--';
   const mdlVstr = r.mdlV === 115 ? '115V/1ph' : '208-230V/1ph';
   const mdlPole = r.mdlV === 115 ? '1-pole'   : '2-pole';
   let h = '';
@@ -5240,7 +5245,7 @@ function buildCDoc() {
   h+='<p style="margin-top:10pt;font-size:10pt"><b>Next Steps:</b></p>';
   h+='<ul style="margin:4pt 0 0 16pt;font-size:9.5pt;line-height:1.8">';
   if (r.availA>=r.mca) {
-    h+='<li>Submit permit application with load calculation and circuit diagram to '+(document.getElementById('ahj')?.value||'the AHJ')+'</li>';
+    h+='<li>Submit permit application with load calculation and circuit diagram to '+(document.getElementById('ahj')?.value||document.getElementById('municipality')?.value||'the AHJ')+'</li>';
     h+='<li>Order equipment and schedule installation upon permit approval</li>';
   } else {
     h+='<li>Evaluate panel upgrade options or load-shed strategies</li>';
