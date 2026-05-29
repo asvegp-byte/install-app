@@ -4550,6 +4550,19 @@ function downloadSurvey(silent) {
 }
 
 function downloadElecSurvey(silent) {
+  if (!silent) {
+    // ── DIAGNOSTIC: remove once confirmed working ──
+    const _pdocLen = document.getElementById('pdoc') ? document.getElementById('pdoc').innerHTML.length : 0;
+    const _custVal = document.getElementById('custName') ? document.getElementById('custName').value : '(empty)';
+    const _diagMsg = 'DEBUG: Save Electrical button received.' +
+      String.fromCharCode(10) + String.fromCharCode(10) +
+      'RES (calc data): ' + (RES ? 'SET OK' : 'NULL — run Calculate first') +
+      String.fromCharCode(10) +
+      'pdoc HTML length: ' + _pdocLen + ' chars' +
+      String.fromCharCode(10) +
+      'Customer: ' + _custVal;
+    alert(_diagMsg);
+  }
   if (!RES) { if (!silent) alert('Run the calculation first before saving.'); return; }
   const r = RES;
   const v = id => document.getElementById(id)?.value || '';
@@ -4651,8 +4664,14 @@ function downloadElecSurvey(silent) {
   }
   if (typeof SURVEY_WEBHOOK_URL === 'string' && SURVEY_WEBHOOK_URL) {
     fetch(SURVEY_WEBHOOK_URL, { method: 'POST', mode: 'no-cors', headers: {'Content-Type':'text/plain'}, body: json })
-      .then(() => { if (!silent) alert('Electrical Survey report saved to team Drive folder.'); })
-      .catch(() => { if (!silent) alert('Could not reach team repository. Check connection.'); });
+      .then(() => {
+        if (!silent) {
+          const _cName = (document.getElementById('custName')?.value || 'Customer').replace(/[^a-z0-9 ]/gi,'_').trim();
+          const _dt    = document.getElementById('surveyDate')?.value || new Date().toISOString().slice(0,10);
+          alert('✅ Electrical report saved to Drive!\n\nLook for this file in your AireServ Drive folder:\n"AireServ — Load Calc — ' + _cName + ' — ' + _dt + '.html"\n\nOpen it in Chrome → File → Print → Save as PDF to submit for permit.');
+        }
+      })
+      .catch(() => { if (!silent) alert('Could not reach team repository. Check your connection.'); });
   } else {
     if (!silent) alert('Electrical Survey downloaded as JSON.');
   }
