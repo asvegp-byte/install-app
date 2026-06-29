@@ -2747,7 +2747,7 @@
       <div class="field-row col2">
         <div class="mj-field">
           <label>Stories</label>
-          <select id="mj_q_stories"><option value="1">1 story</option><option value="2">2 story</option></select>
+          <select id="mj_q_stories" onchange="mjToggleZoneCard()"><option value="1">1 story</option><option value="2">2 story</option></select>
         </div>
         <div class="mj-field">
           <label>Foundation</label>
@@ -2802,6 +2802,17 @@
         </div>
         <input type="hidden" id="mj_q_orientation" value="mixed">
       </div>
+      <div class="mj-field" style="margin-top:14px;" id="mj_q_glass_wrap">
+        <label>Glass type <span class="mj-hint">biggest single driver — confirm on site</span></label>
+        <div class="toggle-group">
+          <button class="toggle-btn active" onclick="mjSetToggle('mj_q_glass','auto',this)">Auto<br><span style="font-size:10px;">By year</span></button>
+          <button class="toggle-btn" onclick="mjSetToggle('mj_q_glass','single',this)">Single<br><span style="font-size:10px;">SHGC .86</span></button>
+          <button class="toggle-btn" onclick="mjSetToggle('mj_q_glass','double',this)">Double<br><span style="font-size:10px;">SHGC .76</span></button>
+          <button class="toggle-btn" onclick="mjSetToggle('mj_q_glass','double_lowe',this)">Double Low-E<br><span style="font-size:10px;">SHGC .40</span></button>
+        </div>
+        <input type="hidden" id="mj_q_glass" value="auto">
+        <div style="font-size:11px;color:var(--gray-400);margin-top:6px;">Low-E has a faint blue/green tint &amp; often a spacer stamp. It wasn't standard until ~2008 — most 2000&ndash;2007 homes are plain double pane. Pick what you see on the windows.</div>
+      </div>
     </div>
     <div class="mj-card">
       <div class="mj-card-title">Ceiling Height</div>
@@ -2812,6 +2823,16 @@
         <button class="toggle-btn" onclick="mjSetToggle('mj_q_ceiling_height','12',this)">12 ft<br><span style="font-size:10px;">Vaulted</span></button>
       </div>
       <input type="hidden" id="mj_q_ceiling_height" value="9">
+      <div style="font-size:11px;color:var(--gray-400);margin-top:8px;">Vaulted ceilings: use the <b>average</b> height (typically ~12 ft), not the peak. The peak might be 15 ft, but volume is driven by the average.</div>
+    </div>
+    <div class="mj-card" id="mj_q_zonecard" style="display:none;">
+      <div class="mj-card-title">Two-Story Zoning</div>
+      <div class="toggle-group">
+        <button class="toggle-btn active" onclick="mjSetToggle('mj_q_zonemode','block',this)">Whole-house block<br><span style="font-size:10px;">Single system</span></button>
+        <button class="toggle-btn" onclick="mjSetToggle('mj_q_zonemode','zone',this)">Per-zone<br><span style="font-size:10px;">Two systems</span></button>
+      </div>
+      <input type="hidden" id="mj_q_zonemode" value="block">
+      <div style="font-size:11px;color:var(--gray-400);margin-top:8px;">Per-zone sizes each floor to its own peak. Upstairs carries the full roof load and usually needs the larger unit. Zone peaks sum to more than the block load — that's correct.</div>
     </div>
     <button class="mj-calc-btn" onclick="mjRunQuickCalc()">&#x26A1; Calculate Quick Estimate</button>
     <div class="mj-loading" id="mjQuickLoading"><div class="mj-spinner"></div><div style="color:var(--gray-600);">Calculating...</div></div>
@@ -5292,13 +5313,13 @@ const MJ_ACH={tight:0.25,average:0.50,leaky:1.00};
 const MJ_OD_GRAINS=82,MJ_IN_GRAINS=65;
 
 class MJRoom{
-  constructor(name,area,ch){this.name=name;this.floor_area=area;this.ch=ch||8.0;this.volume=area*this.ch;this.walls=[];this.windows=[];this.ceiling_type='r30';this.occupants=0;}
+  constructor(name,area,ch){this.name=name;this.floor_area=area;this.ch=ch||8.0;this.volume=area*this.ch;this.walls=[];this.windows=[];this.ceiling_type='r30';this.occupants=0;this.ceilingExposed=true;}
   addWall(area,type,ext){this.walls.push({area,type,exterior:ext});}
   addWindow(area,orient,glass){this.windows.push({area,orient,glass});}
   coolingLoad(){
     let L=0;
     for(const w of this.walls) if(w.exterior) L+=(MJ_WALL_U[w.type]||MJ_WALL_U['2x4_r13'])*w.area*MJ_SUMMER_DT;
-    L+=(MJ_CEIL_U[this.ceiling_type]||MJ_CEIL_U.r30)*this.floor_area*50;
+    if(this.ceilingExposed) L+=(MJ_CEIL_U[this.ceiling_type]||MJ_CEIL_U.r30)*this.floor_area*50;
     for(const w of this.windows){L+=(MJ_WIN_U[w.glass]||MJ_WIN_U.double_lowe)*w.area*MJ_SUMMER_DT;L+=w.area*(MJ_SOLAR[w.orient]||80)*(MJ_SHGC[w.glass]||MJ_SHGC.double_lowe);}
     L+=this.occupants*250+this.floor_area*3.0;
     return L;
@@ -5306,7 +5327,7 @@ class MJRoom{
   heatingLoad(){
     let L=0;
     for(const w of this.walls) if(w.exterior) L+=(MJ_WALL_U[w.type]||MJ_WALL_U['2x4_r13'])*w.area*MJ_WINTER_DT;
-    L+=(MJ_CEIL_U[this.ceiling_type]||MJ_CEIL_U.r30)*this.floor_area*MJ_WINTER_DT;
+    if(this.ceilingExposed) L+=(MJ_CEIL_U[this.ceiling_type]||MJ_CEIL_U.r30)*this.floor_area*MJ_WINTER_DT;
     for(const w of this.windows) L+=(MJ_WIN_U[w.glass]||MJ_WIN_U.double_lowe)*w.area*MJ_WINTER_DT;
     return L;
   }
@@ -5321,7 +5342,7 @@ class MJHouse{
   slabHeating(){return(this.foundation==='slab'&&this.slabPerimeter>0)?MJ_SLAB_F*this.slabPerimeter*MJ_WINTER_DT:0;}
   totalCooling(){const rs=this.rooms.reduce((s,r)=>s+r.coolingLoad(),0);const[is,il]=this.infiltrationCooling();return[rs+is,il*1.10];}
   totalHeating(){return this.rooms.reduce((s,r)=>s+r.heatingLoad(),0)+this.infiltrationHeating()+this.slabHeating();}
-  recommendedTonnage(){const[s,l]=this.totalCooling(),total=s+l,raw=total/12000;for(const sz of[0.75,1,1.5,2,2.5,3,3.5,4,4.5,5,6,7.5,10])if(raw<=sz*1.15)return[sz,raw];return[Math.round(raw*4)/4,raw];}
+  recommendedTonnage(){const[s,l]=this.totalCooling(),total=s+l,raw=total/12000;const SIZES=[0.75,1,1.5,2,2.5,3,3.5,4,4.5,5,6,7.5,10];const rec=SIZES.find(sz=>sz>=raw)||Math.round(raw*4)/4;const pct=raw>0?Math.round(rec/raw*100):100;return[rec,raw,pct,pct>112];}
 }
 
 function mjRunQuickEstimate(d){
@@ -5334,7 +5355,7 @@ function mjRunQuickEstimate(d){
   const totalWin=sqft*(winPct[d.window_exposure]!==undefined?winPct[d.window_exposure]:0.12);
   const orientDist={n_s:{N:0.25,S:0.35,E:0.20,W:0.20},e_w:{N:0.15,S:0.15,E:0.35,W:0.35},mixed:{N:0.20,S:0.25,E:0.25,W:0.30},worst:{N:0.10,S:0.20,E:0.20,W:0.50}};
   const dist=orientDist[d.orientation||'mixed']||orientDist.mixed;
-  const glass=isNoGlass?'none':(year<1985?'single':(year<2000?'double':'double_lowe'));
+  const glass=isNoGlass?'none':(d.glass_type&&MJ_SHGC[d.glass_type]!==undefined?d.glass_type:(year<1985?'single':(year<2008?'double':'double_lowe')));
   const stories=parseInt(d.stories)||1,ch=parseFloat(d.ceiling_height)||9.0,foundation=d.foundation||'slab';
   const house=new MJHouse(foundation,construction);
   if(foundation==='slab')house.slabPerimeter=Math.round(Math.sqrt(sqft/stories)*4);
@@ -5345,10 +5366,65 @@ function mjRunQuickEstimate(d){
   house.addRoom(mkRoom('Bedrooms 2-3',0.22,0.25,[['N',dist.N]],2));
   house.addRoom(mkRoom('Bathrooms/Hallways',0.20,0.15,[],0));
   const[totS,totL]=house.totalCooling(),totC=totS+totL,totH=house.totalHeating();
-  const[recT,rawT]=house.recommendedTonnage(),shr=totC>0?totS/totC:0;
+  const[recT,rawT,pctOfLoad,twoStageFlag]=house.recommendedTonnage(),shr=totC>0?totS/totC:0;
+  const btusqft=Math.round(totC/sqft*10)/10;
+  const sanity=mjSanityBand(btusqft);
   let confidence='Medium',confidence_note='Suitable for budgeting and initial conversations. Full room-by-room calculation recommended before ordering equipment.';
   if(d.window_exposure==='heavy'||d.orientation==='worst'){confidence='Lower — complex exposure';confidence_note='High solar exposure increases uncertainty. Full Manual J strongly recommended before specifying equipment.';}
-  return{mode:'quick',sqft,year_built:year,wall_type,ceiling_type,glass_type:glass,construction,foundation,total_cooling:Math.round(totC),total_heating:Math.round(totH),total_sensible:Math.round(totS),total_latent:Math.round(totL),shr:Math.round(shr*1000)/1000,raw_tons:Math.round(rawT*100)/100,rec_tons:recT,range_low:Math.max(0.75,Math.round(rawT*0.85*4)/4),range_high:(function(t){var s=[0.75,1,1.5,2,2.5,3,3.5,4,4.5,5,6,7.5,10];var i=s.indexOf(t);return(i>=0&&i<s.length-1)?s[i+1]:Math.round(t*1.15*4)/4;})(recT),btusqft:Math.round(totC/sqft*10)/10,confidence,confidence_note,assumed_wall:wall_type,assumed_ceiling:ceiling_type,assumed_glass:glass,window_sqft:Math.round(totalWin)};
+  return{mode:'quick',sqft,year_built:year,wall_type,ceiling_type,glass_type:glass,construction,foundation,total_cooling:Math.round(totC),total_heating:Math.round(totH),total_sensible:Math.round(totS),total_latent:Math.round(totL),shr:Math.round(shr*1000)/1000,raw_tons:Math.round(rawT*100)/100,rec_tons:recT,pct_of_load:pctOfLoad,two_stage_flag:twoStageFlag,band:sanity.band,band_note:sanity.note,range_low:Math.max(0.75,Math.round(rawT*0.85*4)/4),range_high:(function(t){var s=[0.75,1,1.5,2,2.5,3,3.5,4,4.5,5,6,7.5,10];var i=s.indexOf(t);return(i>=0&&i<s.length-1)?s[i+1]:Math.round(t*1.15*4)/4;})(recT),btusqft,confidence,confidence_note,assumed_wall:wall_type,assumed_ceiling:ceiling_type,assumed_glass:glass,window_sqft:Math.round(totalWin)};
+}
+
+function mjSanityBand(b){
+  if(b<18) return {band:'red',note:'Below 18 — likely under-counting. Check glass type & exposure.'};
+  if(b<20) return {band:'yellow',note:'Low side — verify glass type and orientation.'};
+  if(b<=28) return {band:'green',note:'In expected Phoenix range.'};
+  if(b<=32) return {band:'yellow',note:'High side — verify glass area, insulation, exposure.'};
+  return {band:'red',note:'Above 32 — likely over-counting or extreme exposure. Re-check inputs.'};
+}
+
+// Two-zone estimate for two-story homes: sizes each floor to its own peak.
+// Upstairs carries full roof load (ceilingExposed); downstairs ceiling is buffered
+// by the conditioned floor above (ceilingExposed=false). Block load credits diversity,
+// so the zone sum correctly exceeds the block.
+function mjZoneEstimate(d){
+  const sqft=parseFloat(d.sqft)||1800,year=parseInt(d.year_built)||2000;
+  let construction=d.construction||'average';
+  const insMap={poor:['block_r0','r19'],average:['2x4_r13','r30'],good:['2x6_r19','r38'],excellent:['2x6_r21','r49']};
+  const[wall_type,ceiling_type]=insMap[d.insulation||'average']||insMap.average;
+  if(year<1980&&construction==='average')construction='leaky';
+  const winPct={none:0,minimal:0.08,average:0.12,heavy:0.18};
+  const isNoGlass=(d.window_exposure==='none');
+  const totalWin=sqft*(winPct[d.window_exposure]!==undefined?winPct[d.window_exposure]:0.12);
+  const orientDist={n_s:{N:0.25,S:0.35,E:0.20,W:0.20},e_w:{N:0.15,S:0.15,E:0.35,W:0.35},mixed:{N:0.20,S:0.25,E:0.25,W:0.30},worst:{N:0.10,S:0.20,E:0.20,W:0.50}};
+  const dist=orientDist[d.orientation||'mixed']||orientDist.mixed;
+  const glass=isNoGlass?'none':(d.glass_type&&MJ_SHGC[d.glass_type]!==undefined?d.glass_type:(year<1985?'single':(year<2008?'double':'double_lowe')));
+  const ch=parseFloat(d.ceiling_height)||9.0,foundation=d.foundation||'slab';
+  const footprint=sqft/2,perimeter=Math.sqrt(footprint)*4,netWall=Math.max(0,perimeter*ch*2-totalWin);
+
+  function buildZone(frac,exposed,hasSlab,label){
+    const h=new MJHouse(foundation,construction);
+    if(foundation==='slab'&&hasSlab)h.slabPerimeter=Math.round(perimeter);
+    const mk=(nm,pct,wPct,wins,occ)=>{const r=new MJRoom(nm,sqft*pct,ch);r.ceiling_type=ceiling_type;r.occupants=occ;r.ceilingExposed=exposed;r.addWall(netWall*wPct*frac/0.5,wall_type,true);wins.forEach(([dir,wpct])=>r.addWindow(totalWin*wpct*frac,dir,glass));return r;};
+    h.addRoom(mk(label+' Living',frac*0.5,0.40,[['W',dist.W],['S',dist.S]],2));
+    h.addRoom(mk(label+' Beds',frac*0.5,0.35,[['E',dist.E],['N',dist.N]],3));
+    const[s,l]=h.totalCooling(),c=s+l,sz=h.recommendedTonnage();
+    return{total_cooling:Math.round(c),rec_tons:sz[0],raw_tons:Math.round(sz[1]*100)/100,pct_of_load:sz[2]};
+  }
+  const up=buildZone(0.5,true,false,'Upstairs');    // upstairs: full roof, no slab
+  const dn=buildZone(0.5,false,true,'Downstairs');  // downstairs: buffered ceiling, slab below
+
+  // Block: whole house, only top floor footprint sees attic
+  const block=new MJHouse(foundation,construction);
+  if(foundation==='slab')block.slabPerimeter=Math.round(perimeter);
+  const mkB=(name,pct,wPct,wins,occ,exp)=>{const r=new MJRoom(name,sqft*pct,ch);r.ceiling_type=ceiling_type;r.occupants=occ;r.ceilingExposed=exp;r.addWall(netWall*wPct,wall_type,true);wins.forEach(([dir,wpct])=>r.addWindow(totalWin*wpct,dir,glass));return r;};
+  block.addRoom(mkB('Top Living',0.20,0.22,[['W',dist.W*0.5],['S',dist.S*0.5]],1,true));
+  block.addRoom(mkB('Top Beds',0.30,0.28,[['E',dist.E*0.5],['N',dist.N*0.5]],3,true));
+  block.addRoom(mkB('Bottom Living',0.30,0.30,[['W',dist.W*0.5],['S',dist.S*0.5]],2,false));
+  block.addRoom(mkB('Bottom Other',0.20,0.20,[['E',dist.E*0.5],['N',dist.N*0.5]],1,false));
+  const[bs,bl]=block.totalCooling(),bc=bs+bl,bsz=block.recommendedTonnage();
+  const bBtu=Math.round(bc/sqft*10)/10,bSan=mjSanityBand(bBtu);
+  const blockOut={total_cooling:Math.round(bc),rec_tons:bsz[0],raw_tons:Math.round(bsz[1]*100)/100,btusqft:bBtu,band:bSan.band,band_note:bSan.note};
+  return{glass,up,dn,block:blockOut};
 }
 
 function mjRunFullEstimate(d){
@@ -5449,13 +5525,30 @@ function mjToggleGlassFields(val) {
 function mjRunQuickCalc(){
   const sqft=parseFloat(document.getElementById('mj_q_sqft')?.value)||0;
   if(!sqft||sqft<100){mjShowError('mjQuickError','Please enter a valid square footage.');return;}
-  const payload={mode:'quick',sqft,year_built:parseInt(document.getElementById('mj_q_year')?.value)||2000,stories:parseInt(document.getElementById('mj_q_stories')?.value)||1,foundation:document.getElementById('mj_q_foundation')?.value||'slab',insulation:document.getElementById('mj_q_insulation')?.value||'average',construction:document.getElementById('mj_q_construction')?.value||'average',window_exposure:document.getElementById('mj_q_window_exposure')?.value||'average',orientation:document.getElementById('mj_q_orientation')?.value||'mixed',ceiling_height:parseFloat(document.getElementById('mj_q_ceiling_height')?.value)||9};
+  const glassSel=document.getElementById('mj_q_glass')?.value||'auto';
+  const payload={mode:'quick',sqft,year_built:parseInt(document.getElementById('mj_q_year')?.value)||2000,stories:parseInt(document.getElementById('mj_q_stories')?.value)||1,foundation:document.getElementById('mj_q_foundation')?.value||'slab',insulation:document.getElementById('mj_q_insulation')?.value||'average',construction:document.getElementById('mj_q_construction')?.value||'average',window_exposure:document.getElementById('mj_q_window_exposure')?.value||'average',orientation:document.getElementById('mj_q_orientation')?.value||'mixed',ceiling_height:parseFloat(document.getElementById('mj_q_ceiling_height')?.value)||9,glass_type:(glassSel==='auto'?null:glassSel)};
+  const zoneMode=document.getElementById('mj_q_zonemode')?.value||'block';
   document.getElementById('mjQuickLoading').classList.add('active');
   document.getElementById('mjQuickError').style.display='none';
   document.getElementById('mjQuickResults').innerHTML='';
-  try{const data=mjRunQuickEstimate(payload);if(data.error)mjShowError('mjQuickError',data.error);else{mjLastResult=data;document.getElementById('mjQuickResults').innerHTML=mjRenderQuickResults(data);document.getElementById('mjQuickResults').scrollIntoView({behavior:'smooth',block:'start'});}}
+  try{
+    if(payload.stories>=2&&zoneMode==='zone'){
+      const z=mjZoneEstimate(payload);
+      document.getElementById('mjQuickResults').innerHTML=mjRenderZoneResults(z);
+      document.getElementById('mjQuickResults').scrollIntoView({behavior:'smooth',block:'start'});
+    }else{
+      const data=mjRunQuickEstimate(payload);
+      if(data.error)mjShowError('mjQuickError',data.error);
+      else{mjLastResult=data;document.getElementById('mjQuickResults').innerHTML=mjRenderQuickResults(data);document.getElementById('mjQuickResults').scrollIntoView({behavior:'smooth',block:'start'});}
+    }
+  }
   catch(e){mjShowError('mjQuickError','Calculation error: '+e.message);}
   finally{document.getElementById('mjQuickLoading').classList.remove('active');}
+}
+function mjToggleZoneCard(){
+  const stories=parseInt(document.getElementById('mj_q_stories')?.value)||1;
+  const card=document.getElementById('mj_q_zonecard');
+  if(card)card.style.display=(stories>=2)?'block':'none';
 }
 function mjRunFullCalc(){
   const sharedName=document.getElementById('custName')?.value||'',sharedAddr=document.getElementById('custAddress')?.value||'';
@@ -5493,7 +5586,18 @@ function mjRunFullCalc(){
 }
 function mjRenderQuickResults(d){
   const cc=d.confidence.includes('Lower')?'conf-lower':d.confidence.includes('Medium')?'conf-medium':'conf-high',shrOk=d.shr>=0.85;
-  return `<div class="mj-results-panel"><div class="mj-result-hero"><div class="mj-result-label">Recommended Equipment Size</div><div class="mj-result-tons">${d.rec_tons}</div><div class="mj-result-tons-label">tons</div><div class="mj-result-range">Acceptable range: ${d.range_low} &ndash; ${d.range_high} tons &nbsp;&middot;&nbsp; Raw calc: ${d.raw_tons} tons</div></div><div class="mj-result-grid"><div class="mj-result-stat blue"><div class="mj-result-stat-label">Total Cooling Load</div><div class="mj-result-stat-value">${d.total_cooling.toLocaleString()}</div><div class="mj-result-stat-unit">BTU/hr</div></div><div class="mj-result-stat red"><div class="mj-result-stat-label">Total Heating Load</div><div class="mj-result-stat-value">${d.total_heating.toLocaleString()}</div><div class="mj-result-stat-unit">BTU/hr</div></div><div class="mj-result-stat"><div class="mj-result-stat-label">BTU per sq ft</div><div class="mj-result-stat-value">${d.btusqft}</div><div class="mj-result-stat-unit">BTU/hr/sqft · Phoenix target 18–28</div></div><div class="mj-result-stat ${shrOk?'green':''}"><div class="mj-result-stat-label">Sensible Heat Ratio</div><div class="mj-result-stat-value">${d.shr}</div><div class="mj-result-stat-unit">${shrOk?'✓ Good for Phoenix dry climate':'⚠ Check latent load'}</div></div></div><div class="mj-card"><div class="mj-card-title">Confidence &amp; Assumptions</div><div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;"><span class="mj-confidence-badge ${cc}">${d.confidence}</span><span style="font-size:13px;color:var(--gray-600);">${d.confidence_note}</span></div><div class="mj-assumption-grid"><div class="mj-assumption-item"><div class="mj-assumption-label">Wall assembly assumed</div><div class="mj-assumption-value">${MJ_WALL_LABELS[d.assumed_wall]||d.assumed_wall}</div></div><div class="mj-assumption-item"><div class="mj-assumption-label">Ceiling insulation assumed</div><div class="mj-assumption-value">${MJ_CEIL_LABELS[d.assumed_ceiling]||d.assumed_ceiling}</div></div><div class="mj-assumption-item"><div class="mj-assumption-label">Glass type assumed</div><div class="mj-assumption-value">${MJ_GLASS_LABELS[d.assumed_glass]||d.assumed_glass}</div></div><div class="mj-assumption-item"><div class="mj-assumption-label">Total window area</div><div class="mj-assumption-value">${d.window_sqft} sq ft</div></div></div></div><div class="mj-card" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;"><span style="font-size:14px;color:var(--gray-600);">Want a more accurate result?</span><button class="toggle-btn" onclick="mjSelectMode('full')" style="background:var(--blue);border-color:var(--blue);color:#fff;">Switch to Full Manual J →</button></div></div>`;
+  const bandColors={green:{bg:'var(--green-light)',br:'var(--green-border)',fg:'var(--green)'},yellow:{bg:'var(--yellow-light)',br:'var(--yellow-border)',fg:'var(--yellow)'},red:{bg:'var(--red-light)',br:'var(--red-border)',fg:'var(--red)'}};
+  const bc2=bandColors[d.band]||bandColors.green;
+  const pct=d.pct_of_load!=null?d.pct_of_load:100;
+  const flagHtml=d.two_stage_flag?`<div style="margin-top:12px;display:inline-block;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600;background:#422006;color:#fde68a;border:1px solid #854d0e;">⚑ At ${pct}% of load — consider two-stage / variable-speed for a better fit than a single-stage ${d.rec_tons}-ton</div>`:'';
+  const bandHtml=`<div style="border-radius:8px;padding:14px 16px;font-size:14px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:10px;background:${bc2.bg};border:1px solid ${bc2.br};color:${bc2.fg};"><span style="width:12px;height:12px;border-radius:50%;flex-shrink:0;background:${bc2.fg};"></span><span>${d.btusqft} BTU/hr/sq ft — ${d.band_note}</span></div>`;
+  return `<div class="mj-results-panel"><div class="mj-result-hero"><div class="mj-result-label">Recommended Equipment Size</div><div class="mj-result-tons">${d.rec_tons}</div><div class="mj-result-tons-label">tons &nbsp;·&nbsp; ${pct}% of calculated load</div><div class="mj-result-range">Raw load: ${d.raw_tons} tons &nbsp;·&nbsp; rounded up so equipment is never below load</div>${flagHtml}</div>${bandHtml}<div class="mj-result-grid"><div class="mj-result-stat blue"><div class="mj-result-stat-label">Total Cooling Load</div><div class="mj-result-stat-value">${d.total_cooling.toLocaleString()}</div><div class="mj-result-stat-unit">BTU/hr</div></div><div class="mj-result-stat red"><div class="mj-result-stat-label">Total Heating Load</div><div class="mj-result-stat-value">${d.total_heating.toLocaleString()}</div><div class="mj-result-stat-unit">BTU/hr</div></div><div class="mj-result-stat"><div class="mj-result-stat-label">BTU per sq ft</div><div class="mj-result-stat-value" style="color:${bc2.fg};">${d.btusqft}</div><div class="mj-result-stat-unit">Phoenix target 20–28</div></div><div class="mj-result-stat ${shrOk?'green':''}"><div class="mj-result-stat-label">Sensible Heat Ratio</div><div class="mj-result-stat-value">${d.shr}</div><div class="mj-result-stat-unit">${shrOk?'✓ Good for Phoenix dry climate':'⚠ Check latent load'}</div></div></div><div class="mj-card"><div class="mj-card-title">Confidence &amp; Assumptions</div><div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;"><span class="mj-confidence-badge ${cc}">${d.confidence}</span><span style="font-size:13px;color:var(--gray-600);">${d.confidence_note}</span></div><div class="mj-assumption-grid"><div class="mj-assumption-item"><div class="mj-assumption-label">Wall assembly assumed</div><div class="mj-assumption-value">${MJ_WALL_LABELS[d.assumed_wall]||d.assumed_wall}</div></div><div class="mj-assumption-item"><div class="mj-assumption-label">Ceiling insulation assumed</div><div class="mj-assumption-value">${MJ_CEIL_LABELS[d.assumed_ceiling]||d.assumed_ceiling}</div></div><div class="mj-assumption-item"><div class="mj-assumption-label">Glass type used</div><div class="mj-assumption-value">${MJ_GLASS_LABELS[d.assumed_glass]||d.assumed_glass}</div></div><div class="mj-assumption-item"><div class="mj-assumption-label">Total window area</div><div class="mj-assumption-value">${d.window_sqft} sq ft</div></div></div></div><div class="mj-card" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;"><span style="font-size:14px;color:var(--gray-600);">Want a more accurate result?</span><button class="toggle-btn" onclick="mjSelectMode('full')" style="background:var(--blue);border-color:var(--blue);color:#fff;">Switch to Full Manual J →</button></div></div>`;
+}
+function mjRenderZoneResults(z){
+  const bandColors={green:{bg:'var(--green-light)',br:'var(--green-border)',fg:'var(--green)'},yellow:{bg:'var(--yellow-light)',br:'var(--yellow-border)',fg:'var(--yellow)'},red:{bg:'var(--red-light)',br:'var(--red-border)',fg:'var(--red)'}};
+  const bc2=bandColors[z.block.band]||bandColors.green;
+  const bandHtml=`<div style="border-radius:8px;padding:14px 16px;font-size:14px;font-weight:600;margin:16px 0;display:flex;align-items:center;gap:10px;background:${bc2.bg};border:1px solid ${bc2.br};color:${bc2.fg};"><span style="width:12px;height:12px;border-radius:50%;flex-shrink:0;background:${bc2.fg};"></span><span>Block load ${z.block.btusqft} BTU/hr/sq ft — ${z.block.band_note}</span></div>`;
+  return `<div class="mj-results-panel"><div class="mj-result-hero"><div class="mj-result-label">Two-Zone Result — size each system to its own peak</div><div class="mj-result-tons" style="font-size:44px;">${z.up.rec_tons} + ${z.dn.rec_tons}</div><div class="mj-result-tons-label">tons (up + down) &nbsp;·&nbsp; block load ${z.block.rec_tons}T for reference</div><div class="mj-result-range">Zone peaks sum to more than the block load — that's correct. Each system covers its own zone peak.</div></div><div class="mj-result-grid" style="grid-template-columns:1fr 1fr 1fr;"><div class="mj-result-stat" style="border-color:var(--yellow-border);background:var(--yellow-light);"><div class="mj-result-stat-label">Upstairs</div><div class="mj-result-stat-value">${z.up.rec_tons}T</div><div class="mj-result-stat-unit">${z.up.total_cooling.toLocaleString()} BTU · full roof load</div></div><div class="mj-result-stat blue" style="background:var(--blue-light);"><div class="mj-result-stat-label">Downstairs</div><div class="mj-result-stat-value">${z.dn.rec_tons}T</div><div class="mj-result-stat-unit">${z.dn.total_cooling.toLocaleString()} BTU · buffered ceiling</div></div><div class="mj-result-stat"><div class="mj-result-stat-label">Block (1 system)</div><div class="mj-result-stat-value">${z.block.rec_tons}T</div><div class="mj-result-stat-unit">${z.block.total_cooling.toLocaleString()} BTU · diversified</div></div></div>${bandHtml}<div class="mj-card"><div class="mj-card-title">How to use this</div><div style="font-size:13px;color:var(--gray-700);line-height:1.6;"><b>Upstairs runs hotter per square foot</b> — it carries the full roof load and rising heat, so it's often the larger of the two systems even at similar floor area. Verify which existing unit serves which floor; installers sometimes put the bigger box downstairs by reflex. Use the per-zone numbers to size a two-system replacement; the block load is for single-system scenarios only.</div></div><div class="mj-card" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;"><span style="font-size:14px;color:var(--gray-600);">Need room-by-room precision?</span><button class="toggle-btn" onclick="mjSelectMode('full')" style="background:var(--blue);border-color:var(--blue);color:#fff;">Switch to Full Manual J →</button></div></div>`;
 }
 function mjRenderFullResults(d){
   const shrOk=d.shr>=0.85,maxCool=Math.max(...d.rooms.map(r=>r.cooling));
